@@ -82,3 +82,74 @@
     overflow: hidden;
     min-height: 2.8rem;
 }
+
+/* ── PRODUCT PAGE ───────────────────────────────────────── */
+.product-img-wrap {
+    background: #f8f9fa;
+    aspect-ratio: 3 / 4;
+}
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.product-img:hover {
+    transform: scale(1.03);
+}
+.product-price {
+    background: #fff8e1;
+    border-left: 4px solid #ffc107;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    display: inline-block;
+}
+.product-description {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* ── QUANTITY CONTROL ───────────────────────────────────── */
+.quantity-control {
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.qty-input:focus {
+    box-shadow: none;
+}
+.qty-btn:hover {
+    background: #ffc107;
+    color: #000;
+}
+
+/* ── CART PAGE ──────────────────────────────────────────── */
+.cart-book-img {
+    width: 55px;
+    height: 75px;
+    object-fit: cover;
+}
+.cart-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.cart-qty-input {
+    width: 52px !important;
+}
+
+/* ── CHECKOUT STEPS ─────────────────────────────────────── */
+.checkout-steps { font-size: .9rem; }
+.step-active  { font-weight: 700; color: #ffc107; }
+.step-done    { font-weight: 600; color: #198754; }
+.step-inactive{ color: #adb5bd; }
+
+/* ── SUCCESS CHECKMARK ANIMATION ───────────────────────── */
+.success-checkmark i {
+    animation: pop-in .4s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes pop-in {
+    0%   { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}

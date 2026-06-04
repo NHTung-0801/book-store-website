@@ -153,3 +153,70 @@
     0%   { transform: scale(0); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
+
+/* ── ORDER ACCORDION ────────────────────────────────────── */
+.order-accordion .accordion-button:not(.collapsed) {
+    background-color: #fff8e1;
+    color: #000;
+    box-shadow: none;
+}
+.order-accordion .accordion-button::after {
+    filter: brightness(0.5);
+}
+.order-accordion .accordion-item {
+    transition: box-shadow 0.2s ease;
+}
+.order-accordion .accordion-item:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,.1) !important;
+}
+
+/* ── ORDER PROGRESS BAR ─────────────────────────────────── */
+.order-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+}
+.step-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    background: #dee2e6;
+    color: #adb5bd;
+    transition: all .3s ease;
+}
+.progress-step.done .step-dot {
+    background: #ffc107;
+    color: #000;
+}
+.step-label {
+    font-size: .65rem;
+    color: #adb5bd;
+    text-align: center;
+    white-space: nowrap;
+}
+.progress-step.done .step-label {
+    color: #495057;
+    font-weight: 600;
+}
+.progress-line {
+    flex: 1;
+    height: 2px;
+    background: #dee2e6;
+    margin: 0 4px;
+    margin-bottom: 18px;
+    transition: background .3s ease;
+}
+.progress-line.done {
+    background: #ffc107;
+}

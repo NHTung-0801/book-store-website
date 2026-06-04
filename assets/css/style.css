@@ -1,0 +1,84 @@
+/* Hover effect cho link trong footer */
+.footer-link:hover {
+    color: #ffc107 !important;
+    transition: color 0.2s ease;
+}
+
+/* Hover effect cho nút mạng xã hội */
+.social-btn:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000 !important;
+    transition: all 0.2s ease;
+}
+
+/* ── HERO BANNER ───────────────────────────────────────── */
+.hero-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    border-bottom: 3px solid #ffc107;
+}
+
+/* ── BOOK CARD ─────────────────────────────────────────── */
+.book-card {
+    border-radius: 12px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    overflow: hidden;
+}
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .15) !important;
+}
+
+/* Wrapper ảnh — tỷ lệ cố định 3:4 cho mọi bìa sách */
+.book-card__img-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background: #f8f9fa;
+}
+.book-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+.book-card:hover .book-card__img {
+    transform: scale(1.05);
+}
+
+/* Badge thể loại góc trên trái */
+.book-card__badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: .7rem;
+    border-radius: 20px;
+}
+
+/* Overlay "Hết hàng" */
+.book-card__overlay-soldout {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.book-card__overlay-soldout span {
+    background: #dc3545;
+    color: #fff;
+    font-weight: 700;
+    font-size: .9rem;
+    padding: 6px 18px;
+    border-radius: 20px;
+    letter-spacing: .5px;
+}
+
+/* Giới hạn 2 dòng cho tên sách dài */
+.book-card__title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.8rem;
+}

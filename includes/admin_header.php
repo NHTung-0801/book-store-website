@@ -6,18 +6,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 2. BỨC TƯỜNG BẢO MẬT (Rất quan trọng)
-// Kiểm tra nếu chưa đăng nhập HOẶC role không phải là 1 (Admin)
+// 2. BỨC TƯỜNG BẢO MẬT
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 1) {
-    // Ngay lập tức chuyển hướng về trang đăng nhập hoặc trang chủ
     header('Location: /bookstore/login.php');
     exit;
 }
 
 $adminName = htmlspecialchars($_SESSION['fullname']);
 $baseUrl = '/bookstore';
-
-// Lấy tên file hiện tại để làm sáng (active) menu tương ứng
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
@@ -27,95 +23,85 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản trị - Book Store</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-          rel="stylesheet">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" 
-          rel="stylesheet">
-
-    <style>
-        body {
-            background-color: #f4f6f9; /* Màu nền xám nhạt giúp làm nổi bật các bảng dữ liệu */
-        }
-        .admin-navbar {
-            background-color: #0f3460; /* Màu xanh đậm khác biệt với trang khách để dễ nhận diện */
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="<?= $baseUrl ?>/assets/css/style.css" rel="stylesheet">
+    <link href="<?= $baseUrl ?>/assets/css/admin_style.css" rel="stylesheet">
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark admin-navbar shadow-sm sticky-top">
-    <div class="container-fluid px-4">
-        
-        <a class="navbar-brand fw-bold" href="<?= $baseUrl ?>/admin/index.php">
-            <i class="bi bi-shield-lock-fill text-warning me-2"></i>Admin Panel
+<aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-brand">
+        <a href="<?= $baseUrl ?>/admin/index.php" class="text-decoration-none d-flex align-items-center gap-2">
+            <i class="bi bi-book-half text-warning fs-4"></i>
+            <div>
+                <div class="text-white fw-bold lh-1">Book Store</div>
+                <div class="text-warning" style="font-size:.7rem;">Admin Panel</div>
+            </div>
+        </a>
+    </div>
+
+    <nav class="mt-2 pb-4">
+        <div class="nav-section">Tổng quan</div>
+        <a href="<?= $baseUrl ?>/admin/index.php" class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>">
+            <i class="bi bi-speedometer2"></i>Dashboard
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="nav-section">Quản lý</div>
+        <a href="<?= $baseUrl ?>/admin/books.php" class="nav-link <?= ($current_page == 'books.php') ? 'active' : '' ?>">
+            <i class="bi bi-book"></i>Quản lý sách
+        </a>
+        <a href="<?= $baseUrl ?>/admin/categories.php" class="nav-link <?= ($current_page == 'categories.php') ? 'active' : '' ?>">
+            <i class="bi bi-tags"></i>Thể loại
+        </a>
+        <a href="<?= $baseUrl ?>/admin/orders.php" class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?>">
+            <i class="bi bi-bag-check"></i>Đơn hàng
+        </a>
+        <a href="<?= $baseUrl ?>/admin/users.php" class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>">
+            <i class="bi bi-people"></i>Thành viên
+        </a>
 
-        <div class="collapse navbar-collapse" id="adminNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                
-                <li class="nav-item">
-                    <a class="nav-link <?= ($current_page == 'index.php') ? 'active fw-bold text-warning' : '' ?>" 
-                       href="<?= $baseUrl ?>/admin/index.php">
-                        <i class="bi bi-speedometer2 me-1"></i>Tổng quan
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link <?= ($current_page == 'categories.php') ? 'active fw-bold text-warning' : '' ?>" 
-                       href="<?= $baseUrl ?>/admin/categories.php">
-                        <i class="bi bi-tags me-1"></i>Thể loại
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link <?= ($current_page == 'books.php') ? 'active fw-bold text-warning' : '' ?>" 
-                       href="<?= $baseUrl ?>/admin/books.php">
-                        <i class="bi bi-book me-1"></i>Sách
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link <?= ($current_page == 'orders.php') ? 'active fw-bold text-warning' : '' ?>" 
-                       href="<?= $baseUrl ?>/admin/orders.php">
-                        <i class="bi bi-cart-check me-1"></i>Đơn hàng
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link <?= ($current_page == 'users.php') ? 'active fw-bold text-warning' : '' ?>" 
-                       href="<?= $baseUrl ?>/admin/users.php">
-                        <i class="bi bi-people me-1"></i>Người dùng
-                    </a>
-                </li>
+        <div class="nav-section">Hệ thống</div>
+        <a href="<?= $baseUrl ?>/index.php" class="nav-link" target="_blank">
+            <i class="bi bi-box-arrow-up-right"></i>Xem website
+        </a>
+        <a href="<?= $baseUrl ?>/logout.php" class="nav-link text-danger-emphasis">
+            <i class="bi bi-box-arrow-right"></i>Đăng xuất
+        </a>
+    </nav>
+</aside>
 
-            </ul>
-
-            <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item me-3">
-                    <a class="nav-link text-light" href="<?= $baseUrl ?>/index.php" target="_blank" title="Mở trang khách hàng trong thẻ mới">
-                        <i class="bi bi-shop me-1"></i>Xem Cửa hàng
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-badge fs-5 me-1"></i> <?= $adminName ?>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li>
-                            <a class="dropdown-item text-danger" href="<?= $baseUrl ?>/logout.php">
-                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+<div class="admin-main">
+    <div class="admin-topbar d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
+                <i class="bi bi-list fs-5"></i>
+            </button>
+            <div>
+                <h5 class="mb-0 fw-bold">
+                    <?php 
+                        $titles = [
+                            'index.php' => 'Dashboard',
+                            'books.php' => 'Quản lý sách',
+                            'categories.php' => 'Quản lý thể loại',
+                            'orders.php' => 'Quản lý đơn hàng',
+                            'users.php' => 'Quản lý thành viên'
+                        ];
+                        echo $titles[$current_page] ?? 'Bảng điều khiển';
+                    ?>
+                </h5>
+                <p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i><?= date('d/m/Y') ?></p>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="text-end d-none d-sm-block">
+                <p class="mb-0 fw-semibold small"><?= $adminName ?></p>
+                <p class="text-muted mb-0" style="font-size:.75rem;">Quản trị viên</p>
+            </div>
+            <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center fw-bold text-dark" style="width:38px;height:38px;font-size:.9rem;">
+                <?= strtoupper(mb_substr($adminName, 0, 1)) ?>
+            </div>
         </div>
     </div>
-</nav>
 
-<div class="container-fluid p-4">
+    <div class="p-4 flex-grow-1">

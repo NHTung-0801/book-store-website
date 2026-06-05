@@ -1,0 +1,107 @@
+/* assets/css/admin_style.css */
+
+/* ── ADMIN LAYOUT ─────────────────────────────────── */
+body { background: #f0f2f5; }
+
+.admin-sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 1000;
+    transition: transform .3s ease;
+}
+.admin-sidebar .sidebar-brand {
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.admin-sidebar .nav-link {
+    color: rgba(255,255,255,.65);
+    padding: .65rem 1.25rem;
+    border-radius: 8px;
+    margin: 2px .75rem;
+    font-size: .9rem;
+    transition: all .2s ease;
+}
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background: rgba(255,193,7,.15);
+    color: #ffc107;
+}
+.admin-sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+    margin-right: 8px;
+}
+.admin-sidebar .nav-section {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255,255,255,.3);
+    padding: 1rem 1.25rem .35rem;
+}
+
+.admin-main {
+    margin-left: 250px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.admin-topbar {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    padding: .85rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+/* ── STAT CARDS ───────────────────────────────────── */
+.stat-card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.12) !important;
+}
+.stat-card .stat-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+.stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+/* ── TABLE ────────────────────────────────────────── */
+.admin-table thead th {
+    background: #f8f9fa;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #6c757d;
+    border-bottom: 2px solid #e9ecef;
+    white-space: nowrap;
+}
+
+/* Mobile sidebar toggle */
+@media (max-width: 991.98px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+    }
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+    .admin-main {
+        margin-left: 0;
+    }
+}

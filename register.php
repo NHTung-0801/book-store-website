@@ -11,7 +11,7 @@ if ($isLoggedIn) {
 }
 
 $errors  = [];   // Mảng chứa lỗi validate
-$success = '';   // Thông báo thành công
+$success = false; // Đổi thành boolean để dễ xử lý SweetAlert
 $old     = [];   // Giữ lại dữ liệu cũ khi form bị lỗi (tránh người dùng phải nhập lại)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -93,42 +93,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $stmt->execute([$username, $hashedPassword, $fullname, $email]);
 
-        // Đăng ký thành công — thông báo và xóa $old để reset form
-        $success = 'Đăng ký thành công! Bạn có thể <a href="/bookstore/login.php" class="alert-link">đăng nhập ngay</a>.';
+        // Đăng ký thành công — đổi trạng thái cờ success
+        $success = true;
         $old = [];
     }
 }
 ?>
 
-<!-- ========== NỘI DUNG TRANG ĐĂNG KÝ ========== -->
 <main class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-7 col-lg-5">
 
-            <!-- Card chứa form -->
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4 p-md-5">
 
-                    <!-- Tiêu đề -->
                     <div class="text-center mb-4">
                         <i class="bi bi-person-plus-fill fs-1 text-warning"></i>
                         <h3 class="fw-bold mt-2">Tạo tài khoản</h3>
                         <p class="text-muted small">Tham gia Book Store ngay hôm nay</p>
                     </div>
 
-                    <!-- Thông báo thành công -->
                     <?php if ($success): ?>
-                        <div class="alert alert-success" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <?= $success // $success chứa HTML link an toàn — đã tạo thủ công ?>
-                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Tuyệt vời!',
+                                    text: 'Tài khoản của bạn đã được tạo thành công.',
+                                    confirmButtonColor: '#ffc107',
+                                    confirmButtonText: 'Đăng nhập ngay'
+                                }).then((result) => {
+                                    // Tự động chuyển hướng về trang đăng nhập sau khi đóng popup
+                                    window.location.href = '/bookstore/login.php';
+                                });
+                            });
+                        </script>
                     <?php endif; ?>
 
-                    <!-- Form đăng ký — chỉ render khi chưa thành công -->
                     <?php if (!$success): ?>
                     <form method="POST" action="" novalidate>
 
-                        <!-- Username -->
                         <div class="mb-3">
                             <label for="username" class="form-label fw-semibold">
                                 Tên đăng nhập <span class="text-danger">*</span>
@@ -150,7 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Họ và tên -->
                         <div class="mb-3">
                             <label for="fullname" class="form-label fw-semibold">
                                 Họ và tên <span class="text-danger">*</span>
@@ -172,7 +175,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label fw-semibold">
                                 Email <span class="text-danger">*</span>
@@ -194,12 +196,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Mật khẩu -->
                         <div class="mb-3">
                             <label for="password" class="form-label fw-semibold">
                                 Mật khẩu <span class="text-danger">*</span>
                             </label>
-                            <!-- Input group để thêm nút toggle hiện/ẩn mật khẩu -->
                             <div class="input-group">
                                 <input
                                     type="password"
@@ -209,7 +209,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     placeholder="Tối thiểu 6 ký tự"
                                     autocomplete="new-password"
                                 >
-                                <!-- Nút toggle hiện/ẩn — xử lý bằng main.js -->
                                 <button class="btn btn-outline-secondary toggle-password"
                                         type="button" data-target="password"
                                         title="Hiện/ẩn mật khẩu">
@@ -224,7 +223,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
 
-                        <!-- Xác nhận mật khẩu -->
                         <div class="mb-4">
                             <label for="confirm_password" class="form-label fw-semibold">
                                 Xác nhận mật khẩu <span class="text-danger">*</span>
@@ -252,7 +250,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
 
-                        <!-- Nút submit -->
                         <div class="d-grid">
                             <button type="submit" class="btn btn-warning fw-bold py-2">
                                 <i class="bi bi-person-check me-2"></i>Tạo tài khoản
@@ -262,7 +259,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </form>
                     <?php endif; ?>
 
-                    <!-- Link chuyển sang đăng nhập -->
                     <hr class="my-4">
                     <p class="text-center text-muted small mb-0">
                         Đã có tài khoản?
@@ -271,10 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                     </p>
 
-                </div><!-- /.card-body -->
-            </div><!-- /.card -->
-
-        </div>
+                </div></div></div>
     </div>
 </main>
 

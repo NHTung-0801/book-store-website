@@ -52,6 +52,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['fullname'] = $user['fullname'];
             $_SESSION['username'] = $user['username'];
 
+            // ── LƯU THÔNG BÁO THÀNH CÔNG VÀO SESSION TRƯỚC KHI CHUYỂN TRANG ──
+            $_SESSION['sweet_alert'] = [
+                'icon'  => 'success',
+                'title' => 'Thành công!',
+                'text'  => 'Chào mừng bạn quay trở lại.'
+            ];
+
             // ── 6. ĐIỀU HƯỚNG THEO PHÂN QUYỀN ───────────────────────────
             if ($user['role'] == 1) {
                 // Admin → trang quản trị
@@ -66,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!-- ========== NỘI DUNG TRANG ĐĂNG NHẬP ========== -->
 <main class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
@@ -74,25 +80,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4 p-md-5">
 
-                    <!-- Tiêu đề -->
                     <div class="text-center mb-4">
                         <i class="bi bi-box-arrow-in-right fs-1 text-warning"></i>
                         <h3 class="fw-bold mt-2">Đăng nhập</h3>
                         <p class="text-muted small">Chào mừng bạn quay trở lại!</p>
                     </div>
 
-                    <!-- Thông báo lỗi đăng nhập -->
                     <?php if ($error): ?>
-                        <div class="alert alert-danger d-flex align-items-center" role="alert">
-                            <i class="bi bi-shield-exclamation me-2 flex-shrink-0"></i>
-                            <span><?= htmlspecialchars($error) ?></span>
-                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Đăng nhập thất bại',
+                                    text: '<?= addslashes($error) ?>',
+                                    confirmButtonColor: '#d33'
+                                });
+                            });
+                        </script>
                     <?php endif; ?>
 
-                    <!-- Form đăng nhập -->
                     <form method="POST" action="" novalidate>
 
-                        <!-- Username -->
                         <div class="mb-3">
                             <label for="username" class="form-label fw-semibold">
                                 Tên đăng nhập <span class="text-danger">*</span>
@@ -114,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
 
-                        <!-- Mật khẩu -->
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <label for="password" class="form-label fw-semibold mb-0">
@@ -133,7 +140,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     placeholder="Nhập mật khẩu"
                                     autocomplete="current-password"
                                 >
-                                <!-- Nút toggle hiện/ẩn mật khẩu (xử lý bởi main.js) -->
                                 <button class="btn btn-outline-secondary toggle-password"
                                         type="button" data-target="password"
                                         title="Hiện/ẩn mật khẩu">
@@ -142,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
 
-                        <!-- Nút submit -->
                         <div class="d-grid">
                             <button type="submit" class="btn btn-warning fw-bold py-2">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
@@ -151,7 +156,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     </form>
 
-                    <!-- Link chuyển sang đăng ký -->
                     <hr class="my-4">
                     <p class="text-center text-muted small mb-0">
                         Chưa có tài khoản?
@@ -161,10 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                     </p>
 
-                </div><!-- /.card-body -->
-            </div><!-- /.card -->
-
-        </div>
+                </div></div></div>
     </div>
 </main>
 

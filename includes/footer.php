@@ -133,5 +133,23 @@ $currentYear = date('Y');
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
+<?php if (isset($_SESSION['sweet_alert'])): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: '<?= $_SESSION['sweet_alert']['icon'] ?>',
+            title: '<?= $_SESSION['sweet_alert']['title'] ?>',
+            text: '<?= $_SESSION['sweet_alert']['text'] ?>',
+            timer: 3000,
+            showConfirmButton: false,
+            toast: <?= isset($_SESSION['sweet_alert']['toast']) && $_SESSION['sweet_alert']['toast'] ? 'true' : 'false' ?>,
+            position: '<?= $_SESSION['sweet_alert']['position'] ?? 'center' ?>'
+        });
+    });
+</script>
+<?php unset($_SESSION['sweet_alert']); ?>
+<?php endif; ?>
+
 </body>
 </html>

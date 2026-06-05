@@ -10,6 +10,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // ── 1. KIỂM TRA ĐĂNG NHẬP ────────────────────────────────────────────────────
 if (!isset($_SESSION['user_id'])) {
+    $_SESSION['sweet_alert'] = [
+        'icon'  => 'warning',
+        'title' => 'Chưa đăng nhập',
+        'text'  => 'Vui lòng đăng nhập để thao tác với giỏ hàng.'
+    ];
     header('Location: ../login.php');
     exit;
 }
@@ -26,17 +31,32 @@ $bookId   = filter_input(INPUT_POST, 'book_id',  FILTER_VALIDATE_INT);
 $quantity = filter_input(INPUT_POST, 'quantity', FILTER_VALIDATE_INT);
 
 if (!$bookId || $bookId <= 0 || !$quantity || $quantity <= 0) {
-    header('Location: ../cart.php?status=error');
+    $_SESSION['sweet_alert'] = [
+        'icon'     => 'error',
+        'title'    => 'Lỗi dữ liệu',
+        'text'     => 'Số lượng hoặc sản phẩm không hợp lệ.',
+        'toast'    => true,
+        'position' => 'top-end'
+    ];
+    header('Location: ../cart.php');
     exit;
 }
 
 // ── 4. KIỂM TRA TỒN KHO THỰC TẾ ─────────────────────────────────────────────
-$stmtStock = $pdo->prepare("SELECT stock_quantity FROM books WHERE id = ? LIMIT 1");
+// Cập nhật: Lấy thêm title để hiển thị thông báo cho đẹp
+$stmtStock = $pdo->prepare("SELECT stock_quantity, title FROM books WHERE id = ? LIMIT 1");
 $stmtStock->execute([$bookId]);
 $book = $stmtStock->fetch();
 
 if (!$book) {
-    header('Location: ../cart.php?status=error');
+    $_SESSION['sweet_alert'] = [
+        'icon'     => 'error',
+        'title'    => 'Lỗi',
+        'text'     => 'Không tìm thấy sản phẩm này.',
+        'toast'    => true,
+        'position' => 'top-end'
+    ];
+    header('Location: ../cart.php');
     exit;
 }
 
@@ -53,5 +73,14 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$quantity, $userId, $bookId]);
 
-header('Location: ../cart.php?status=updated');
+// ── 6. LƯU THÔNG BÁO VÀ CHUYỂN HƯỚNG ─────────────────────────────────────────
+$_SESSION['sweet_alert'] = [
+    'icon'     => 'success',
+    'title'    => 'Đã cập nhật',
+    'text'     => 'Số lượng của « ' . htmlspecialchars($book['title']) . ' » đã thay đổi.',
+    'toast'    => true,
+    'position' => 'top-end'
+];
+
+header('Location: ../cart.php');
 exit;

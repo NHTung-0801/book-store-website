@@ -10,9 +10,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ── 1. KIỂM TRA ĐĂNG NHẬP ────────────────────────────────────────────────────
-// Nếu chưa đăng nhập → redirect về login, kèm status để product.php hiện cảnh báo
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php?status=login');
+    // Lưu thông báo yêu cầu đăng nhập
+    $_SESSION['sweet_alert'] = [
+        'icon'  => 'warning',
+        'title' => 'Chưa đăng nhập',
+        'text'  => 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.'
+    ];
+    header('Location: ../login.php');
     exit;
 }
 
@@ -30,13 +35,18 @@ $quantity = filter_input(INPUT_POST, 'quantity', FILTER_VALIDATE_INT);
 
 // Kiểm tra book_id và quantity phải là số nguyên dương hợp lệ
 if (!$bookId || $bookId <= 0 || !$quantity || $quantity <= 0) {
+    $_SESSION['sweet_alert'] = [
+        'icon'  => 'error',
+        'title' => 'Lỗi dữ liệu',
+        'text'  => 'Số lượng hoặc sản phẩm không hợp lệ.'
+    ];
     header('Location: ../index.php');
     exit;
 }
 
 // ── 4. KIỂM TRA SÁCH CÓ TỒN TẠI VÀ CÒN HÀNG KHÔNG ─────────────────────────
 $stmtBook = $pdo->prepare("
-    SELECT id, stock_quantity
+    SELECT id, stock_quantity, title
     FROM   books
     WHERE  id = ?
     LIMIT  1
@@ -44,15 +54,25 @@ $stmtBook = $pdo->prepare("
 $stmtBook->execute([$bookId]);
 $book = $stmtBook->fetch();
 
-// Sách không tồn tại → redirect về trang chủ
+// Sách không tồn tại
 if (!$book) {
+    $_SESSION['sweet_alert'] = [
+        'icon'  => 'error',
+        'title' => 'Lỗi',
+        'text'  => 'Không tìm thấy sản phẩm này.'
+    ];
     header('Location: ../index.php');
     exit;
 }
 
 // Sách hết hàng → redirect về trang chi tiết với thông báo lỗi
 if ($book['stock_quantity'] <= 0) {
-    header("Location: ../product.php?id={$bookId}&status=error");
+    $_SESSION['sweet_alert'] = [
+        'icon'  => 'error',
+        'title' => 'Hết hàng',
+        'text'  => 'Rất tiếc, sản phẩm này hiện đã hết hàng.'
+    ];
+    header("Location: ../product.php?id={$bookId}");
     exit;
 }
 
@@ -72,9 +92,8 @@ $cartItem = $stmtCheck->fetch();
 
 if ($cartItem) {
     // ── 5a. ĐÃ CÓ → UPDATE CỘNG DỒN QUANTITY ────────────────────────────────
-    // Đồng thời giới hạn tổng số lượng không vượt quá stock_quantity
     $newQuantity = $cartItem['quantity'] + $quantity;
-    $newQuantity = min($newQuantity, $book['stock_quantity']);
+    $newQuantity = min($newQuantity, $book['stock_quantity']); // Không vượt quá kho
 
     $stmtUpdate = $pdo->prepare("
         UPDATE cart
@@ -86,7 +105,6 @@ if ($cartItem) {
 
 } else {
     // ── 5b. CHƯA CÓ → INSERT MỚI VÀO GIỎ HÀNG ───────────────────────────────
-    // Bảng cart có khóa chính kép (user_id, book_id)
     $stmtInsert = $pdo->prepare("
         INSERT INTO cart (user_id, book_id, quantity)
         VALUES (?, ?, ?)
@@ -94,6 +112,14 @@ if ($cartItem) {
     $stmtInsert->execute([$userId, $bookId, $quantity]);
 }
 
-// ── 6. REDIRECT VỀ TRANG GIỎ HÀNG SAU KHI XỬ LÝ XONG ──────────────────────
-header('Location: ../cart.php?status=added');
+// ── 6. LƯU THÔNG BÁO THÀNH CÔNG VÀ CHUYỂN HƯỚNG ────────────────────────────
+$_SESSION['sweet_alert'] = [
+    'icon'     => 'success',
+    'title'    => 'Đã thêm vào giỏ',
+    'text'     => '« ' . htmlspecialchars($book['title']) . ' » đã được thêm vào giỏ hàng!',
+    'toast'    => true,           // Dùng dạng toast (thông báo nhỏ gọn)
+    'position' => 'top-end'       // Hiển thị ở góc trên bên phải
+];
+
+header('Location: ../cart.php');
 exit;

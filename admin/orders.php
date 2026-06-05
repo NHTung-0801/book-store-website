@@ -1,7 +1,7 @@
 <?php
 // admin/orders.php
 
-// ── 1. LOGIC & BẢO MẬT ────────────────────────────────────────────────
+// ── 1. LOGIC & BẢO MẬT (PHẢI ĐẶT TRÊN CÙNG) ───────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
     header('Location: /bookstore/index.php');
@@ -10,13 +10,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
 
 require_once __DIR__ . '/../config/db.php';
 
-// Các trạng thái hợp lệ (Đã bổ sung 'failed')
+// Các trạng thái hợp lệ
 const VALID_STATUSES = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'failed'];
 
 // Các trạng thái đóng băng (Không được phép thay đổi nữa)
 const LOCKED_STATUSES = ['delivered', 'cancelled', 'failed'];
 
-// ── ACTION: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG ────────────────────────────────────
+// ── ACTION: CẬP TRẠNG THÁI ĐƠN HÀNG
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
     $orderId   = filter_input(INPUT_POST, 'order_id', FILTER_VALIDATE_INT);
     $newStatus = trim($_POST['status'] ?? '');
@@ -43,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// ── BỘ LỌC + TÌM KIẾM ────────────────────────────────────────────────────────
+// ── BỘ LỌC + TÌM KIẾM
 $filterStatus = $_GET['status'] ?? '';
 $search       = trim($_GET['search'] ?? '');
 
-// ── PHÂN TRANG ────────────────────────────────────────────────────────────────
+// ── PHÂN TRANG
 $perPage     = 10;
 $currentPage = max(1, (int)($_GET['page'] ?? 1));
 $offset      = ($currentPage - 1) * $perPage;
@@ -75,14 +75,7 @@ $totalPages  = (int) ceil($totalOrders / $perPage);
 
 // Lấy danh sách đơn hàng
 $stmtOrders = $pdo->prepare("
-    SELECT  o.id,
-            o.fullname,
-            o.phone,
-            o.address,
-            o.total_price,
-            o.status,
-            o.created_at,
-            COUNT(od.book_id) AS item_count
+    SELECT  o.id, o.fullname, o.phone, o.address, o.total_price, o.status, o.created_at, COUNT(od.book_id) AS item_count
     FROM    orders o
     LEFT JOIN order_details od ON od.order_id = o.id
     $whereSQL
@@ -97,23 +90,14 @@ $orders = $stmtOrders->fetchAll();
 $statsRaw = $pdo->query("SELECT status, COUNT(*) AS cnt FROM orders GROUP BY status")->fetchAll();
 $stats = array_column($statsRaw, 'cnt', 'status');
 
-// Đếm đơn hàng pending cho Sidebar
-$pendingOrders = $stats['pending'] ?? 0;
-
 // Lấy chi tiết order_details cho Modal
 $orderIds = array_column($orders, 'id');
 $detailsMap = [];
 if (!empty($orderIds)) {
     $inPlaceholders = implode(',', array_fill(0, count($orderIds), '?'));
     $stmtDetails = $pdo->prepare("
-        SELECT  od.order_id,
-                od.quantity,
-                od.price,
-                od.price * od.quantity AS subtotal,
-                b.id        AS book_id,
-                b.title,
-                b.author,
-                b.image
+        SELECT  od.order_id, od.quantity, od.price, od.price * od.quantity AS subtotal,
+                b.id AS book_id, b.title, b.author, b.image
         FROM    order_details od
         JOIN    books b ON b.id = od.book_id
         WHERE   od.order_id IN ($inPlaceholders)
@@ -125,7 +109,7 @@ if (!empty($orderIds)) {
     }
 }
 
-// Hàm hỗ trợ render Badge trạng thái
+// Hàm hỗ trợ render Badge trạng thái (Giữ nguyên icon nhỏ Bootstrap)
 function getStatusMeta(string $status): array {
     return match($status) {
         'pending'   => ['badge' => 'bg-warning text-dark', 'icon' => 'bi-clock',               'label' => 'Chờ xác nhận'],
@@ -138,275 +122,197 @@ function getStatusMeta(string $status): array {
     };
 }
 
+// Map thông báo với Icon 3D (Đã fix 100% link chuẩn)
 $msgMap = [
-    'updated' => ['type' => 'success', 'text' => 'Cập nhật trạng thái đơn hàng thành công!'],
-    'error'   => ['type' => 'danger',  'text' => 'Có lỗi xảy ra. Vui lòng thử lại.'],
-    'locked'  => ['type' => 'danger',  'text' => 'Đơn hàng này đã được đóng băng, không thể thay đổi trạng thái!'],
+    'updated' => ['type' => 'success', 'text' => 'Cập nhật trạng thái đơn hàng thành công!', 'icon' => 'book'],
+    'error'   => ['type' => 'danger',  'text' => 'Có lỗi xảy ra. Vui lòng thử lại.', 'icon' => 'close-window'],
+    'locked'  => ['type' => 'danger',  'text' => 'Đơn hàng này đã được đóng băng, không thể thay đổi trạng thái!', 'icon' => 'close-window'],
 ];
 $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
+
+
+// ── 2. GỌI HEADER ADMIN ───────────────────────────────────────────────────────
+require_once __DIR__ . '/../includes/admin_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý đơn hàng — Book Store Admin</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    
-    <style>
-        body { background: #f0f2f5; }
-        .admin-sidebar {
-            width: 250px; min-height: 100vh;
-            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-            position: fixed; top: 0; left: 0; z-index: 1000;
-            transition: transform .3s ease;
-        }
-        .admin-sidebar .sidebar-brand {
-            padding: 1.5rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,.08);
-        }
-        .admin-sidebar .nav-link {
-            color: rgba(255,255,255,.65); padding: .65rem 1.25rem;
-            border-radius: 8px; margin: 2px .75rem; font-size: .9rem; transition: all .2s ease;
-        }
-        .admin-sidebar .nav-link:hover, .admin-sidebar .nav-link.active {
-            background: rgba(255,193,7,.15); color: #ffc107;
-        }
-        .admin-sidebar .nav-link i { width: 20px; text-align: center; margin-right: 8px; }
-        .admin-sidebar .nav-section {
-            font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
-            color: rgba(255,255,255,.3); padding: 1rem 1.25rem .35rem;
-        }
-        .admin-main { margin-left: 250px; min-height: 100vh; }
-        .admin-topbar {
-            background: #fff; border-bottom: 1px solid #e9ecef;
-            padding: .85rem 1.5rem; position: sticky; top: 0; z-index: 999;
-        }
-        @media (max-width: 991.98px) {
-            .admin-sidebar { transform: translateX(-100%); }
-            .admin-sidebar.show { transform: translateX(0); }
-            .admin-main { margin-left: 0; }
-        }
-        .status-select { min-width: 145px; font-size: .82rem; }
-        .modal-book-img { width: 48px; height: 64px; object-fit: cover; border-radius: 6px; }
-    </style>
-</head>
-<body>
 
-<aside class="admin-sidebar" id="adminSidebar">
-    <div class="sidebar-brand">
-        <a href="/bookstore/admin/index.php" class="text-decoration-none d-flex align-items-center gap-2">
-            <i class="bi bi-book-half text-warning fs-4"></i>
-            <div>
-                <div class="text-white fw-bold lh-1">Book Store</div>
-                <div class="text-warning" style="font-size:.7rem;">Admin Panel</div>
+<style>
+    .status-select { min-width: 145px; font-size: .82rem; }
+    .modal-book-img { width: 48px; height: 64px; object-fit: cover; border-radius: 6px; }
+</style>
+
+<?php if ($msg): ?>
+    <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm d-flex align-items-center gap-2">
+        <img src="https://img.icons8.com/3d-fluency/94/<?= $msg['icon'] ?>.png" style="width: 24px; height: 24px;" alt="Alert">
+        <span class="mb-0"><?= $msg['text'] ?></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<div class="row g-3 mb-4">
+    <?php
+    $statCards = [
+        ['key' => '',           'label' => 'Tất cả',       'icon' => 'shopping-cart', 'color' => 'secondary'],
+        ['key' => 'pending',    'label' => 'Chờ xác nhận', 'icon' => 'alarm-clock',   'color' => 'warning'],
+        ['key' => 'confirmed',  'label' => 'Đã xác nhận',  'icon' => 'book',          'color' => 'info'],
+        ['key' => 'shipping',   'label' => 'Đang giao',    'icon' => 'truck',         'color' => 'primary'],
+        ['key' => 'delivered',  'label' => 'Đã giao',      'icon' => 'money-bag',     'color' => 'success'],
+        ['key' => 'failed',     'label' => 'Thất bại',     'icon' => 'box-important', 'color' => 'dark'],
+        ['key' => 'cancelled',  'label' => 'Đã hủy',       'icon' => 'close-window',  'color' => 'danger'],
+    ];
+    foreach ($statCards as $sc):
+        $cnt = $sc['key'] === '' ? $totalOrders : ($stats[$sc['key']] ?? 0);
+        if ($sc['key'] === '') $cnt = array_sum($stats);
+        $isActive = ($filterStatus === $sc['key']);
+    ?>
+    <div class="col-6 col-md-4 col-xl">
+        <a href="/bookstore/admin/orders.php?status=<?= $sc['key'] ?>&search=<?= urlencode($search) ?>"
+           class="card border-0 shadow-sm text-decoration-none <?= $isActive ? 'border border-' . $sc['color'] . ' border-2 bg-light' : '' ?>"
+           style="border-radius:12px;">
+            <div class="card-body py-3 px-2 text-center">
+                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:46px;height:46px;">
+                    <img src="https://img.icons8.com/3d-fluency/94/<?= $sc['icon'] ?>.png" alt="<?= $sc['label'] ?>" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
+                </div>
+                <div class="fw-bold fs-5 mt-1 text-dark"><?= $cnt ?></div>
+                <div class="text-muted" style="font-size:.70rem;"><?= $sc['label'] ?></div>
             </div>
         </a>
     </div>
+    <?php endforeach; ?>
+</div>
 
-    <nav class="mt-2 pb-4">
-        <div class="nav-section">Tổng quan</div>
-        <a href="/bookstore/admin/index.php" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
-        <div class="nav-section">Quản lý</div>
-        <a href="/bookstore/admin/books.php" class="nav-link"><i class="bi bi-book"></i>Quản lý sách</a>
-        <a href="/bookstore/admin/categories.php" class="nav-link"><i class="bi bi-tags"></i>Thể loại</a>
-        <a href="/bookstore/admin/orders.php" class="nav-link active">
-            <i class="bi bi-bag-check"></i>Đơn hàng
-            <?php if ($pendingOrders > 0): ?>
-                <span class="badge bg-danger rounded-pill ms-auto"><?= $pendingOrders ?></span>
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3 px-4">
+        <form method="GET" action="" class="d-flex gap-2 align-items-center flex-wrap">
+            <input type="hidden" name="status" value="<?= htmlspecialchars($filterStatus) ?>">
+            <div class="input-group" style="max-width:360px;">
+                <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Tìm mã đơn, tên khách, SĐT..." value="<?= htmlspecialchars($search) ?>">
+            </div>
+            <button type="submit" class="btn btn-dark fw-semibold">Tìm kiếm</button>
+            <?php if ($search || $filterStatus): ?>
+                <a href="/bookstore/admin/orders.php" class="btn btn-outline-secondary"><i class="bi bi-x me-1"></i>Xóa lọc</a>
             <?php endif; ?>
-        </a>
-        <a href="/bookstore/admin/users.php" class="nav-link"><i class="bi bi-people"></i>Thành viên</a>
-        <div class="nav-section">Hệ thống</div>
-        <a href="/bookstore/index.php" class="nav-link" target="_blank"><i class="bi bi-box-arrow-up-right"></i>Xem website</a>
-        <a href="/bookstore/logout.php" class="nav-link text-danger-emphasis"><i class="bi bi-box-arrow-right"></i>Đăng xuất</a>
-    </nav>
-</aside>
-
-<div class="admin-main">
-
-    <div class="admin-topbar d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
-                <i class="bi bi-list fs-5"></i>
-            </button>
-            <div><h5 class="mb-0 fw-bold">Quản lý đơn hàng</h5></div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <div class="text-end d-none d-sm-block">
-                <p class="mb-0 fw-semibold small"><?= htmlspecialchars($_SESSION['fullname']) ?></p>
-                <p class="text-muted mb-0" style="font-size:.75rem;">Quản trị viên</p>
-            </div>
-            <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center fw-bold text-dark" style="width:38px;height:38px;font-size:.9rem;">
-                <?= strtoupper(mb_substr($_SESSION['fullname'], 0, 1)) ?>
-            </div>
-        </div>
+        </form>
     </div>
+</div>
 
-    <div class="p-4">
-
-        <?php if ($msg): ?>
-            <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm">
-                <i class="bi bi-info-circle me-2"></i><?= $msg['text'] ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-
-        <div class="row g-3 mb-4">
-            <?php
-            $statCards = [
-                ['key' => '',           'label' => 'Tất cả',       'icon' => 'bi-list-ul',              'color' => 'secondary'],
-                ['key' => 'pending',    'label' => 'Chờ xác nhận', 'icon' => 'bi-clock',                'color' => 'warning'],
-                ['key' => 'confirmed',  'label' => 'Đã xác nhận',  'icon' => 'bi-check-circle',         'color' => 'info'],
-                ['key' => 'shipping',   'label' => 'Đang giao',    'icon' => 'bi-truck',                'color' => 'primary'],
-                ['key' => 'delivered',  'label' => 'Đã giao',      'icon' => 'bi-bag-check',            'color' => 'success'],
-                ['key' => 'failed',     'label' => 'Thất bại',     'icon' => 'bi-exclamation-triangle', 'color' => 'dark'],
-                ['key' => 'cancelled',  'label' => 'Đã hủy',       'icon' => 'bi-x-circle',             'color' => 'danger'],
-            ];
-            foreach ($statCards as $sc):
-                $cnt = $sc['key'] === '' ? $totalOrders : ($stats[$sc['key']] ?? 0);
-                if ($sc['key'] === '') $cnt = array_sum($stats);
-                $isActive = ($filterStatus === $sc['key']);
-            ?>
-            <div class="col-6 col-md-4 col-xl">
-                <a href="/bookstore/admin/orders.php?status=<?= $sc['key'] ?>&search=<?= urlencode($search) ?>"
-                   class="card border-0 shadow-sm text-decoration-none <?= $isActive ? 'border border-' . $sc['color'] . ' border-2 bg-light' : '' ?>"
-                   style="border-radius:12px;">
-                    <div class="card-body py-3 px-2 text-center">
-                        <i class="bi <?= $sc['icon'] ?> text-<?= $sc['color'] ?> fs-4"></i>
-                        <div class="fw-bold fs-5 mt-1 text-dark"><?= $cnt ?></div>
-                        <div class="text-muted" style="font-size:.70rem;"><?= $sc['label'] ?></div>
-                    </div>
-                </a>
-            </div>
-            <?php endforeach; ?>
-        </div>
-
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body py-3 px-4">
-                <form method="GET" action="" class="d-flex gap-2 align-items-center flex-wrap">
-                    <input type="hidden" name="status" value="<?= htmlspecialchars($filterStatus) ?>">
-                    <div class="input-group" style="max-width:360px;">
-                        <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control" placeholder="Tìm mã đơn, tên khách, SĐT..." value="<?= htmlspecialchars($search) ?>">
-                    </div>
-                    <button type="submit" class="btn btn-dark fw-semibold">Tìm kiếm</button>
-                    <?php if ($search || $filterStatus): ?>
-                        <a href="/bookstore/admin/orders.php" class="btn btn-outline-secondary"><i class="bi bi-x me-1"></i>Xóa lọc</a>
-                    <?php endif; ?>
-                </form>
-            </div>
-        </div>
-
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Mã đơn</th>
-                                <th>Người nhận</th>
-                                <th>Số điện thoại</th>
-                                <th class="text-end">Tổng tiền</th>
-                                <th class="text-center">SP</th>
-                                <th>Ngày đặt</th>
-                                <th style="min-width:180px;">Trạng thái</th>
-                                <th class="text-center pe-4">Chi tiết</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php if (empty($orders)): ?>
-                            <tr><td colspan="8" class="text-center text-muted py-5"><i class="bi bi-inbox fs-2 d-block mb-2"></i>Không có đơn hàng nào phù hợp.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($orders as $order):
-                                $meta = getStatusMeta($order['status']);
-                                $isLocked = in_array($order['status'], LOCKED_STATUSES);
-                            ?>
-                            <tr>
-                                <td class="ps-4 fw-bold text-secondary">
-                                    #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
-                                </td>
-                                <td>
-                                    <p class="fw-bold mb-0 text-dark"><?= htmlspecialchars($order['fullname']) ?></p>
-                                    <p class="text-muted mb-0 small text-truncate" style="max-width:180px;">
-                                        <i class="bi bi-geo-alt me-1"></i><?= htmlspecialchars($order['address']) ?>
-                                    </p>
-                                </td>
-                                <td><?= htmlspecialchars($order['phone']) ?></td>
-                                <td class="text-end fw-bold text-danger">
-                                    <?= number_format($order['total_price'], 0, ',', '.') ?>₫
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge bg-secondary rounded-pill"><?= $order['item_count'] ?></span>
-                                </td>
-                                <td class="small text-muted">
-                                    <?php if (!empty($order['created_at'])): ?>
-                                        <?= date('d/m/Y', strtotime($order['created_at'])) ?><br>
-                                        <?= date('H:i', strtotime($order['created_at'])) ?>
-                                    <?php else: ?>—<?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if ($isLocked): ?>
-                                        <div class="d-inline-block">
-                                            <span class="badge <?= $meta['badge'] ?> px-3 py-2" style="font-size:.85rem;">
-                                                <i class="bi <?= $meta['icon'] ?> me-1"></i><?= $meta['label'] ?>
-                                            </span>
-                                            <div class="small text-muted mt-2 fw-semibold text-center">
-                                                <i class="bi bi-lock-fill me-1"></i>Đã khóa
-                                            </div>
-                                        </div>
-                                    <?php else: ?>
-                                        <form method="POST" action="/bookstore/admin/orders.php?page=<?= $currentPage ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>" class="d-flex align-items-center gap-2">
-                                            <input type="hidden" name="action" value="update_status">
-                                            <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                            <select name="status" class="form-select form-select-sm status-select">
-                                                <?php foreach (VALID_STATUSES as $st): $m = getStatusMeta($st); ?>
-                                                    <option value="<?= $st ?>" <?= $order['status'] === $st ? 'selected' : '' ?>>
-                                                        <?= $m['label'] ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-warning" title="Lưu trạng thái"><i class="bi bi-check-lg"></i></button>
-                                        </form>
-                                        <span class="badge <?= $meta['badge'] ?> mt-1"><i class="bi <?= $meta['icon'] ?> me-1"></i><?= $meta['label'] ?></span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-center pe-4">
-                                    <button type="button" class="btn btn-sm btn-outline-info" title="Xem chi tiết" data-bs-toggle="modal" data-bs-target="#orderModal<?= $order['id'] ?>">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-
-                <?php if ($totalPages > 1): ?>
-                <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top bg-light">
-                    <p class="text-muted small mb-0">Hiển thị trang <?= $currentPage ?> / <?= $totalPages ?></p>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                                <a class="page-link" href="?page=<?= $currentPage - 1 ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>"><i class="bi bi-chevron-left"></i></a>
-                            </li>
-                            <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                                <li class="page-item <?= $p === $currentPage ? 'active' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $p ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>"><?= $p ?></a>
-                                </li>
-                            <?php endfor; ?>
-                            <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                                <a class="page-link" href="?page=<?= $currentPage + 1 ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>"><i class="bi bi-chevron-right"></i></a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold mb-0 d-flex align-items-center text-dark">
+            <img src="https://img.icons8.com/3d-fluency/94/truck.png" width="26" height="26" class="me-2" alt="Orders">
+            Danh sách đơn hàng
+            <span class="badge bg-secondary ms-2"><?= $totalOrders ?></span>
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover admin-table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã đơn</th>
+                        <th>Người nhận</th>
+                        <th>Số điện thoại</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th class="text-center">SP</th>
+                        <th>Ngày đặt</th>
+                        <th style="min-width:180px;">Trạng thái</th>
+                        <th class="text-center pe-4">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php if (empty($orders)): ?>
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <img src="https://img.icons8.com/3d-fluency/94/box-important.png" style="width: 56px; height: 56px; filter: grayscale(0.5); opacity: 0.8;" class="mb-3 d-block mx-auto" alt="No data">
+                            Không có đơn hàng nào phù hợp.
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($orders as $order):
+                        $meta = getStatusMeta($order['status']);
+                        $isLocked = in_array($order['status'], LOCKED_STATUSES);
+                    ?>
+                    <tr>
+                        <td class="ps-4 fw-bold text-secondary">
+                            #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
+                        </td>
+                        <td>
+                            <p class="fw-bold mb-0 text-dark"><?= htmlspecialchars($order['fullname']) ?></p>
+                            <p class="text-muted mb-0 small text-truncate" style="max-width:180px;">
+                                <i class="bi bi-geo-alt me-1"></i><?= htmlspecialchars($order['address']) ?>
+                            </p>
+                        </td>
+                        <td><?= htmlspecialchars($order['phone']) ?></td>
+                        <td class="text-end fw-bold text-danger">
+                            <?= number_format($order['total_price'], 0, ',', '.') ?>₫
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary rounded-pill"><?= $order['item_count'] ?></span>
+                        </td>
+                        <td class="small text-muted">
+                            <?php if (!empty($order['created_at'])): ?>
+                                <?= date('d/m/Y', strtotime($order['created_at'])) ?><br>
+                                <?= date('H:i', strtotime($order['created_at'])) ?>
+                            <?php else: ?>—<?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ($isLocked): ?>
+                                <div class="d-inline-block">
+                                    <span class="badge <?= $meta['badge'] ?> px-3 py-2" style="font-size:.85rem;">
+                                        <i class="bi <?= $meta['icon'] ?> me-1"></i><?= $meta['label'] ?>
+                                    </span>
+                                    <div class="small text-muted mt-2 fw-semibold text-center">
+                                        <i class="bi bi-lock-fill me-1"></i>Đã khóa
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <form method="POST" action="/bookstore/admin/orders.php?page=<?= $currentPage ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>" class="d-flex align-items-center gap-2">
+                                    <input type="hidden" name="action" value="update_status">
+                                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                    <select name="status" class="form-select form-select-sm status-select">
+                                        <?php foreach (VALID_STATUSES as $st): $m = getStatusMeta($st); ?>
+                                            <option value="<?= $st ?>" <?= $order['status'] === $st ? 'selected' : '' ?>>
+                                                <?= $m['label'] ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-warning" title="Lưu trạng thái"><i class="bi bi-check-lg"></i></button>
+                                </form>
+                                <span class="badge <?= $meta['badge'] ?> mt-1"><i class="bi <?= $meta['icon'] ?> me-1"></i><?= $meta['label'] ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="text-center pe-4">
+                            <button type="button" class="btn btn-sm btn-outline-info" title="Xem chi tiết" data-bs-toggle="modal" data-bs-target="#orderModal<?= $order['id'] ?>">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
                 <?php endif; ?>
-
-            </div>
+                </tbody>
+            </table>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top bg-light">
+            <p class="text-muted small mb-0">Hiển thị trang <?= $currentPage ?> / <?= $totalPages ?></p>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= $currentPage - 1 ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>"><i class="bi bi-chevron-left"></i></a>
+                    </li>
+                    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                        <li class="page-item <?= $p === $currentPage ? 'active' : '' ?>">
+                            <a class="page-link" href="?page=<?= $p ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>"><?= $p ?></a>
+                        </li>
+                    <?php endfor; ?>
+                    <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= $currentPage + 1 ?>&status=<?= urlencode($filterStatus) ?>&search=<?= urlencode($search) ?>"><i class="bi bi-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <?php endif; ?>
 
     </div>
 </div>
@@ -419,8 +325,9 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-receipt me-2 text-warning"></i>Chi tiết đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
+                <h5 class="modal-title fw-bold d-flex align-items-center">
+                    <img src="https://img.icons8.com/3d-fluency/94/shopping-cart.png" width="28" height="28" class="me-2" alt="Receipt">
+                    Chi tiết đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -475,14 +382,7 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
 </div>
 <?php endforeach; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    // Toggle sidebar trên mobile
-    document.getElementById('sidebarToggle')?.addEventListener('click', function () {
-        document.getElementById('adminSidebar').classList.toggle('show');
-    });
-</script>
-
-</body>
-</html>
+<?php
+// ── 4. GỌI FOOTER ADMIN ───────────────────────────────────────────────────────
+require_once __DIR__ . '/../includes/admin_footer.php';
+?>

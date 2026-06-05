@@ -24,9 +24,22 @@ if (ini_get('session.use_cookies')) {
     );
 }
 
-// Bước 3: Hủy hoàn toàn session trên server
+// Bước 3: Hủy hoàn toàn session đăng nhập cũ trên server
 session_destroy();
 
-// Bước 4: Redirect về trang chủ
+// ==============================================================================
+// Bước 4: TÍCH HỢP SWEETALERT2
+// Khởi tạo một session hoàn toàn mới chỉ để chứa thông báo đăng xuất thành công
+// ==============================================================================
+session_start();
+$_SESSION['sweet_alert'] = [
+    'icon'  => 'success',
+    'title' => 'Đã đăng xuất',
+    'text'  => 'Hẹn gặp lại bạn lần sau!',
+    'toast' => true, // Có thể bật dạng toast (thông báo nhỏ góc màn hình) nếu muốn
+    'position' => 'center'
+];
+
+// Bước 5: Redirect về trang chủ
 header('Location: /bookstore/index.php');
 exit;

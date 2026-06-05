@@ -45,14 +45,14 @@ $outOfStockBooks = $pdo->query("
     SELECT COUNT(*) FROM books WHERE stock_quantity = 0
 ")->fetchColumn();
 
-// ── 5 ĐƠN HÀNG MỚI NHẤT ──────────────────────────────────────────────────────
+// ── 5 ĐƠN HÀNG MỚI NHẤT (ĐÃ FIX LỖI od.id THÀNH od.book_id) ──────────────────
 $recentOrders = $pdo->query("
     SELECT  o.id,
             o.fullname,
             o.total_price,
             o.status,
             o.created_at,
-            COUNT(od.id) AS item_count
+            COUNT(od.book_id) AS item_count
     FROM    orders o
     LEFT JOIN order_details od ON o.id = od.order_id
     GROUP BY o.id
@@ -89,9 +89,7 @@ function getStatusBadge(string $status): array {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard — Book Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous">
+          rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
           rel="stylesheet">
     <link href="/bookstore/assets/css/style.css" rel="stylesheet">
@@ -186,16 +184,25 @@ function getStatusBadge(string $status): array {
             border-bottom: 2px solid #e9ecef;
             white-space: nowrap;
         }
+
+        /* Mobile sidebar toggle */
+        @media (max-width: 991.98px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            .admin-main {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════
-     SIDEBAR
-══════════════════════════════════════════════════════════ -->
 <aside class="admin-sidebar" id="adminSidebar">
 
-    <!-- Brand -->
     <div class="sidebar-brand">
         <a href="/bookstore/admin/index.php"
            class="text-decoration-none d-flex align-items-center gap-2">
@@ -207,7 +214,6 @@ function getStatusBadge(string $status): array {
         </a>
     </div>
 
-    <!-- Navigation -->
     <nav class="mt-2 pb-4">
 
         <div class="nav-section">Tổng quan</div>
@@ -246,15 +252,10 @@ function getStatusBadge(string $status): array {
     </nav>
 </aside>
 
-<!-- ══════════════════════════════════════════════════════════
-     NỘI DUNG CHÍNH
-══════════════════════════════════════════════════════════ -->
 <div class="admin-main">
 
-    <!-- Topbar -->
     <div class="admin-topbar d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-3">
-            <!-- Nút toggle sidebar (mobile) -->
             <button class="btn btn-sm btn-outline-secondary d-lg-none"
                     id="sidebarToggle">
                 <i class="bi bi-list fs-5"></i>
@@ -284,13 +285,10 @@ function getStatusBadge(string $status): array {
         </div>
     </div>
 
-    <!-- Page content -->
     <div class="p-4">
 
-        <!-- ── HÀNG 1: STAT CARDS ── -->
         <div class="row g-3 mb-4">
 
-            <!-- Tổng sách -->
             <div class="col-6 col-lg-3">
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
@@ -307,7 +305,6 @@ function getStatusBadge(string $status): array {
                 </div>
             </div>
 
-            <!-- Tổng đơn hàng -->
             <div class="col-6 col-lg-3">
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
@@ -324,7 +321,6 @@ function getStatusBadge(string $status): array {
                 </div>
             </div>
 
-            <!-- Tổng thành viên -->
             <div class="col-6 col-lg-3">
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
@@ -341,7 +337,6 @@ function getStatusBadge(string $status): array {
                 </div>
             </div>
 
-            <!-- Doanh thu -->
             <div class="col-6 col-lg-3">
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
@@ -360,10 +355,8 @@ function getStatusBadge(string $status): array {
 
         </div>
 
-        <!-- ── HÀNG 2: CẢNH BÁO TỒN KHO + TRUY CẬP NHANH ── -->
         <div class="row g-3 mb-4">
 
-            <!-- Đơn chờ xử lý -->
             <?php if ($pendingOrders > 0): ?>
             <div class="col-md-4">
                 <div class="alert alert-warning d-flex align-items-center gap-3 mb-0 rounded-3">
@@ -377,7 +370,6 @@ function getStatusBadge(string $status): array {
             </div>
             <?php endif; ?>
 
-            <!-- Sách sắp hết -->
             <?php if ($lowStockBooks > 0): ?>
             <div class="col-md-4">
                 <div class="alert alert-info d-flex align-items-center gap-3 mb-0 rounded-3">
@@ -391,7 +383,6 @@ function getStatusBadge(string $status): array {
             </div>
             <?php endif; ?>
 
-            <!-- Sách hết hàng -->
             <?php if ($outOfStockBooks > 0): ?>
             <div class="col-md-4">
                 <div class="alert alert-danger d-flex align-items-center gap-3 mb-0 rounded-3">
@@ -407,7 +398,6 @@ function getStatusBadge(string $status): array {
 
         </div>
 
-        <!-- ── HÀNG 3: SHORTCUT MENU ── -->
         <div class="row g-3 mb-4">
             <?php
             $shortcuts = [
@@ -435,10 +425,8 @@ function getStatusBadge(string $status): array {
             <?php endforeach; ?>
         </div>
 
-        <!-- ── HÀNG 4: BẢNG ĐƠN HÀNG MỚI + SÁCH MỚI ── -->
         <div class="row g-4">
 
-            <!-- Đơn hàng mới nhất -->
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white border-bottom d-flex
@@ -518,7 +506,6 @@ function getStatusBadge(string $status): array {
                 </div>
             </div>
 
-            <!-- Sách mới thêm vào -->
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white border-bottom d-flex
@@ -559,7 +546,6 @@ function getStatusBadge(string $status): array {
                                         <p class="fw-bold text-danger small mb-0">
                                             <?= number_format($book['price'], 0, ',', '.') ?>₫
                                         </p>
-                                        <!-- Badge tồn kho -->
                                         <?php if ($book['stock_quantity'] == 0): ?>
                                             <span class="badge bg-danger-subtle text-danger"
                                                   style="font-size:.68rem;">Hết hàng</span>
@@ -584,13 +570,7 @@ function getStatusBadge(string $status): array {
                 </div>
             </div>
 
-        </div><!-- /.row hàng 4 -->
-    </div><!-- /.p-4 -->
-</div><!-- /.admin-main -->
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmArFmcZZm7MFEBp3VLFHnFX8oH"
-        crossorigin="anonymous"></script>
+        </div></div></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Toggle sidebar trên mobile
     document.getElementById('sidebarToggle')?.addEventListener('click', function () {

@@ -54,3 +54,33 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// ── PASSWORD STRENGTH METER ───────────────────────────────
+const newPwInput = document.getElementById('new_password');
+if (newPwInput) {
+    newPwInput.addEventListener('input', function () {
+        const val = this.value;
+        const bar = document.getElementById('pwStrengthBar');
+        const txt = document.getElementById('pwStrengthText');
+        if (!bar || !txt) return;
+
+        let score = 0;
+        if (val.length >= 6)                    score++;
+        if (val.length >= 10)                   score++;
+        if (/[A-Z]/.test(val))                  score++;
+        if (/[0-9]/.test(val))                  score++;
+        if (/[^A-Za-z0-9]/.test(val))           score++;
+
+        const levels = [
+            { w: '0%',   bg: '',          text: '' },
+            { w: '25%',  bg: '#dc3545',   text: '😟 Rất yếu' },
+            { w: '50%',  bg: '#fd7e14',   text: '😐 Trung bình' },
+            { w: '75%',  bg: '#ffc107',   text: '🙂 Khá mạnh' },
+            { w: '100%', bg: '#198754',   text: '💪 Rất mạnh' },
+        ];
+        const lv = levels[Math.min(score, 4)];
+        bar.style.width      = lv.w;
+        bar.style.background = lv.bg;
+        txt.textContent      = lv.text;
+    });
+}

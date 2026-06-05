@@ -165,12 +165,10 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý thành viên — Book Store Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-          rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
     <style>
         body { background: #f0f2f5; }
 
@@ -179,6 +177,7 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
             width: 250px; min-height: 100vh;
             background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
             position: fixed; top: 0; left: 0; z-index: 1000;
+            transition: transform .3s ease;
         }
         .admin-sidebar .sidebar-brand {
             padding: 1.5rem 1.25rem;
@@ -199,10 +198,19 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
             letter-spacing: .08em; color: rgba(255,255,255,.3);
             padding: 1rem 1.25rem .35rem;
         }
+        
         .admin-main  { margin-left: 250px; min-height: 100vh; }
+        
         .admin-topbar {
             background: #fff; border-bottom: 1px solid #e9ecef;
             padding: .85rem 1.5rem; position: sticky; top: 0; z-index: 999;
+        }
+
+        /* ── Mobile Sidebar Toggle ──────────────────────── */
+        @media (max-width: 991.98px) {
+            .admin-sidebar { transform: translateX(-100%); }
+            .admin-sidebar.show { transform: translateX(0); }
+            .admin-main { margin-left: 0; }
         }
 
         /* ── Table ─────────────────────────────────────── */
@@ -226,8 +234,7 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
 </head>
 <body>
 
-<!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
-<aside class="admin-sidebar">
+<aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-brand">
         <a href="/bookstore/admin/index.php"
            class="text-decoration-none d-flex align-items-center gap-2">
@@ -266,24 +273,32 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
     </nav>
 </aside>
 
-<!-- ══ MAIN ══════════════════════════════════════════════════ -->
 <div class="admin-main">
 
-    <!-- Topbar -->
     <div class="admin-topbar d-flex align-items-center justify-content-between">
-        <h5 class="mb-0 fw-bold">
-            <i class="bi bi-people me-2 text-warning"></i>Quản lý thành viên
-        </h5>
-        <span class="text-muted small">
-            <?= htmlspecialchars($_SESSION['fullname']) ?> · Quản trị viên
-        </span>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
+                <i class="bi bi-list fs-5"></i>
+            </button>
+            <div>
+                <h5 class="mb-0 fw-bold">Quản lý thành viên</h5>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="text-end d-none d-sm-block">
+                <p class="mb-0 fw-semibold small"><?= htmlspecialchars($_SESSION['fullname']) ?></p>
+                <p class="text-muted mb-0" style="font-size:.75rem;">Quản trị viên</p>
+            </div>
+            <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center fw-bold text-dark" style="width:38px;height:38px;font-size:.9rem;">
+                <?= strtoupper(mb_substr($_SESSION['fullname'], 0, 1)) ?>
+            </div>
+        </div>
     </div>
 
     <div class="p-4">
 
-        <!-- Thông báo -->
         <?php if ($msg): ?>
-            <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show
+            <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm
                         d-flex align-items-center gap-2">
                 <span><?= $msg['text'] ?></span>
                 <button type="button" class="btn-close ms-auto"
@@ -291,10 +306,8 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
             </div>
         <?php endif; ?>
 
-        <!-- ── STAT CARDS ── -->
         <div class="row g-3 mb-4">
 
-            <!-- Tất cả -->
             <div class="col-6 col-md-4">
                 <div class="card border-0 shadow-sm" style="border-radius:12px;">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
@@ -311,7 +324,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                 </div>
             </div>
 
-            <!-- Admin -->
             <div class="col-6 col-md-4">
                 <div class="card border-0 shadow-sm" style="border-radius:12px;">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
@@ -328,7 +340,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                 </div>
             </div>
 
-            <!-- User thường -->
             <div class="col-6 col-md-4">
                 <div class="card border-0 shadow-sm" style="border-radius:12px;">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
@@ -347,13 +358,11 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
 
         </div>
 
-        <!-- ── BỘ LỌC + TÌM KIẾM ── -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body py-3 px-4">
                 <form method="GET" action=""
                       class="d-flex gap-2 align-items-center flex-wrap">
 
-                    <!-- Tìm kiếm -->
                     <div class="input-group" style="max-width:340px;">
                         <span class="input-group-text bg-light">
                             <i class="bi bi-search text-muted"></i>
@@ -364,7 +373,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                                value="<?= htmlspecialchars($search) ?>">
                     </div>
 
-                    <!-- Lọc theo role -->
                     <select name="role" class="form-select" style="max-width:160px;">
                         <option value=""  <?= $filterRole === ''  ? 'selected' : '' ?>>Tất cả vai trò</option>
                         <option value="1" <?= $filterRole === '1' ? 'selected' : '' ?>>Quản trị viên</option>
@@ -389,7 +397,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
             </div>
         </div>
 
-        <!-- ── BẢNG DANH SÁCH THÀNH VIÊN ── -->
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom py-3 d-flex
                         align-items-center justify-content-between">
@@ -397,7 +404,7 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                     Danh sách tài khoản
                     <span class="badge bg-secondary ms-1"><?= $totalUsers ?></span>
                 </h6>
-                <span class="text-muted small">
+                <span class="text-muted small d-none d-md-block">
                     <i class="bi bi-info-circle me-1"></i>
                     Tài khoản đang đăng nhập được đánh dấu <span class="text-warning fw-semibold">màu vàng</span>
                 </span>
@@ -440,12 +447,10 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                             ?>
                             <tr class="<?= $isSelf ? 'current-user-row' : '' ?>">
 
-                                <!-- ID -->
                                 <td class="ps-4 text-muted small fw-semibold">
                                     #<?= $user['id'] ?>
                                 </td>
 
-                                <!-- Avatar + Username + Fullname -->
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="user-avatar"
@@ -467,7 +472,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                                     </div>
                                 </td>
 
-                                <!-- Email -->
                                 <td class="small">
                                     <a href="mailto:<?= htmlspecialchars($user['email']) ?>"
                                        class="text-dark text-decoration-none">
@@ -475,12 +479,10 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                                     </a>
                                 </td>
 
-                                <!-- SĐT -->
                                 <td class="small text-muted">
                                     <?= htmlspecialchars($user['phone'] ?: '—') ?>
                                 </td>
 
-                                <!-- Vai trò: badge Admin đỏ, User xanh -->
                                 <td class="text-center">
                                     <?php if ($isAdmin): ?>
                                         <span class="badge bg-danger px-3 py-2 rounded-pill">
@@ -493,7 +495,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                                     <?php endif; ?>
                                 </td>
 
-                                <!-- Ngày đăng ký -->
                                 <td class="small text-muted">
                                     <?php if (!empty($user['created_at'])): ?>
                                         <?= date('d/m/Y', strtotime($user['created_at'])) ?>
@@ -506,11 +507,9 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                                     <?php endif; ?>
                                 </td>
 
-                                <!-- Thao tác -->
                                 <td class="text-center pe-4">
                                     <div class="d-flex justify-content-center gap-2">
 
-                                        <!-- Nút Cấp/Hạ quyền -->
                                         <form method="POST" action="/bookstore/admin/users.php"
                                               class="d-inline"
                                               onsubmit="return confirm('<?= $isAdmin
@@ -528,7 +527,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                                             </button>
                                         </form>
 
-                                        <!-- Nút Xóa -->
                                         <form method="POST" action="/bookstore/admin/users.php"
                                               class="d-inline"
                                               onsubmit="return confirm('Xóa tài khoản «<?= addslashes($user['username']) ?>»?\nHành động này không thể hoàn tác!')">
@@ -545,7 +543,6 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
 
                                     </div>
 
-                                    <!-- Ghi chú riêng cho tài khoản đang đăng nhập -->
                                     <?php if ($isSelf): ?>
                                         <small class="text-warning d-block mt-1" style="font-size:.68rem;">
                                             <i class="bi bi-lock-fill me-1"></i>Tài khoản của bạn
@@ -558,10 +555,7 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                         <?php endif; ?>
                         </tbody>
                     </table>
-                </div><!-- /.table-responsive -->
-
-                <!-- Phân trang -->
-                <?php if ($totalPages > 1): ?>
+                </div><?php if ($totalPages > 1): ?>
                 <div class="d-flex justify-content-between align-items-center
                             px-4 py-3 border-top">
                     <p class="text-muted small mb-0">
@@ -595,14 +589,13 @@ $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
                 </div>
                 <?php endif; ?>
 
-            </div><!-- /.card-body -->
-        </div><!-- /.card -->
+            </div></div></div></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    </div><!-- /.p-4 -->
-</div><!-- /.admin-main -->
+<script>
+    document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+        document.getElementById('adminSidebar').classList.toggle('show');
+    });
+</script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmArFmcZZm7MFEBp3VLFHnFX8oH"
-        crossorigin="anonymous"></script>
 </body>
 </html>

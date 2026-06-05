@@ -15,6 +15,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 1) {
 $adminName = htmlspecialchars($_SESSION['fullname']);
 $baseUrl = '/bookstore';
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// 3. ĐẾM SỐ ĐƠN HÀNG CHỜ XÁC NHẬN ĐỂ HIỂN THỊ THÔNG BÁO ĐỎ
+require_once __DIR__ . '/../config/db.php';
+$stmtPending = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'pending'");
+$pendingOrdersCount = (int) $stmtPending->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -54,9 +59,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="<?= $baseUrl ?>/admin/categories.php" class="nav-link <?= ($current_page == 'categories.php') ? 'active' : '' ?>">
             <i class="bi bi-tags"></i>Thể loại
         </a>
-        <a href="<?= $baseUrl ?>/admin/orders.php" class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?>">
+        
+        <a href="<?= $baseUrl ?>/admin/orders.php" class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?> d-flex align-items-center">
             <i class="bi bi-bag-check"></i>Đơn hàng
+            <?php if ($pendingOrdersCount > 0): ?>
+                <span class="badge bg-danger rounded-pill ms-auto"><?= $pendingOrdersCount ?></span>
+            <?php endif; ?>
         </a>
+
         <a href="<?= $baseUrl ?>/admin/users.php" class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>">
             <i class="bi bi-people"></i>Thành viên
         </a>

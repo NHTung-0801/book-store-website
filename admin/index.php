@@ -84,8 +84,8 @@ if (!function_exists('getStatusBadge')) {
     <div class="col-6 col-lg-3">
         <div class="card stat-card shadow-sm h-100">
             <div class="card-body d-flex align-items-center gap-3 p-4">
-                <div class="stat-icon bg-warning bg-opacity-15">
-                    <i class="bi bi-book-fill text-warning"></i>
+                <div class="flex-shrink-0">
+                    <img src="https://img.icons8.com/3d-fluency/94/book.png" alt="Books" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 <div>
                     <div class="stat-value text-dark">
@@ -100,8 +100,8 @@ if (!function_exists('getStatusBadge')) {
     <div class="col-6 col-lg-3">
         <div class="card stat-card shadow-sm h-100">
             <div class="card-body d-flex align-items-center gap-3 p-4">
-                <div class="stat-icon bg-primary bg-opacity-15">
-                    <i class="bi bi-bag-fill text-primary"></i>
+                <div class="flex-shrink-0">
+                    <img src="https://img.icons8.com/3d-fluency/94/shopping-cart.png" alt="Orders" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 <div>
                     <div class="stat-value text-dark">
@@ -116,8 +116,8 @@ if (!function_exists('getStatusBadge')) {
     <div class="col-6 col-lg-3">
         <div class="card stat-card shadow-sm h-100">
             <div class="card-body d-flex align-items-center gap-3 p-4">
-                <div class="stat-icon bg-info bg-opacity-15">
-                    <i class="bi bi-people-fill text-info"></i>
+                <div class="flex-shrink-0">
+                    <img src="https://img.icons8.com/3d-fluency/94/group.png" alt="Users" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 <div>
                     <div class="stat-value text-dark">
@@ -132,8 +132,8 @@ if (!function_exists('getStatusBadge')) {
     <div class="col-6 col-lg-3">
         <div class="card stat-card shadow-sm h-100">
             <div class="card-body d-flex align-items-center gap-3 p-4">
-                <div class="stat-icon bg-success bg-opacity-15">
-                    <i class="bi bi-cash-coin text-success"></i>
+                <div class="flex-shrink-0">
+                    <img src="https://img.icons8.com/3d-fluency/94/money-bag.png" alt="Revenue" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 <div>
                     <div class="stat-value text-success" style="font-size:1.4rem;">
@@ -149,8 +149,8 @@ if (!function_exists('getStatusBadge')) {
 <div class="row g-3 mb-4">
     <?php if ($pendingOrders > 0): ?>
     <div class="col-md-4">
-        <div class="alert alert-warning d-flex align-items-center gap-3 mb-0 rounded-3">
-            <i class="bi bi-clock-history fs-4 flex-shrink-0"></i>
+        <div class="alert alert-warning d-flex align-items-center gap-3 mb-0 rounded-3 border-0 shadow-sm">
+            <img src="https://img.icons8.com/3d-fluency/94/alarm-clock.png" style="width: 36px; height: 36px;" class="flex-shrink-0" alt="Pending">
             <div>
                 <strong><?= $pendingOrders ?> đơn hàng</strong> đang chờ xác nhận.
                 <a href="/bookstore/admin/orders.php" class="alert-link d-block small">Xử lý ngay →</a>
@@ -161,8 +161,8 @@ if (!function_exists('getStatusBadge')) {
 
     <?php if ($lowStockBooks > 0): ?>
     <div class="col-md-4">
-        <div class="alert alert-info d-flex align-items-center gap-3 mb-0 rounded-3">
-            <i class="bi bi-exclamation-triangle fs-4 flex-shrink-0"></i>
+        <div class="alert alert-info d-flex align-items-center gap-3 mb-0 rounded-3 border-0 shadow-sm">
+            <img src="https://img.icons8.com/3d-fluency/94/box-important.png" style="width: 36px; height: 36px;" class="flex-shrink-0" alt="Low Stock">
             <div>
                 <strong><?= $lowStockBooks ?> đầu sách</strong> sắp hết hàng (≤5 cuốn).
                 <a href="/bookstore/admin/books.php" class="alert-link d-block small">Kiểm tra →</a>
@@ -173,8 +173,8 @@ if (!function_exists('getStatusBadge')) {
 
     <?php if ($outOfStockBooks > 0): ?>
     <div class="col-md-4">
-        <div class="alert alert-danger d-flex align-items-center gap-3 mb-0 rounded-3">
-            <i class="bi bi-x-circle fs-4 flex-shrink-0"></i>
+        <div class="alert alert-danger d-flex align-items-center gap-3 mb-0 rounded-3 border-0 shadow-sm">
+            <img src="https://img.icons8.com/3d-fluency/94/close-window.png" style="width: 36px; height: 36px;" class="flex-shrink-0" alt="Out of stock">
             <div>
                 <strong><?= $outOfStockBooks ?> đầu sách</strong> đã hết hàng.
                 <a href="/bookstore/admin/books.php" class="alert-link d-block small">Cập nhật →</a>
@@ -187,17 +187,17 @@ if (!function_exists('getStatusBadge')) {
 <div class="row g-3 mb-4">
     <?php
     $shortcuts = [
-        ['href' => '/bookstore/admin/books.php',      'icon' => 'bi-book',        'color' => 'warning', 'label' => 'Quản lý sách',    'desc' => 'Thêm, sửa, xóa sách'],
-        ['href' => '/bookstore/admin/categories.php', 'icon' => 'bi-tags',        'color' => 'info',    'label' => 'Thể loại',         'desc' => 'Quản lý thể loại sách'],
-        ['href' => '/bookstore/admin/orders.php',     'icon' => 'bi-bag-check',   'color' => 'primary', 'label' => 'Quản lý đơn hàng','desc' => 'Duyệt & cập nhật đơn'],
-        ['href' => '/bookstore/admin/users.php',      'icon' => 'bi-people',      'color' => 'success', 'label' => 'Thành viên',       'desc' => 'Danh sách người dùng'],
+        ['href' => '/bookstore/admin/books.php',      'img' => 'https://img.icons8.com/3d-fluency/94/book.png',           'label' => 'Quản lý sách',    'desc' => 'Thêm, sửa, xóa sách'],
+        ['href' => '/bookstore/admin/categories.php', 'img' => 'https://img.icons8.com/3d-fluency/94/price-tag.png',      'label' => 'Thể loại',         'desc' => 'Quản lý thể loại sách'],
+        ['href' => '/bookstore/admin/orders.php',     'img' => 'https://img.icons8.com/3d-fluency/94/truck.png',          'label' => 'Quản lý đơn hàng','desc' => 'Duyệt & cập nhật đơn'],
+        ['href' => '/bookstore/admin/users.php',      'img' => 'https://img.icons8.com/3d-fluency/94/group.png',          'label' => 'Thành viên',       'desc' => 'Danh sách người dùng'],
     ];
     foreach ($shortcuts as $s): ?>
     <div class="col-6 col-lg-3">
         <a href="<?= $s['href'] ?>" class="card border-0 shadow-sm text-decoration-none stat-card h-100">
             <div class="card-body text-center p-4">
-                <div class="mx-auto mb-3 rounded-circle bg-<?= $s['color'] ?> bg-opacity-15 d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
-                    <i class="bi <?= $s['icon'] ?> text-<?= $s['color'] ?> fs-4"></i>
+                <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+                    <img src="<?= $s['img'] ?>" alt="<?= $s['label'] ?>" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.15));">
                 </div>
                 <p class="fw-bold text-dark mb-1"><?= $s['label'] ?></p>
                 <p class="text-muted small mb-0"><?= $s['desc'] ?></p>
@@ -211,8 +211,8 @@ if (!function_exists('getStatusBadge')) {
     <div class="col-lg-7">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
-                <h6 class="fw-bold mb-0">
-                    <i class="bi bi-clock-history me-2 text-warning"></i> Đơn hàng mới nhất
+                <h6 class="fw-bold mb-0 d-flex align-items-center">
+                    <img src="https://img.icons8.com/3d-fluency/94/shopping-cart.png" width="26" height="26" class="me-2" alt="New Orders"> Đơn hàng mới nhất
                 </h6>
                 <a href="/bookstore/admin/orders.php" class="btn btn-sm btn-outline-warning">Xem tất cả</a>
             </div>
@@ -276,8 +276,8 @@ if (!function_exists('getStatusBadge')) {
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
-                <h6 class="fw-bold mb-0">
-                    <i class="bi bi-book me-2 text-warning"></i> Sách mới thêm vào
+                <h6 class="fw-bold mb-0 d-flex align-items-center">
+                    <img src="https://img.icons8.com/3d-fluency/94/book.png" width="26" height="26" class="me-2" alt="New Books"> Sách mới thêm vào
                 </h6>
                 <a href="/bookstore/admin/books.php" class="btn btn-sm btn-outline-warning">Quản lý</a>
             </div>

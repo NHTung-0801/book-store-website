@@ -74,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Dùng transaction: xóa dữ liệu liên quan trước, rồi mới xóa user
-        // tránh lỗi foreign key nếu DB có constraint
         try {
             $pdo->beginTransaction();
 
@@ -84,7 +83,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Xóa user
             $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$targetId]);
 
-            // Lưu ý: orders giữ lại để bảo toàn lịch sử đơn hàng
             $pdo->commit();
             header('Location: /bookstore/admin/users.php?msg=deleted');
 
@@ -144,16 +142,16 @@ $totalAll    = (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalAdmins = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE role = 1")->fetchColumn();
 $totalNormal = $totalAll - $totalAdmins;
 
-// ── MAP THÔNG BÁO ─────────────────────────────────────────────────────────────
+// ── MAP THÔNG BÁO VỚI ICON 3D MỚI ────────────────────────────────────────────
 $msgMap = [
-    'promoted'    => ['type' => 'success', 'text' => '✅ Đã cấp quyền Admin cho tài khoản.'],
-    'demoted'     => ['type' => 'warning', 'text' => '⬇️ Đã hạ quyền tài khoản xuống User.'],
-    'deleted'     => ['type' => 'danger',  'text' => '🗑️ Đã xóa tài khoản khỏi hệ thống.'],
-    'self_delete' => ['type' => 'danger',  'text' => '⛔ Không thể tự xóa tài khoản đang đăng nhập!'],
-    'self_role'   => ['type' => 'danger',  'text' => '⛔ Không thể tự thay đổi quyền của tài khoản đang đăng nhập!'],
-    'notfound'    => ['type' => 'warning', 'text' => '⚠️ Không tìm thấy tài khoản này.'],
-    'invalid'     => ['type' => 'danger',  'text' => '❌ Dữ liệu không hợp lệ.'],
-    'error'       => ['type' => 'danger',  'text' => '❌ Có lỗi xảy ra. Vui lòng thử lại.'],
+    'promoted'    => ['type' => 'success', 'text' => 'Đã cấp quyền Admin cho tài khoản.', 'icon' => 'ok'],
+    'demoted'     => ['type' => 'warning', 'text' => 'Đã hạ quyền tài khoản xuống User.', 'icon' => 'user-male-circle'],
+    'deleted'     => ['type' => 'danger',  'text' => 'Đã xóa tài khoản khỏi hệ thống.', 'icon' => 'close-window'],
+    'self_delete' => ['type' => 'danger',  'text' => 'Không thể tự xóa tài khoản đang đăng nhập!', 'icon' => 'close-window'],
+    'self_role'   => ['type' => 'danger',  'text' => 'Không thể tự thay đổi quyền của tài khoản đang đăng nhập!', 'icon' => 'close-window'],
+    'notfound'    => ['type' => 'warning', 'text' => 'Không tìm thấy tài khoản này.', 'icon' => 'box-important'],
+    'invalid'     => ['type' => 'danger',  'text' => 'Dữ liệu không hợp lệ.', 'icon' => 'close-window'],
+    'error'       => ['type' => 'danger',  'text' => 'Có lỗi xảy ra. Vui lòng thử lại.', 'icon' => 'close-window'],
 ];
 $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
 
@@ -174,6 +172,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
 <?php if ($msg): ?>
     <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm d-flex align-items-center gap-2">
+        <img src="https://img.icons8.com/3d-fluency/94/<?= $msg['icon'] ?>.png" style="width: 24px; height: 24px;" alt="Alert">
         <span><?= $msg['text'] ?></span>
         <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
@@ -183,11 +182,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="col-6 col-md-4">
         <div class="card border-0 shadow-sm" style="border-radius:12px;">
             <div class="card-body d-flex align-items-center gap-3 p-4">
-                <div class="rounded-circle bg-secondary bg-opacity-15 d-flex align-items-center justify-content-center flex-shrink-0" style="width:50px;height:50px;">
-                    <i class="bi bi-people-fill text-secondary fs-5"></i>
+                <div class="flex-shrink-0">
+                    <img src="https://img.icons8.com/3d-fluency/94/group.png" alt="All Users" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 <div>
-                    <div class="fw-bold fs-3"><?= number_format($totalAll) ?></div>
+                    <div class="fw-bold fs-3 text-dark"><?= number_format($totalAll) ?></div>
                     <div class="text-muted small">Tổng thành viên</div>
                 </div>
             </div>
@@ -197,11 +196,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="col-6 col-md-4">
         <div class="card border-0 shadow-sm" style="border-radius:12px;">
             <div class="card-body d-flex align-items-center gap-3 p-4">
-                <div class="rounded-circle bg-danger bg-opacity-15 d-flex align-items-center justify-content-center flex-shrink-0" style="width:50px;height:50px;">
-                    <i class="bi bi-shield-fill-check text-danger fs-5"></i>
+                <div class="flex-shrink-0">
+                    <img src="https://img.icons8.com/3d-fluency/94/laptop.png" alt="Admins" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 <div>
-                    <div class="fw-bold fs-3"><?= number_format($totalAdmins) ?></div>
+                    <div class="fw-bold fs-3 text-danger"><?= number_format($totalAdmins) ?></div>
                     <div class="text-muted small">Quản trị viên</div>
                 </div>
             </div>
@@ -211,11 +210,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="col-6 col-md-4">
         <div class="card border-0 shadow-sm" style="border-radius:12px;">
             <div class="card-body d-flex align-items-center gap-3 p-4">
-                <div class="rounded-circle bg-primary bg-opacity-15 d-flex align-items-center justify-content-center flex-shrink-0" style="width:50px;height:50px;">
-                    <i class="bi bi-person-fill text-primary fs-5"></i>
+                <div class="flex-shrink-0">
+                    <img src="https://img.icons8.com/3d-fluency/94/user-male-circle.png" alt="Normal Users" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                 </div>
                 <div>
-                    <div class="fw-bold fs-3"><?= number_format($totalNormal) ?></div>
+                    <div class="fw-bold fs-3 text-primary"><?= number_format($totalNormal) ?></div>
                     <div class="text-muted small">Người dùng</div>
                 </div>
             </div>
@@ -254,9 +253,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
-        <h6 class="fw-bold mb-0">
+        <h6 class="fw-bold mb-0 d-flex align-items-center text-dark">
+            <img src="https://img.icons8.com/3d-fluency/94/group.png" width="26" height="26" class="me-2" alt="Users">
             Danh sách tài khoản
-            <span class="badge bg-secondary ms-1"><?= $totalUsers ?></span>
+            <span class="badge bg-secondary ms-2"><?= $totalUsers ?></span>
         </h6>
         <span class="text-muted small d-none d-md-block">
             <i class="bi bi-info-circle me-1"></i>Tài khoản đang đăng nhập được đánh dấu <span class="text-warning fw-semibold">màu vàng</span>
@@ -281,7 +281,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <?php if (empty($users)): ?>
                     <tr>
                         <td colspan="7" class="text-center text-muted py-5">
-                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>Không có tài khoản nào phù hợp.
+                            <img src="https://img.icons8.com/3d-fluency/94/box-important.png" style="width: 56px; height: 56px; filter: grayscale(0.5); opacity: 0.8;" class="mb-3 d-block mx-auto" alt="No data">
+                            Không có tài khoản nào phù hợp.
                         </td>
                     </tr>
                 <?php else: ?>

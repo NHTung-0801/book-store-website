@@ -16,7 +16,7 @@ const VALID_STATUSES = ['pending', 'confirmed', 'shipping', 'delivered', 'cancel
 // Các trạng thái đóng băng (Không được phép thay đổi nữa)
 const LOCKED_STATUSES = ['delivered', 'cancelled', 'failed'];
 
-// ── ACTION: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
+// ── ACTION: CẬP TRẠNG THÁI ĐƠN HÀNG
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
     $orderId   = filter_input(INPUT_POST, 'order_id', FILTER_VALIDATE_INT);
     $newStatus = trim($_POST['status'] ?? '');
@@ -109,7 +109,7 @@ if (!empty($orderIds)) {
     }
 }
 
-// Hàm hỗ trợ render Badge trạng thái
+// Hàm hỗ trợ render Badge trạng thái (Giữ nguyên icon nhỏ Bootstrap)
 function getStatusMeta(string $status): array {
     return match($status) {
         'pending'   => ['badge' => 'bg-warning text-dark', 'icon' => 'bi-clock',               'label' => 'Chờ xác nhận'],
@@ -122,10 +122,11 @@ function getStatusMeta(string $status): array {
     };
 }
 
+// Map thông báo với Icon 3D (Đã fix 100% link chuẩn)
 $msgMap = [
-    'updated' => ['type' => 'success', 'text' => 'Cập nhật trạng thái đơn hàng thành công!'],
-    'error'   => ['type' => 'danger',  'text' => 'Có lỗi xảy ra. Vui lòng thử lại.'],
-    'locked'  => ['type' => 'danger',  'text' => 'Đơn hàng này đã được đóng băng, không thể thay đổi trạng thái!'],
+    'updated' => ['type' => 'success', 'text' => 'Cập nhật trạng thái đơn hàng thành công!', 'icon' => 'book'],
+    'error'   => ['type' => 'danger',  'text' => 'Có lỗi xảy ra. Vui lòng thử lại.', 'icon' => 'close-window'],
+    'locked'  => ['type' => 'danger',  'text' => 'Đơn hàng này đã được đóng băng, không thể thay đổi trạng thái!', 'icon' => 'close-window'],
 ];
 $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
 
@@ -140,22 +141,23 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </style>
 
 <?php if ($msg): ?>
-    <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm">
-        <i class="bi bi-info-circle me-2"></i><?= $msg['text'] ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm d-flex align-items-center gap-2">
+        <img src="https://img.icons8.com/3d-fluency/94/<?= $msg['icon'] ?>.png" style="width: 24px; height: 24px;" alt="Alert">
+        <span class="mb-0"><?= $msg['text'] ?></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
 <div class="row g-3 mb-4">
     <?php
     $statCards = [
-        ['key' => '',           'label' => 'Tất cả',       'icon' => 'bi-list-ul',              'color' => 'secondary'],
-        ['key' => 'pending',    'label' => 'Chờ xác nhận', 'icon' => 'bi-clock',                'color' => 'warning'],
-        ['key' => 'confirmed',  'label' => 'Đã xác nhận',  'icon' => 'bi-check-circle',         'color' => 'info'],
-        ['key' => 'shipping',   'label' => 'Đang giao',    'icon' => 'bi-truck',                'color' => 'primary'],
-        ['key' => 'delivered',  'label' => 'Đã giao',      'icon' => 'bi-bag-check',            'color' => 'success'],
-        ['key' => 'failed',     'label' => 'Thất bại',     'icon' => 'bi-exclamation-triangle', 'color' => 'dark'],
-        ['key' => 'cancelled',  'label' => 'Đã hủy',       'icon' => 'bi-x-circle',             'color' => 'danger'],
+        ['key' => '',           'label' => 'Tất cả',       'icon' => 'shopping-cart', 'color' => 'secondary'],
+        ['key' => 'pending',    'label' => 'Chờ xác nhận', 'icon' => 'alarm-clock',   'color' => 'warning'],
+        ['key' => 'confirmed',  'label' => 'Đã xác nhận',  'icon' => 'book',          'color' => 'info'],
+        ['key' => 'shipping',   'label' => 'Đang giao',    'icon' => 'truck',         'color' => 'primary'],
+        ['key' => 'delivered',  'label' => 'Đã giao',      'icon' => 'money-bag',     'color' => 'success'],
+        ['key' => 'failed',     'label' => 'Thất bại',     'icon' => 'box-important', 'color' => 'dark'],
+        ['key' => 'cancelled',  'label' => 'Đã hủy',       'icon' => 'close-window',  'color' => 'danger'],
     ];
     foreach ($statCards as $sc):
         $cnt = $sc['key'] === '' ? $totalOrders : ($stats[$sc['key']] ?? 0);
@@ -167,7 +169,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
            class="card border-0 shadow-sm text-decoration-none <?= $isActive ? 'border border-' . $sc['color'] . ' border-2 bg-light' : '' ?>"
            style="border-radius:12px;">
             <div class="card-body py-3 px-2 text-center">
-                <i class="bi <?= $sc['icon'] ?> text-<?= $sc['color'] ?> fs-4"></i>
+                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:46px;height:46px;">
+                    <img src="https://img.icons8.com/3d-fluency/94/<?= $sc['icon'] ?>.png" alt="<?= $sc['label'] ?>" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
+                </div>
                 <div class="fw-bold fs-5 mt-1 text-dark"><?= $cnt ?></div>
                 <div class="text-muted" style="font-size:.70rem;"><?= $sc['label'] ?></div>
             </div>
@@ -193,6 +197,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 
 <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold mb-0 d-flex align-items-center text-dark">
+            <img src="https://img.icons8.com/3d-fluency/94/truck.png" width="26" height="26" class="me-2" alt="Orders">
+            Danh sách đơn hàng
+            <span class="badge bg-secondary ms-2"><?= $totalOrders ?></span>
+        </h6>
+    </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover admin-table align-middle mb-0">
@@ -210,7 +221,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 </thead>
                 <tbody>
                 <?php if (empty($orders)): ?>
-                    <tr><td colspan="8" class="text-center text-muted py-5"><i class="bi bi-inbox fs-2 d-block mb-2"></i>Không có đơn hàng nào phù hợp.</td></tr>
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <img src="https://img.icons8.com/3d-fluency/94/box-important.png" style="width: 56px; height: 56px; filter: grayscale(0.5); opacity: 0.8;" class="mb-3 d-block mx-auto" alt="No data">
+                            Không có đơn hàng nào phù hợp.
+                        </td>
+                    </tr>
                 <?php else: ?>
                     <?php foreach ($orders as $order):
                         $meta = getStatusMeta($order['status']);
@@ -309,8 +325,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-receipt me-2 text-warning"></i>Chi tiết đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
+                <h5 class="modal-title fw-bold d-flex align-items-center">
+                    <img src="https://img.icons8.com/3d-fluency/94/shopping-cart.png" width="28" height="28" class="me-2" alt="Receipt">
+                    Chi tiết đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>

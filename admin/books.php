@@ -166,10 +166,10 @@ if ($action === 'list') {
 }
 
 $msgMap = [
-    'added'    => ['type' => 'success', 'text' => 'Thêm sách mới thành công!'],
-    'updated'  => ['type' => 'success', 'text' => 'Cập nhật sách thành công!'],
-    'deleted'  => ['type' => 'warning', 'text' => 'Đã xóa sách khỏi hệ thống.'],
-    'notfound' => ['type' => 'danger',  'text' => 'Không tìm thấy sách.'],
+    'added'    => ['type' => 'success', 'text' => 'Thêm sách mới thành công!', 'icon' => 'ok'],
+    'updated'  => ['type' => 'success', 'text' => 'Cập nhật sách thành công!', 'icon' => 'ok'],
+    'deleted'  => ['type' => 'warning', 'text' => 'Đã xóa sách khỏi hệ thống.', 'icon' => 'high-priority'],
+    'notfound' => ['type' => 'danger',  'text' => 'Không tìm thấy sách.', 'icon' => 'cancel'],
 ];
 $msg = $msgMap[$_GET['msg'] ?? ''] ?? null;
 
@@ -178,9 +178,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
 <?php if ($msg): ?>
-    <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm">
-        <i class="bi bi-info-circle me-2"></i><?= $msg['text'] ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show shadow-sm d-flex align-items-center gap-2">
+        <img src="https://img.icons8.com/3d-fluency/94/<?= $msg['icon'] ?>.png" style="width: 24px; height: 24px;" alt="Alert">
+        <span class="mb-0"><?= $msg['text'] ?></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
@@ -189,8 +190,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
-                    <h6 class="fw-bold mb-0 text-primary">
-                        <i class="bi bi-<?= $editBook ? 'pencil-square' : 'plus-circle' ?> me-2"></i>
+                    <h6 class="fw-bold mb-0 d-flex align-items-center text-primary">
+                        <img src="https://img.icons8.com/3d-fluency/94/book.png" width="26" height="26" class="me-2" alt="Book">
                         <?= $editBook ? 'Cập nhật thông tin sách' : 'Thêm sách mới' ?>
                     </h6>
                     <a href="/bookstore/admin/books.php" class="btn btn-sm btn-outline-secondary">
@@ -274,7 +275,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
-                <h6 class="fw-bold mb-0 text-dark">
+                <h6 class="fw-bold mb-0 d-flex align-items-center text-dark">
+                    <img src="https://img.icons8.com/3d-fluency/94/books.png" width="26" height="26" class="me-2" alt="Books">
                     Danh sách sách đang bán
                     <span class="badge bg-secondary ms-2"><?= $totalBooks ?> cuốn</span>
                 </h6>
@@ -306,7 +308,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     </thead>
                     <tbody>
                     <?php if (empty($books)): ?>
-                        <tr><td colspan="6" class="text-center text-muted py-5"><i class="bi bi-inbox fs-2 d-block mb-2"></i>Không có dữ liệu.</td></tr>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <img src="https://img.icons8.com/3d-fluency/94/box-important.png" style="width: 56px; height: 56px; filter: grayscale(0.5); opacity: 0.8;" class="mb-3 d-block mx-auto" alt="No data">
+                                Chưa có sách nào phù hợp.
+                            </td>
+                        </tr>
                     <?php else: ?>
                         <?php foreach ($books as $book):
                             $imgPath = '/bookstore/assets/images/books/' . $book['image'];
@@ -331,7 +338,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             </td>
                             <td class="text-center pe-4">
                                 <a href="/bookstore/admin/books.php?action=edit&id=<?= $book['id'] ?>" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="bi bi-pencil"></i></a>
-                                <form method="POST" action="/bookstore/admin/books.php?action=delete&id=<?= $book['id'] ?>" class="d-inline btn-delete" onsubmit="return false;">
+                                <form method="POST" action="/bookstore/admin/books.php?action=delete&id=<?= $book['id'] ?>" class="d-inline btn-delete">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

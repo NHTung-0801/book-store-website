@@ -99,15 +99,15 @@ if ($action === 'list') {
     ")->fetchAll();
 }
 
-// ── MAP THÔNG BÁO REDIRECT
+// ── MAP THÔNG BÁO REDIRECT (Sử dụng icon 3D Fluency)
 $msgKey  = $_GET['msg']   ?? '';
 $bkCount = (int)($_GET['count'] ?? 0);
 $msgMap  = [
-    'added'     => ['type' => 'success', 'text' => 'Thêm thể loại mới thành công!'],
-    'updated'   => ['type' => 'success', 'text' => 'Cập nhật thể loại thành công!'],
-    'deleted'   => ['type' => 'warning', 'text' => 'Đã xóa thể loại khỏi hệ thống.'],
-    'notfound'  => ['type' => 'danger',  'text' => 'Không tìm thấy thể loại cần sửa.'],
-    'has_books' => ['type' => 'danger',  'text' => "Không thể xóa! Thể loại này đang chứa {$bkCount} cuốn sách. Hãy chuyển hoặc xóa sách trước."],
+    'added'     => ['type' => 'success', 'text' => 'Thêm thể loại mới thành công!', 'icon' => 'ok'],
+    'updated'   => ['type' => 'success', 'text' => 'Cập nhật thể loại thành công!', 'icon' => 'ok'],
+    'deleted'   => ['type' => 'warning', 'text' => 'Đã xóa thể loại khỏi hệ thống.', 'icon' => 'ok'],
+    'notfound'  => ['type' => 'danger',  'text' => 'Không tìm thấy thể loại cần sửa.', 'icon' => 'cancel'],
+    'has_books' => ['type' => 'danger',  'text' => "Không thể xóa! Thể loại này đang chứa {$bkCount} cuốn sách. Hãy chuyển hoặc xóa sách trước.", 'icon' => 'cancel'],
 ];
 $msg = $msgMap[$msgKey] ?? null;
 
@@ -116,9 +116,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
 ?>
 
 <?php if ($msg): ?>
-    <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show d-flex align-items-start gap-2 shadow-sm">
-        <i class="bi bi-<?= $msg['type'] === 'success' ? 'check-circle' : 'exclamation-triangle' ?>-fill flex-shrink-0 mt-1"></i>
-        <span><?= $msg['text'] ?></span>
+    <div class="alert alert-<?= $msg['type'] ?> alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm">
+        <img src="https://img.icons8.com/3d-fluency/94/<?= $msg['icon'] ?>.png" style="width: 24px; height: 24px;" alt="Alert">
+        <span class="mb-0"><?= $msg['text'] ?></span>
         <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
@@ -128,8 +128,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
-                    <h6 class="fw-bold mb-0 text-primary">
-                        <i class="bi bi-<?= $editCat ? 'pencil-square' : 'plus-circle' ?> me-2"></i>
+                    <h6 class="fw-bold mb-0 d-flex align-items-center text-primary">
+                        <img src="https://img.icons8.com/3d-fluency/94/price-tag.png" width="26" height="26" class="me-2" alt="Category Icon">
                         <?= $editCat ? 'Cập nhật thể loại' : 'Thêm thể loại mới' ?>
                     </h6>
                     <a href="/bookstore/admin/categories.php" class="btn btn-sm btn-outline-secondary">
@@ -180,7 +180,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
-                <h6 class="fw-bold mb-0 text-dark">
+                <h6 class="fw-bold mb-0 d-flex align-items-center text-dark">
+                    <img src="https://img.icons8.com/3d-fluency/94/price-tag.png" width="26" height="26" class="me-2" alt="Category Icon">
                     Danh sách thể loại
                     <span class="badge bg-secondary ms-2"><?= count($categories) ?></span>
                 </h6>
@@ -211,7 +212,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <?php if (empty($categories)): ?>
                         <tr>
                             <td colspan="5" class="text-center text-muted py-5">
-                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>Chưa có thể loại nào. Hãy thêm thể loại đầu tiên!
+                                <img src="https://img.icons8.com/3d-fluency/94/box-important.png" style="width: 56px; height: 56px; filter: grayscale(0.5); opacity: 0.8;" class="mb-3 d-block mx-auto" alt="No data">
+                                Chưa có thể loại nào. Hãy thêm thể loại đầu tiên!
                             </td>
                         </tr>
                     <?php else: ?>

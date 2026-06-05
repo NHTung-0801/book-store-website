@@ -1,6 +1,6 @@
 <?php
 // includes/header.php
-
+ob_start();
 // Khởi tạo session nếu chưa có
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

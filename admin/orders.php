@@ -14,7 +14,8 @@ require_once __DIR__ . '/../config/db.php';
 const VALID_STATUSES = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'failed'];
 
 // Các trạng thái đóng băng (Không được phép thay đổi nữa)
-const LOCKED_STATUSES = ['delivered', 'cancelled', 'failed'];
+// ĐÃ XÓA 'failed' ĐỂ ADMIN CÓ THỂ TIẾP TỤC CẬP NHẬT TRẠNG THÁI LẦN SAU
+const LOCKED_STATUSES = ['delivered', 'cancelled'];
 
 // ── ACTION: CẬP TRẠNG THÁI ĐƠN HÀNG
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
@@ -109,7 +110,7 @@ if (!empty($orderIds)) {
     }
 }
 
-// Hàm hỗ trợ render Badge trạng thái (Giữ nguyên icon nhỏ Bootstrap)
+// Hàm hỗ trợ render Badge trạng thái
 function getStatusMeta(string $status): array {
     return match($status) {
         'pending'   => ['badge' => 'bg-warning text-dark', 'icon' => 'bi-clock',               'label' => 'Chờ xác nhận'],
@@ -117,12 +118,12 @@ function getStatusMeta(string $status): array {
         'shipping'  => ['badge' => 'bg-primary',           'icon' => 'bi-truck',               'label' => 'Đang giao'],
         'delivered' => ['badge' => 'bg-success',           'icon' => 'bi-bag-check',           'label' => 'Đã giao'],
         'cancelled' => ['badge' => 'bg-danger',            'icon' => 'bi-x-circle',            'label' => 'Đã hủy'],
-        'failed'    => ['badge' => 'bg-dark',              'icon' => 'bi-exclamation-triangle','label' => 'Thất bại'],
+        'failed'    => ['badge' => 'bg-dark',              'icon' => 'bi-exclamation-triangle','label' => 'Giao hàng thất bại'],
         default     => ['badge' => 'bg-secondary',         'icon' => 'bi-question-circle',     'label' => ucfirst($status)],
     };
 }
 
-// Map thông báo với Icon 3D (Đã fix 100% link chuẩn)
+// Map thông báo
 $msgMap = [
     'updated' => ['type' => 'success', 'text' => 'Cập nhật trạng thái đơn hàng thành công!', 'icon' => 'book'],
     'error'   => ['type' => 'danger',  'text' => 'Có lỗi xảy ra. Vui lòng thử lại.', 'icon' => 'close-window'],
@@ -151,13 +152,13 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <div class="row g-3 mb-4">
     <?php
     $statCards = [
-        ['key' => '',           'label' => 'Tất cả',       'icon' => 'shopping-cart', 'color' => 'secondary'],
-        ['key' => 'pending',    'label' => 'Chờ xác nhận', 'icon' => 'alarm-clock',   'color' => 'warning'],
-        ['key' => 'confirmed',  'label' => 'Đã xác nhận',  'icon' => 'book',          'color' => 'info'],
-        ['key' => 'shipping',   'label' => 'Đang giao',    'icon' => 'truck',         'color' => 'primary'],
-        ['key' => 'delivered',  'label' => 'Đã giao',      'icon' => 'money-bag',     'color' => 'success'],
-        ['key' => 'failed',     'label' => 'Thất bại',     'icon' => 'box-important', 'color' => 'dark'],
-        ['key' => 'cancelled',  'label' => 'Đã hủy',       'icon' => 'close-window',  'color' => 'danger'],
+        ['key' => '',           'label' => 'Tất cả',             'icon' => 'shopping-cart', 'color' => 'secondary'],
+        ['key' => 'pending',    'label' => 'Chờ xác nhận',       'icon' => 'alarm-clock',   'color' => 'warning'],
+        ['key' => 'confirmed',  'label' => 'Đã xác nhận',        'icon' => 'book',          'color' => 'info'],
+        ['key' => 'shipping',   'label' => 'Đang giao',          'icon' => 'truck',         'color' => 'primary'],
+        ['key' => 'delivered',  'label' => 'Đã giao',            'icon' => 'money-bag',     'color' => 'success'],
+        ['key' => 'failed',     'label' => 'Giao hàng thất bại', 'icon' => 'box-important', 'color' => 'dark'],
+        ['key' => 'cancelled',  'label' => 'Đã hủy',             'icon' => 'close-window',  'color' => 'danger'],
     ];
     foreach ($statCards as $sc):
         $cnt = $sc['key'] === '' ? $totalOrders : ($stats[$sc['key']] ?? 0);

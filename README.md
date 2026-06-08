@@ -75,7 +75,7 @@ bookstore/
 ├── product.php
 ├── profile.php
 └── register.php
-
+```
 
 # 📚 Book Store
 
@@ -90,3 +90,31 @@ Website bán sách xây dựng bằng PHP thuần + MySQL + Bootstrap 5.
 ### Các bước chạy dự án
 
 1. Clone repository về máy:
+git clone https://github.com/username/bookstore.git
+
+2. Copy vào thư mục XAMPP:
+C:\xampp\htdocs\bookstore\
+
+3. Cài PHPMailer:
+composer install
+
+4. Import database:
+   - Mở phpMyAdmin
+   - Tạo database tên `bookstore_db`
+   - Import file `bookstore_db.sql`
+
+5. Cấu hình database:
+   - Mở `config/db.php`
+   - Sửa thông tin kết nối nếu cần
+
+6. Cấu hình email (tính năng quên mật khẩu):
+   - Copy file mẫu:
+ config/mail.example.php → config/mail.php
+   - Điền Gmail + App Password vào `config/mail.php`
+
+7. Truy cập:
+http://localhost/bookstore
+
+## Tài khoản Admin mặc định
+- Username: `admin`
+- Password: `123456`

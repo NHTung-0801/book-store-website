@@ -75,3 +75,18 @@ bookstore/
 ├── product.php
 ├── profile.php
 └── register.php
+
+
+# 📚 Book Store
+
+Website bán sách xây dựng bằng PHP thuần + MySQL + Bootstrap 5.
+
+## Cài đặt
+
+### Yêu cầu
+- XAMPP (PHP 8.x, MySQL)
+- Composer
+
+### Các bước chạy dự án
+
+1. Clone repository về máy:

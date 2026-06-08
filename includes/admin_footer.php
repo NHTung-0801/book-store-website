@@ -26,12 +26,54 @@ $currentYear = date('Y');
             });
         }
 
-        // 2. Xác nhận xóa
+        // 2. Xác nhận xóa (SweetAlert2, fallback về confirm nếu không có Swal)
         const deleteButtons = document.querySelectorAll('.btn-delete');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function(e) {
-                if (!confirm('Hành động nguy hiểm: Bạn có chắc chắn muốn xóa dữ liệu này không? Quá trình này không thể hoàn tác!')) {
-                    e.preventDefault();
+                e.preventDefault(); // chặn hành vi mặc định, xử lý thủ công sau khi xác nhận
+
+                const message = 'Hành động nguy hiểm: Bạn có chắc chắn muốn xóa dữ liệu này không? Quá trình này không thể hoàn tác!';
+
+                function doAction() {
+                    const form = button.closest('form');
+                    if (form) {
+                        form.submit();
+                        return;
+                    }
+                    if (button.tagName.toLowerCase() === 'a' && button.href) {
+                        window.location.href = button.href;
+                        return;
+                    }
+                    // Nếu có data-href dùng làm fallback
+                    const dataHref = button.getAttribute('data-href');
+                    if (dataHref) {
+                        window.location.href = dataHref;
+                        return;
+                    }
+                    // Nếu không có gì để làm, thử kích hoạt click mặc định (không đảm bảo)
+                    try { button.click(); } catch (err) {}
+                }
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Xác nhận',
+                        text: message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Có, xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            doAction();
+                        }
+                    });
+                } else {
+                    // Fallback sang confirm() nếu SweetAlert2 chưa được nạp
+                    if (confirm(message)) {
+                        doAction();
+                    }
                 }
             });
         });

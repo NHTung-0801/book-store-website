@@ -10,6 +10,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // ── 1. KIỂM TRA ĐĂNG NHẬP ────────────────────────────────────────────────────
 if (!isset($_SESSION['user_id'])) {
+    $_SESSION['sweet_alert'] = [
+        'icon'  => 'warning',
+        'title' => 'Chưa đăng nhập',
+        'text'  => 'Vui lòng đăng nhập để thao tác với giỏ hàng.'
+    ];
     header('Location: ../login.php');
     exit;
 }
@@ -25,11 +30,26 @@ $userId = (int) $_SESSION['user_id'];
 $bookId = filter_input(INPUT_POST, 'book_id', FILTER_VALIDATE_INT);
 
 if (!$bookId || $bookId <= 0) {
-    header('Location: ../cart.php?status=error');
+    $_SESSION['sweet_alert'] = [
+        'icon'     => 'error',
+        'title'    => 'Lỗi dữ liệu',
+        'text'     => 'Sản phẩm không hợp lệ.',
+        'toast'    => true,
+        'position' => 'top-end'
+    ];
+    header('Location: ../cart.php');
     exit;
 }
 
-// ── 4. XÓA KHỎI GIỎ HÀNG ────────────────────────────────────────────────────
+// ── 4. LẤY TÊN SÁCH ĐỂ HIỂN THỊ THÔNG BÁO CHO ĐẸP ─────────────────────────────
+$stmtBook = $pdo->prepare("SELECT title FROM books WHERE id = ? LIMIT 1");
+$stmtBook->execute([$bookId]);
+$bookTitle = $stmtBook->fetchColumn();
+
+// Nếu vì lý do nào đó không tìm thấy tên sách, dùng chữ "Sản phẩm" làm mặc định
+$displayName = $bookTitle ? htmlspecialchars($bookTitle) : 'Sản phẩm';
+
+// ── 5. XÓA KHỎI GIỎ HÀNG ────────────────────────────────────────────────────
 // Điều kiện WHERE gồm cả user_id để đảm bảo user chỉ xóa được sách của mình
 $stmt = $pdo->prepare("
     DELETE FROM cart
@@ -38,5 +58,14 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$userId, $bookId]);
 
-header('Location: ../cart.php?status=removed');
+// ── 6. LƯU THÔNG BÁO THÀNH CÔNG VÀ CHUYỂN HƯỚNG ──────────────────────────────
+$_SESSION['sweet_alert'] = [
+    'icon'     => 'success',
+    'title'    => 'Đã xóa',
+    'text'     => '« ' . $displayName . ' » đã được xóa khỏi giỏ hàng.',
+    'toast'    => true,
+    'position' => 'top-end'
+];
+
+header('Location: ../cart.php');
 exit;

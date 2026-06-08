@@ -63,15 +63,14 @@ function getStatusBadge(string $status): array {
         'shipping'  => ['class' => 'bg-primary',            'icon' => 'bi-truck',                'label' => 'Đang giao hàng'],
         'delivered' => ['class' => 'bg-success',            'icon' => 'bi-bag-check',            'label' => 'Đã giao hàng'],
         'cancelled' => ['class' => 'bg-danger',             'icon' => 'bi-x-circle',             'label' => 'Đã hủy'],
+        'failed'    => ['class' => 'bg-dark',               'icon' => 'bi-exclamation-triangle', 'label' => 'Giao hàng thất bại'],
         default     => ['class' => 'bg-secondary',          'icon' => 'bi-question-circle',      'label' => ucfirst($status)],
     };
 }
 ?>
 
-<!-- ========== NỘI DUNG TRANG ĐƠN HÀNG CỦA TÔI ========== -->
 <main class="container my-5">
 
-    <!-- Tiêu đề trang -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h3 class="fw-bold mb-0">
             <i class="bi bi-bag-check me-2 text-warning"></i>Đơn hàng của tôi
@@ -84,7 +83,6 @@ function getStatusBadge(string $status): array {
     </div>
 
     <?php if (empty($orders)): ?>
-        <!-- Trạng thái chưa có đơn hàng nào -->
         <div class="text-center py-5">
             <i class="bi bi-bag-x text-muted" style="font-size: 5rem;"></i>
             <h5 class="text-muted mt-3">Bạn chưa có đơn hàng nào</h5>
@@ -96,7 +94,6 @@ function getStatusBadge(string $status): array {
 
     <?php else: ?>
 
-        <!-- Timeline / Danh sách đơn hàng dạng Accordion -->
         <div class="accordion accordion-flush order-accordion" id="orderAccordion">
 
             <?php foreach ($orders as $index => $order):
@@ -109,7 +106,6 @@ function getStatusBadge(string $status): array {
 
             <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
 
-                <!-- ── HEADER ĐƠN HÀNG (luôn hiển thị) ── -->
                 <h2 class="accordion-header">
                     <button
                         class="accordion-button <?= $isFirst ? '' : 'collapsed' ?> py-3 px-4"
@@ -120,7 +116,6 @@ function getStatusBadge(string $status): array {
                     >
                         <div class="d-flex align-items-center justify-content-between w-100 me-3 flex-wrap gap-2">
 
-                            <!-- Mã đơn hàng + ngày đặt -->
                             <div>
                                 <span class="fw-bold text-dark">
                                     Đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
@@ -133,7 +128,6 @@ function getStatusBadge(string $status): array {
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Tổng tiền + badge trạng thái -->
                             <div class="d-flex align-items-center gap-2">
                                 <span class="fw-bold text-danger">
                                     <?= number_format($order['total_price'], 0, ',', '.') ?>₫
@@ -148,7 +142,6 @@ function getStatusBadge(string $status): array {
                     </button>
                 </h2>
 
-                <!-- ── CHI TIẾT ĐƠN HÀNG (collapsible) ── -->
                 <div id="<?= $collapseId ?>"
                      class="accordion-collapse collapse <?= $isFirst ? 'show' : '' ?>"
                      data-bs-parent="#orderAccordion">
@@ -157,7 +150,6 @@ function getStatusBadge(string $status): array {
 
                         <div class="row g-0">
 
-                            <!-- Cột trái: Danh sách sách trong đơn -->
                             <div class="col-lg-8 border-end">
                                 <div class="p-4">
                                     <h6 class="fw-bold text-muted text-uppercase small mb-3">
@@ -176,14 +168,12 @@ function getStatusBadge(string $status): array {
                                                             : '/bookstore/assets/images/books/placeholder.png';
                                             ?>
                                             <div class="d-flex gap-3 align-items-center">
-                                                <!-- Ảnh bìa -->
                                                 <img
                                                     src="<?= htmlspecialchars($imgSrc) ?>"
                                                     alt="<?= htmlspecialchars($item['title']) ?>"
                                                     class="rounded flex-shrink-0"
                                                     style="width: 52px; height: 70px; object-fit: cover;"
                                                 >
-                                                <!-- Thông tin sách -->
                                                 <div class="flex-grow-1 overflow-hidden">
                                                     <p class="fw-semibold mb-0 text-truncate">
                                                         <?= htmlspecialchars($item['title']) ?>
@@ -197,7 +187,6 @@ function getStatusBadge(string $status): array {
                                                         × <?= $item['quantity'] ?> cuốn
                                                     </p>
                                                 </div>
-                                                <!-- Thành tiền -->
                                                 <span class="fw-bold text-danger flex-shrink-0">
                                                     <?= number_format($item['subtotal'], 0, ',', '.') ?>₫
                                                 </span>
@@ -208,11 +197,9 @@ function getStatusBadge(string $status): array {
                                 </div>
                             </div>
 
-                            <!-- Cột phải: Thông tin giao hàng + tổng tiền -->
                             <div class="col-lg-4 bg-light">
                                 <div class="p-4">
 
-                                    <!-- Thông tin giao hàng -->
                                     <h6 class="fw-bold text-muted text-uppercase small mb-3">
                                         <i class="bi bi-geo-alt me-1"></i>Thông tin giao hàng
                                     </h6>
@@ -233,7 +220,6 @@ function getStatusBadge(string $status): array {
                                         </li>
                                     </ul>
 
-                                    <!-- Tổng tiền -->
                                     <div class="border-top pt-3">
                                         <div class="d-flex justify-content-between small text-muted mb-1">
                                             <span>Tạm tính</span>
@@ -253,7 +239,6 @@ function getStatusBadge(string $status): array {
                                         </div>
                                     </div>
 
-                                    <!-- Trạng thái đơn hàng nổi bật -->
                                     <div class="mt-3 text-center">
                                         <span class="badge <?= $badge['class'] ?> px-4 py-2 rounded-pill fs-6 w-100">
                                             <i class="bi <?= $badge['icon'] ?> me-1"></i>
@@ -261,8 +246,7 @@ function getStatusBadge(string $status): array {
                                         </span>
                                     </div>
 
-                                    <!-- Thanh tiến trình trạng thái -->
-                                    <?php if ($order['status'] !== 'cancelled'): ?>
+                                    <?php if (!in_array($order['status'], ['cancelled', 'failed'])): ?>
                                     <div class="mt-4">
                                         <?php
                                         // Xác định bước hiện tại trong tiến trình
@@ -291,18 +275,9 @@ function getStatusBadge(string $status): array {
                                     <?php endif; ?>
 
                                 </div>
-                            </div><!-- /.col-lg-4 -->
+                            </div></div></div></div></div><?php endforeach; ?>
 
-                        </div><!-- /.row -->
-                    </div><!-- /.accordion-body -->
-                </div><!-- /.accordion-collapse -->
-
-            </div><!-- /.accordion-item -->
-            <?php endforeach; ?>
-
-        </div><!-- /.accordion -->
-
-    <?php endif; ?>
+        </div><?php endif; ?>
 
 </main>
 

@@ -1,0 +1,17 @@
+# Cấu hình nhạy cảm — KHÔNG được upload lên Git
+/config/mail.php
+
+# Thư mục vendor (PHPMailer) — quá nặng, không cần up
+/vendor/
+
+# File test tạm thời
+test_mail.php
+
+# File hệ thống
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor
+.vscode/
+.idea/

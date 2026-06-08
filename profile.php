@@ -284,8 +284,8 @@ $activeTab = ($_POST['tab'] ?? '') === 'password' ? 'password' : 'info';
                         <i class="bi bi-cart3 me-2"></i>Giỏ hàng
                     </a>
                     <a href="/bookstore/logout.php"
-                       class="btn btn-outline-danger btn-sm"
-                       onclick="return confirm('Bạn có chắc muốn đăng xuất?')">
+                       class="btn btn-outline-danger btn-sm btn-logout"
+                       data-confirm="Bạn có chắc muốn đăng xuất?">
                         <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
                     </a>
                 </div>
@@ -664,3 +664,33 @@ $activeTab = ($_POST['tab'] ?? '') === 'password' ? 'password' : 'info';
 </main>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-logout').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var msg = btn.getAttribute('data-confirm') || 'Bạn có chắc muốn tiếp tục?';
+            var href = btn.href;
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: msg,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Đăng xuất',
+                    cancelButtonText: 'Hủy'
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        window.location.href = href;
+                    }
+                });
+            } else {
+                if (confirm(msg)) {
+                    window.location.href = href;
+                }
+            }
+        });
+    });
+});
+</script>

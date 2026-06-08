@@ -28,8 +28,13 @@ $stmtUser = $pdo->prepare("
     WHERE  id = ?
     LIMIT  1
 ");
-$stmtUser->execute([$userId]);
-$user = $stmtUser->fetch();
+$user = $stmtUser->execute([$userId]) ? $stmtUser->fetch() : null;
+
+// CSRF token (tạo nếu chưa có)
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
 
 // ── QUERY GIỎ HÀNG ĐỂ HIỂN THỊ TÓM TẮT ĐƠN HÀNG ────────────────────────────
 $stmtCart = $pdo->prepare("
@@ -38,388 +43,221 @@ $stmtCart = $pdo->prepare("
             b.title,
             b.price,
             b.image,
-            b.stock_quantity,
-            (b.price * c.quantity) AS subtotal
+            b.stock_quantity
     FROM    cart c
     JOIN    books b ON c.book_id = b.id
     WHERE   c.user_id = ?
-    ORDER BY b.title ASC
 ");
 $stmtCart->execute([$userId]);
 $cartItems = $stmtCart->fetchAll();
 
-// Tính tổng tiền hiển thị trước khi đặt
-$totalPrice = array_sum(array_column($cartItems, 'subtotal'));
+// Tính tổng tiền của toàn bộ giỏ hàng
+$totalPrice = 0;
+foreach ($cartItems as $item) {
+    $totalPrice += $item['price'] * $item['quantity'];
+}
 
-// Biến lưu lỗi / kết quả xử lý
-$errors     = [];
-$successMsg = '';
-$orderId    = null;
+$errors  = [];
+$success = false;
 
-// ── XỬ LÝ POST: ĐẶT HÀNG ─────────────────────────────────────────────────────
+// ── XỬ LÝ ĐẶT HÀNG KHI SUBMIT FORM ──────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // 1. LẤY VÀ LÀM SẠCH DỮ LIỆU FORM ─────────────────────────────────────
     $fullname = trim($_POST['fullname'] ?? '');
-    $phone    = trim($_POST['phone']    ?? '');
-    $address  = trim($_POST['address']  ?? '');
-    $email    = trim($_POST['email']    ?? '');
+    $phone    = trim($_POST['phone'] ?? '');
+    $address  = trim($_POST['address'] ?? '');
 
-    // 2. VALIDATE ────────────────────────────────────────────────────────────
+    // CSRF token validation
+    $postedToken = $_POST['csrf_token'] ?? '';
+    if (empty($_SESSION['csrf_token']) || !is_string($postedToken) || !hash_equals($_SESSION['csrf_token'], $postedToken)) {
+        $errors['csrf'] = 'Yêu cầu không hợp lệ. Vui lòng thử lại.';
+    }
+
+    // Validate dữ liệu người nhận
     if (empty($fullname)) {
-        $errors['fullname'] = 'Vui lòng nhập họ và tên.';
+        $errors['fullname'] = 'Họ và tên người nhận không được để trống.';
     }
     if (empty($phone)) {
-        $errors['phone'] = 'Vui lòng nhập số điện thoại.';
-    } elseif (!preg_match('/^(0|\+84)[0-9]{8,10}$/', $phone)) {
-        $errors['phone'] = 'Số điện thoại không hợp lệ.';
+        $errors['phone'] = 'Số điện thoại không được để trống.';
     }
     if (empty($address)) {
-        $errors['address'] = 'Vui lòng nhập địa chỉ giao hàng.';
-    }
-    if (empty($email)) {
-        $errors['email'] = 'Vui lòng nhập email.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Email không hợp lệ.';
+        $errors['address'] = 'Địa chỉ giao hàng không được để trống.';
     }
 
-    // 3. XỬ LÝ TRANSACTION NẾU KHÔNG CÓ LỖI ─────────────────────────────────
     if (empty($errors)) {
         try {
-            // Bắt đầu transaction — đảm bảo toàn bộ các bước thành công hoặc rollback hết
+            // Sử dụng Transaction để đảm bảo an toàn dữ liệu tuyệt đối
             $pdo->beginTransaction();
 
-            // ── BƯỚC A: TÍNH TỔNG TIỀN TỪ CART TRONG TRANSACTION ────────────
-            // Query lại trong transaction để đảm bảo dữ liệu nhất quán (tránh race condition)
-            $stmtTotal = $pdo->prepare("
-                SELECT SUM(b.price * c.quantity) AS total
-                FROM   cart c
-                JOIN   books b ON c.book_id = b.id
-                WHERE  c.user_id = ?
-            ");
-            $stmtTotal->execute([$userId]);
-            $totalInTransaction = (float) $stmtTotal->fetchColumn();
-
-            if ($totalInTransaction <= 0) {
-                throw new Exception('Giỏ hàng không hợp lệ.');
-            }
-
-            // ── BƯỚC B: INSERT VÀO BẢNG ORDERS ──────────────────────────────
+            // 1. Chèn dữ liệu vào bảng orders
             $stmtOrder = $pdo->prepare("
-                INSERT INTO orders (user_id, fullname, phone, address, total_price, status)
-                VALUES (?, ?, ?, ?, ?, 'pending')
+                INSERT INTO orders (user_id, fullname, phone, address, total_price, status, created_at)
+                VALUES (?, ?, ?, ?, ?, 'pending', NOW())
             ");
-            $stmtOrder->execute([$userId, $fullname, $phone, $address, $totalInTransaction]);
-
-            // Lấy order_id vừa tạo để dùng cho order_details
+            $stmtOrder->execute([$userId, $fullname, $phone, $address, $totalPrice]);
             $orderId = $pdo->lastInsertId();
 
-            // ── BƯỚC C: SELECT GIỎ HÀNG VÀ INSERT VÀO ORDER_DETAILS ─────────
-            $stmtItems = $pdo->prepare("
-                SELECT  c.book_id,
-                        c.quantity,
-                        b.price,
-                        b.stock_quantity
-                FROM    cart c
-                JOIN    books b ON c.book_id = b.id
-                WHERE   c.user_id = ?
-            ");
-            $stmtItems->execute([$userId]);
-            $orderItems = $stmtItems->fetchAll();
+            // 2. Chèn dữ liệu vào order_details và cập nhật lại kho sách
+            foreach ($cartItems as $item) {
+                $stmtDetail = $pdo->prepare("
+                    INSERT INTO order_details (order_id, book_id, quantity, price)
+                    VALUES (?, ?, ?, ?)
+                ");
+                $stmtDetail->execute([$orderId, $item['book_id'], $item['quantity'], $item['price']]);
 
-            // Chuẩn bị sẵn các statement để tái sử dụng trong vòng lặp (hiệu quả hơn)
-            $stmtDetail = $pdo->prepare("
-                INSERT INTO order_details (order_id, book_id, quantity, price)
-                VALUES (?, ?, ?, ?)
-            ");
-            $stmtUpdateStock = $pdo->prepare("
-                UPDATE books
-                SET    stock_quantity = stock_quantity - ?
-                WHERE  id = ?
-                  AND  stock_quantity >= ?
-            ");
-
-            foreach ($orderItems as $item) {
-
-                // Kiểm tra tồn kho lần cuối trước khi insert (có thể đã thay đổi)
-                if ($item['stock_quantity'] < $item['quantity']) {
-                    throw new Exception(
-                        "Sách '{$item['book_id']}' không đủ số lượng trong kho. Vui lòng cập nhật giỏ hàng."
-                    );
-                }
-
-                // Insert chi tiết đơn hàng — lưu price tại thời điểm mua (không bị ảnh hưởng nếu giá thay đổi sau)
-                $stmtDetail->execute([
-                    $orderId,
-                    $item['book_id'],
-                    $item['quantity'],
-                    $item['price']
-                ]);
-
-                // ── BƯỚC D: TRỪ stock_quantity TRONG BẢNG BOOKS ─────────────
-                // Điều kiện AND stock_quantity >= quantity đảm bảo không trừ âm
-                $stmtUpdateStock->execute([
-                    $item['quantity'],
-                    $item['book_id'],
-                    $item['quantity']
-                ]);
-
-                // Kiểm tra rowCount — nếu = 0 nghĩa là điều kiện stock không thỏa
-                if ($stmtUpdateStock->rowCount() === 0) {
-                    throw new Exception('Cập nhật tồn kho thất bại. Vui lòng thử lại.');
-                }
+                // Trừ số lượng tồn kho của sách
+                $newStock = $item['stock_quantity'] - $item['quantity'];
+                $stmtUpdateStock = $pdo->prepare("
+                    UPDATE books SET stock_quantity = ? WHERE id = ?
+                ");
+                $stmtUpdateStock->execute([$newStock, $item['book_id']]);
             }
 
-            // ── BƯỚC E: XÓA TOÀN BỘ GIỎ HÀNG CỦA USER NÀY ─────────────────
-            $stmtClearCart = $pdo->prepare("DELETE FROM cart WHERE user_id = ?");
-            $stmtClearCart->execute([$userId]);
+            // 3. Xóa sạch giỏ hàng của user sau khi đã đặt hàng thành công
+            $stmtClear = $pdo->prepare("DELETE FROM cart WHERE user_id = ?");
+            $stmtClear->execute([$userId]);
 
-            // ── BƯỚC F: COMMIT — XÁC NHẬN TOÀN BỘ TRANSACTION ───────────────
             $pdo->commit();
-
-            // Đặt hàng thành công — reset cartItems để ẩn tóm tắt đơn hàng cũ
-            $successMsg = 'Đặt hàng thành công!';
-            $cartItems  = [];
-            $totalPrice = 0;
+            $success = true;
 
         } catch (Exception $e) {
-            // Có bất kỳ lỗi nào → rollback toàn bộ, không có gì được lưu vào DB
             $pdo->rollBack();
-            $errors['transaction'] = 'Đặt hàng thất bại: ' . $e->getMessage();
-            $orderId = null;
+            // Log full exception server-side and show generic message to user
+            error_log('[checkout] Order processing error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            $errors['submit'] = 'Có lỗi xảy ra trong quá trình xử lý đơn hàng. Vui lòng thử lại sau.';
         }
     }
 }
 ?>
 
-<!-- ========== NỘI DUNG TRANG THANH TOÁN ========== -->
 <main class="container my-5">
 
-    <!-- Tiêu đề -->
-    <h3 class="fw-bold mb-4">
-        <i class="bi bi-credit-card me-2 text-warning"></i>Thanh toán
-    </h3>
+    <?php if ($success): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đặt hàng thành công!',
+                    text: 'Đơn hàng của bạn đã được ghi nhận và đang chờ xử lý.',
+                    confirmButtonColor: '#ffc107',
+                    confirmButtonText: 'Xem đơn hàng của tôi'
+                }).then((result) => {
+                    // Chuyển hướng sang trang lịch sử đơn hàng của khách
+                    window.location.href = '/bookstore/my_orders.php';
+                });
+            });
+        </script>
+    <?php endif; ?>
 
-    <!-- Thanh bước (Step indicator) -->
-    <div class="checkout-steps d-flex align-items-center gap-2 mb-5">
-        <span class="step-done">
-            <i class="bi bi-cart-check me-1"></i>Giỏ hàng
-        </span>
-        <i class="bi bi-chevron-right text-muted"></i>
-        <span class="step-active <?= $successMsg ? 'step-done' : '' ?>">
-            <i class="bi bi-pencil-square me-1"></i>Thông tin giao hàng
-        </span>
-        <i class="bi bi-chevron-right text-muted"></i>
-        <span class="<?= $successMsg ? 'step-active' : 'step-inactive' ?>">
-            <i class="bi bi-check-circle me-1"></i>Xác nhận
-        </span>
+    <?php if (isset($errors['submit'])): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi đặt hàng',
+                    text: <?= json_encode($errors['submit']) ?>,
+                    confirmButtonColor: '#d33'
+                });
+            });
+        </script>
+    <?php endif; ?>
+
+    <div class="mb-4">
+        <h2 class="fw-bold"><i class="bi bi-credit-card me-2 text-warning"></i>Thanh toán đơn hàng</h2>
+        <p class="text-muted">Vui lòng kiểm tra lại thông tin và xác nhận đặt hàng.</p>
     </div>
 
-    <?php if ($successMsg): ?>
-        <!-- ══ THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG ══ -->
-        <div class="text-center py-5">
-            <div class="success-checkmark mb-4">
-                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
-            </div>
-            <h4 class="fw-bold text-success mb-2">Đặt hàng thành công!</h4>
-            <p class="text-muted mb-1">
-                Cảm ơn bạn đã mua hàng tại <strong>Book Store</strong>.
-            </p>
-            <p class="text-muted mb-4">
-                Mã đơn hàng của bạn: <strong class="text-dark">#<?= str_pad($orderId, 6, '0', STR_PAD_LEFT) ?></strong>
-            </p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="/bookstore/my_orders.php" class="btn btn-warning fw-bold px-4">
-                    <i class="bi bi-bag-check me-2"></i>Xem đơn hàng của tôi
-                </a>
-                <a href="/bookstore/index.php" class="btn btn-outline-secondary px-4">
-                    <i class="bi bi-house me-2"></i>Về trang chủ
-                </a>
-            </div>
-        </div>
-
-    <?php else: ?>
-        <!-- ══ LAYOUT 2 CỘT: FORM + TÓM TẮT ══ -->
+    <?php if (!$success): ?>
         <div class="row g-4">
-
-            <!-- CỘT TRÁI: FORM THÔNG TIN GIAO HÀNG -->
             <div class="col-lg-7">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-dark text-white fw-bold py-3">
-                        <i class="bi bi-truck me-2 text-warning"></i>Thông tin giao hàng
-                    </div>
+                <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4 text-dark border-bottom pb-2">
+                            <i class="bi bi-geo-alt me-2 text-warning"></i>Thông tin giao hàng
+                        </h5>
 
-                        <!-- Lỗi transaction -->
-                        <?php if (isset($errors['transaction'])): ?>
-                            <div class="alert alert-danger">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <?= htmlspecialchars($errors['transaction']) ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <form method="POST" action="" novalidate>
-
-                            <!-- Họ và tên -->
+                        <form id="checkoutForm" method="POST" action="" novalidate>
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                             <div class="mb-3">
-                                <label for="fullname" class="form-label fw-semibold">
-                                    Họ và tên <span class="text-danger">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="fullname"
-                                    name="fullname"
-                                    class="form-control <?= isset($errors['fullname']) ? 'is-invalid' : '' ?>"
-                                    value="<?= htmlspecialchars($_POST['fullname'] ?? $user['fullname'] ?? '') ?>"
-                                    placeholder="Nguyễn Văn A"
-                                >
+                                <label for="fullname" class="form-label fw-semibold">Họ và tên người nhận <span class="text-danger">*</span></label>
+                                <input type="text" id="fullname" name="fullname" 
+                                       class="form-control <?= isset($errors['fullname']) ? 'is-invalid' : '' ?>" 
+                                       placeholder="Nhập đầy đủ họ tên người nhận"
+                                       value="<?= htmlspecialchars($_POST['fullname'] ?? $user['fullname'] ?? '') ?>">
                                 <?php if (isset($errors['fullname'])): ?>
-                                    <div class="invalid-feedback">
-                                        <i class="bi bi-exclamation-circle me-1"></i>
-                                        <?= htmlspecialchars($errors['fullname']) ?>
-                                    </div>
+                                    <div class="invalid-feedback"><i class="bi bi-exclamation-circle me-1"></i><?= $errors['fullname'] ?></div>
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Email -->
                             <div class="mb-3">
-                                <label for="email" class="form-label fw-semibold">
-                                    Email <span class="text-danger">*</span>
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"
-                                    value="<?= htmlspecialchars($_POST['email'] ?? $user['email'] ?? '') ?>"
-                                    placeholder="example@email.com"
-                                >
-                                <?php if (isset($errors['email'])): ?>
-                                    <div class="invalid-feedback">
-                                        <i class="bi bi-exclamation-circle me-1"></i>
-                                        <?= htmlspecialchars($errors['email']) ?>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <!-- Số điện thoại -->
-                            <div class="mb-3">
-                                <label for="phone" class="form-label fw-semibold">
-                                    Số điện thoại <span class="text-danger">*</span>
-                                </label>
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    class="form-control <?= isset($errors['phone']) ? 'is-invalid' : '' ?>"
-                                    value="<?= htmlspecialchars($_POST['phone'] ?? $user['phone'] ?? '') ?>"
-                                    placeholder="0901 234 567"
-                                >
+                                <label for="phone" class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="text" id="phone" name="phone" 
+                                       class="form-control <?= isset($errors['phone']) ? 'is-invalid' : '' ?>" 
+                                       placeholder="Nhập số điện thoại liên hệ"
+                                       value="<?= htmlspecialchars($_POST['phone'] ?? $user['phone'] ?? '') ?>">
                                 <?php if (isset($errors['phone'])): ?>
-                                    <div class="invalid-feedback">
-                                        <i class="bi bi-exclamation-circle me-1"></i>
-                                        <?= htmlspecialchars($errors['phone']) ?>
-                                    </div>
+                                    <div class="invalid-feedback"><i class="bi bi-exclamation-circle me-1"></i><?= $errors['phone'] ?></div>
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Địa chỉ giao hàng -->
                             <div class="mb-4">
-                                <label for="address" class="form-label fw-semibold">
-                                    Địa chỉ giao hàng <span class="text-danger">*</span>
-                                </label>
-                                <textarea
-                                    id="address"
-                                    name="address"
-                                    rows="3"
-                                    class="form-control <?= isset($errors['address']) ? 'is-invalid' : '' ?>"
-                                    placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"
-                                ><?= htmlspecialchars($_POST['address'] ?? $user['address'] ?? '') ?></textarea>
+                                <label for="address" class="form-label fw-semibold">Địa chỉ nhận hàng <span class="text-danger">*</span></label>
+                                <textarea id="address" name="address" rows="3" 
+                                          class="form-control <?= isset($errors['address']) ? 'is-invalid' : '' ?>" 
+                                          placeholder="Ghi rõ số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."><?= htmlspecialchars($_POST['address'] ?? $user['address'] ?? '') ?></textarea>
                                 <?php if (isset($errors['address'])): ?>
-                                    <div class="invalid-feedback">
-                                        <i class="bi bi-exclamation-circle me-1"></i>
-                                        <?= htmlspecialchars($errors['address']) ?>
-                                    </div>
+                                    <div class="invalid-feedback"><i class="bi bi-exclamation-circle me-1"></i><?= $errors['address'] ?></div>
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Phương thức thanh toán (COD duy nhất) -->
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Phương thức thanh toán</label>
-                                <div class="form-check border rounded-3 p-3 bg-light">
-                                    <input class="form-check-input" type="radio"
-                                           name="payment" id="cod" value="cod" checked>
-                                    <label class="form-check-label fw-semibold ms-2" for="cod">
-                                        <i class="bi bi-cash-coin text-success me-2"></i>
-                                        Thanh toán khi nhận hàng (COD)
-                                    </label>
-                                </div>
+                            <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                                <i class="bi bi-cash-coin me-2 text-warning"></i>Phương thức thanh toán
+                            </h5>
+                            <div class="form-check p-3 rounded-3 border bg-light mb-4 d-flex align-items-center gap-2">
+                                <input class="form-check-input ms-1 shadow-none" type="radio" name="payment_method" id="cod" checked>
+                                <label class="form-check-label fw-semibold text-dark" for="cod">
+                                    <i class="bi bi-truck me-1 text-secondary"></i> Thanh toán khi nhận hàng (COD)
+                                </label>
                             </div>
 
-                            <!-- Nút đặt hàng -->
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-warning btn-lg fw-bold py-3">
-                                    <i class="bi bi-bag-check me-2"></i>
-                                    Đặt hàng —
-                                    <?= number_format($totalPrice, 0, ',', '.') ?>₫
+                                <button type="submit" class="btn btn-warning fw-bold py-2.5 fs-5 shadow-sm">
+                                    <i class="bi bi-bag-check-fill me-2"></i>Xác nhận đặt hàng
                                 </button>
                             </div>
-
                         </form>
-                    </div><!-- /.card-body -->
-                </div><!-- /.card -->
+                    </div>
+                </div>
             </div>
 
-            <!-- CỘT PHẢI: TÓM TẮT ĐƠN HÀNG -->
             <div class="col-lg-5">
-                <div class="card border-0 shadow-sm sticky-top" style="top: 80px;">
-                    <div class="card-header bg-dark text-white fw-bold py-3">
-                        <i class="bi bi-receipt me-2 text-warning"></i>
-                        Đơn hàng (<?= count($cartItems) ?> sản phẩm)
-                    </div>
-                    <div class="card-body p-0">
+                <div class="card shadow-sm border-0 sticky-lg-top" style="top: 2rem; z-index: 10;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                            <i class="bi bi-journal-text me-2 text-warning"></i>Tóm tắt đơn hàng
+                        </h5>
 
-                        <!-- Danh sách sách trong đơn -->
-                        <ul class="list-group list-group-flush">
-                            <?php foreach ($cartItems as $item): ?>
-                            <?php
-                                $imgPath = '/bookstore/assets/images/books/' . $item['image'];
-                                $imgSrc  = (!empty($item['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $imgPath))
-                                            ? $imgPath
-                                            : '/bookstore/assets/images/books/placeholder.png';
-                            ?>
-                            <li class="list-group-item px-4 py-3">
-                                <div class="d-flex gap-3 align-items-center">
-                                    <!-- Ảnh nhỏ + badge số lượng -->
-                                    <div class="position-relative flex-shrink-0">
-                                        <img src="<?= htmlspecialchars($imgSrc) ?>"
-                                             alt="<?= htmlspecialchars($item['title']) ?>"
-                                             class="rounded" style="width:48px;height:64px;object-fit:cover;">
-                                        <span class="position-absolute top-0 start-100 translate-middle
-                                                     badge rounded-pill bg-warning text-dark">
-                                            <?= $item['quantity'] ?>
-                                        </span>
-                                    </div>
-                                    <!-- Tên + thành tiền -->
-                                    <div class="flex-grow-1 overflow-hidden">
-                                        <p class="fw-semibold small mb-0 text-truncate">
-                                            <?= htmlspecialchars($item['title']) ?>
-                                        </p>
-                                        <p class="text-muted x-small mb-0" style="font-size:.8rem;">
-                                            <?= number_format($item['price'], 0, ',', '.') ?>₫
-                                            × <?= $item['quantity'] ?>
-                                        </p>
-                                    </div>
-                                    <span class="fw-bold text-danger small flex-shrink-0">
-                                        <?= number_format($item['subtotal'], 0, ',', '.') ?>₫
-                                    </span>
-                                </div>
-                            </li>
-                            <?php endforeach; ?>
-                        </ul>
+                        <div class="overflow-y-auto pe-1" style="max-height: 280px;">
+                            <ul class="list-group list-group-flush">
+                                <?php foreach ($cartItems as $item): ?>
+                                    <li class="list-group-item px-0 py-3 border-bottom">
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <img src="/bookstore/assets/images/books/<?= htmlspecialchars($item['image'] ?: 'placeholder.png') ?>" 
+                                                 alt="Book cover" class="rounded border shadow-sm flex-shrink-0" 
+                                                 style="width: 44px; height: 60px; object-fit: cover;">
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <p class="fw-bold small mb-0 text-truncate text-dark"><?= htmlspecialchars($item['title']) ?></p>
+                                                <p class="text-muted small mb-0"><?= number_format($item['price'], 0, ',', '.') ?>₫ × <?= $item['quantity'] ?></p>
+                                            </div>
+                                            <div class="text-end flex-shrink-0 fw-semibold text-dark">
+                                                <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>₫
+                                            </div>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
 
-                        <!-- Tổng cộng -->
-                        <div class="px-4 py-3 border-top">
+                        <div class="bg-light p-3 rounded-3 border mt-4">
                             <div class="d-flex justify-content-between text-muted small mb-2">
                                 <span>Tạm tính</span>
                                 <span><?= number_format($totalPrice, 0, ',', '.') ?>₫</span>
@@ -436,21 +274,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
 
-                    </div><!-- /.card-body -->
-                </div><!-- /.card -->
-
-                <!-- Link quay lại giỏ hàng -->
-                <div class="mt-3 text-center">
-                    <a href="/bookstore/cart.php"
-                       class="text-muted small text-decoration-none">
+                    </div></div><div class="mt-3 text-center">
+                    <a href="/bookstore/cart.php" class="text-muted small text-decoration-none">
                         <i class="bi bi-arrow-left me-1"></i>Quay lại giỏ hàng
                     </a>
                 </div>
-
             </div>
-        </div><!-- /.row -->
-    <?php endif; ?>
+        </div><?php endif; ?>
 
 </main>
+
+<script>
+// Prevent double submit on checkout form
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('checkoutForm');
+    if (!form) return;
+    form.addEventListener('submit', function() {
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = 'Đang xử lý...';
+        }
+    });
+});
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

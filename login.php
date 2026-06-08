@@ -127,6 +127,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label for="password" class="form-label fw-semibold mb-0">
                                     Mật khẩu <span class="text-danger">*</span>
                                 </label>
+                                <a href="/bookstore/forgot_password.php"
+                                class="text-muted small text-decoration-none">
+                                    <i class="bi bi-question-circle me-1"></i>Quên mật khẩu?
+                                </a>
                             </div>
                             <div class="input-group mt-1">
                                 <span class="input-group-text bg-light">

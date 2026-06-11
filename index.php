@@ -4,24 +4,35 @@
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/config/db.php';
 
-// ── LẤY 12 CUỐN SÁCH MỚI NHẤT ────────────────────────────────────────────────
-// JOIN với categories để lấy tên thể loại hiển thị trên card
-$stmt = $pdo->prepare("
+// ── 1. KIỂM TRA THAM SỐ LỌC THỂ LOẠI TỪ URL ──────────────────────────────────
+$selectedCategoryId = filter_input(INPUT_GET, 'category', FILTER_VALIDATE_INT);
+
+// ── 2. LẤY SÁCH (CÓ XỬ LÝ ĐIỀU KIỆN LỌC) ─────────────────────────────────────
+// Xây dựng câu SQL động: Nếu có category thì thêm WHERE, nếu không thì lấy tất cả
+$sql = "
     SELECT b.id, b.title, b.author, b.price, b.image,
            b.stock_quantity, c.name AS category_name
     FROM books b
     LEFT JOIN categories c ON b.category_id = c.id
-    ORDER BY b.id DESC
-    LIMIT 12
-");
-$stmt->execute();
+";
+
+$params = [];
+// Nếu người dùng chọn 1 thể loại cụ thể
+if ($selectedCategoryId) {
+    $sql .= " WHERE b.category_id = ? ";
+    $params[] = $selectedCategoryId;
+}
+
+$sql .= " ORDER BY b.id DESC LIMIT 12";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $books = $stmt->fetchAll();
 
-// ── LẤY DANH SÁCH THỂ LOẠI CHO THANH LỌC ────────────────────────────────────
+// ── 3. LẤY DANH SÁCH THỂ LOẠI CHO THANH LỌC ─────────────────────────────────
 $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->fetchAll();
 ?>
 
-<!-- ========== BANNER TRANG CHỦ ========== -->
 <section class="hero-banner bg-dark text-white py-5 mb-5">
     <div class="container">
         <div class="row align-items-center">
@@ -48,7 +59,6 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
     </div>
 </section>
 
-<!-- ========== DANH MỤC THỂ LOẠI ========== -->
 <?php if (!empty($categories)): ?>
 <section class="mb-5">
     <div class="container">
@@ -57,12 +67,13 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
         </h5>
         <div class="d-flex flex-wrap gap-2">
             <a href="/bookstore/index.php"
-               class="btn btn-sm btn-warning fw-semibold">
+               class="btn btn-sm <?= !$selectedCategoryId ? 'btn-warning fw-semibold' : 'btn-outline-secondary' ?>">
                 Tất cả
             </a>
+            
             <?php foreach ($categories as $cat): ?>
                 <a href="/bookstore/index.php?category=<?= $cat['id'] ?>"
-                   class="btn btn-sm btn-outline-secondary">
+                   class="btn btn-sm <?= ($selectedCategoryId === (int)$cat['id']) ? 'btn-warning fw-semibold' : 'btn-outline-secondary' ?>">
                     <?= htmlspecialchars($cat['name']) ?>
                 </a>
             <?php endforeach; ?>
@@ -71,14 +82,13 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
 </section>
 <?php endif; ?>
 
-<!-- ========== DANH SÁCH SÁCH ========== -->
 <section id="book-list" class="mb-5">
     <div class="container">
 
-        <!-- Tiêu đề section -->
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h4 class="fw-bold mb-0">
-                <i class="bi bi-stars me-2 text-warning"></i>Sách mới nhất
+                <i class="bi bi-stars me-2 text-warning"></i>
+                <?= $selectedCategoryId ? 'Kết quả lọc' : 'Sách mới nhất' ?>
             </h4>
             <span class="text-muted small">
                 Hiển thị <?= count($books) ?> cuốn sách
@@ -86,21 +96,18 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
         </div>
 
         <?php if (empty($books)): ?>
-            <!-- Trạng thái rỗng — chưa có sách nào trong DB -->
             <div class="text-center py-5">
                 <i class="bi bi-inbox fs-1 text-muted"></i>
-                <p class="text-muted mt-3">Chưa có sách nào. Vui lòng quay lại sau!</p>
+                <p class="text-muted mt-3">Chưa có sách nào thuộc thể loại này. Vui lòng thử thể loại khác!</p>
             </div>
 
         <?php else: ?>
-            <!-- Grid hiển thị sách dạng card -->
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
 
                 <?php foreach ($books as $book): ?>
                 <div class="col">
                     <div class="card h-100 border-0 shadow-sm book-card">
 
-                        <!-- Ảnh bìa sách -->
                         <div class="book-card__img-wrap">
                             <?php
                                 // Kiểm tra ảnh tồn tại, fallback về ảnh placeholder nếu không có
@@ -118,14 +125,12 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
                                 >
                             </a>
 
-                            <!-- Badge thể loại (hiển thị góc trên trái ảnh) -->
                             <?php if (!empty($book['category_name'])): ?>
                                 <span class="badge bg-warning text-dark book-card__badge">
                                     <?= htmlspecialchars($book['category_name']) ?>
                                 </span>
                             <?php endif; ?>
 
-                            <!-- Badge hết hàng nếu stock = 0 -->
                             <?php if ($book['stock_quantity'] <= 0): ?>
                                 <div class="book-card__overlay-soldout">
                                     <span>Hết hàng</span>
@@ -133,10 +138,8 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
                             <?php endif; ?>
                         </div>
 
-                        <!-- Nội dung card -->
                         <div class="card-body d-flex flex-column p-3">
 
-                            <!-- Tên sách -->
                             <h6 class="card-title fw-bold mb-1 book-card__title">
                                 <a href="/bookstore/product.php?id=<?= $book['id'] ?>"
                                    class="text-dark text-decoration-none stretched-link-title">
@@ -144,20 +147,17 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
                                 </a>
                             </h6>
 
-                            <!-- Tác giả -->
                             <p class="text-muted small mb-2">
                                 <i class="bi bi-person me-1"></i>
                                 <?= htmlspecialchars($book['author']) ?>
                             </p>
 
-                            <!-- Giá — đẩy xuống cuối card bằng mt-auto -->
                             <div class="mt-auto">
                                 <p class="fw-bold text-danger fs-5 mb-3">
                                     <?= number_format($book['price'], 0, ',', '.') ?>
                                     <span class="fs-6">₫</span>
                                 </p>
 
-                                <!-- Nút Xem chi tiết -->
                                 <a href="/bookstore/product.php?id=<?= $book['id'] ?>"
                                    class="btn btn-warning btn-sm w-100 fw-semibold
                                           <?= $book['stock_quantity'] <= 0 ? 'disabled' : '' ?>">
@@ -165,15 +165,10 @@ $categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->
                                 </a>
                             </div>
 
-                        </div><!-- /.card-body -->
-                    </div><!-- /.card -->
-                </div><!-- /.col -->
-                <?php endforeach; ?>
+                        </div></div></div><?php endforeach; ?>
 
-            </div><!-- /.row -->
-        <?php endif; ?>
+            </div><?php endif; ?>
 
-    </div><!-- /.container -->
-</section>
+    </div></section>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

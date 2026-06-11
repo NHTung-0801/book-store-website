@@ -12,9 +12,15 @@ if (!$isLoggedIn) {
 
 $userId = (int) $_SESSION['user_id'];
 
-// ── QUERY DANH SÁCH ĐƠN HÀNG CỦA USER ───────────────────────────────────────
-// Lấy toàn bộ đơn hàng, sắp xếp mới nhất lên đầu
-$stmtOrders = $pdo->prepare("
+// ── XỬ LÝ LỌC TRẠNG THÁI (STATUS FILTER) TỪ URL ─────────────────────────────
+$statusFilter = filter_input(INPUT_GET, 'status');
+$validFilters = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'];
+if ($statusFilter && !in_array($statusFilter, $validFilters)) {
+    $statusFilter = null; // Gỡ bỏ nếu tham số truyền vào không hợp lệ
+}
+
+// ── QUERY DANH SÁCH ĐƠN HÀNG CỦA USER (CÓ BỘ LỌC) ───────────────────────────
+$sqlOrders = "
     SELECT  id,
             fullname,
             phone,
@@ -24,13 +30,27 @@ $stmtOrders = $pdo->prepare("
             created_at
     FROM    orders
     WHERE   user_id = ?
-    ORDER BY id DESC
-");
-$stmtOrders->execute([$userId]);
+";
+$params = [$userId];
+
+// Áp dụng điều kiện lọc nếu người dùng có chọn
+if ($statusFilter) {
+    if ($statusFilter === 'shipping') {
+        // Gom cả 'shipping' và 'failed' vào mục Đang giao
+        $sqlOrders .= " AND status IN ('shipping', 'failed')";
+    } else {
+        $sqlOrders .= " AND status = ?";
+        $params[] = $statusFilter;
+    }
+}
+// Sắp xếp đơn mới nhất lên đầu
+$sqlOrders .= " ORDER BY id DESC";
+
+$stmtOrders = $pdo->prepare($sqlOrders);
+$stmtOrders->execute($params);
 $orders = $stmtOrders->fetchAll();
 
 // ── QUERY CHI TIẾT TỪNG ĐƠN HÀNG (sách bên trong) ───────────────────────────
-// Dùng 1 query duy nhất lấy hết order_details của user, tránh N+1 query
 $stmtDetails = $pdo->prepare("
     SELECT  od.order_id,
             od.quantity,
@@ -48,45 +68,60 @@ $stmtDetails = $pdo->prepare("
 $stmtDetails->execute([$userId]);
 $allDetails = $stmtDetails->fetchAll();
 
-// Nhóm order_details theo order_id để dễ render
-// Kết quả: $detailsMap[order_id] = [ [...item1], [...item2], ... ]
 $detailsMap = [];
 foreach ($allDetails as $detail) {
     $detailsMap[$detail['order_id']][] = $detail;
 }
 
-// ── HÀM HELPER: Trả về class badge Bootstrap theo trạng thái đơn hàng ────────
+// ── HÀM HELPER: Lấy thông tin hiển thị trạng thái ───────────────────────────
 function getStatusBadge(string $status): array {
     return match($status) {
-        'pending'   => ['class' => 'bg-warning text-dark',  'icon' => 'bi-clock',               'label' => 'Chờ xác nhận'],
-        'confirmed' => ['class' => 'bg-info text-dark',     'icon' => 'bi-check-circle',         'label' => 'Đã xác nhận'],
-        'shipping'  => ['class' => 'bg-primary',            'icon' => 'bi-truck',                'label' => 'Đang giao hàng'],
-        'delivered' => ['class' => 'bg-success',            'icon' => 'bi-bag-check',            'label' => 'Đã giao hàng'],
-        'cancelled' => ['class' => 'bg-danger',             'icon' => 'bi-x-circle',             'label' => 'Đã hủy'],
-        'failed'    => ['class' => 'bg-dark',               'icon' => 'bi-exclamation-triangle', 'label' => 'Giao hàng thất bại'],
-        default     => ['class' => 'bg-secondary',          'icon' => 'bi-question-circle',      'label' => ucfirst($status)],
+        'pending'   => ['class' => 'bg-warning text-dark',  'icon' => 'bi-clock',               'label' => 'Chờ xác nhận',       'color' => '#ffc107'],
+        'confirmed' => ['class' => 'bg-info text-dark',     'icon' => 'bi-check-circle',         'label' => 'Đã xác nhận',        'color' => '#0dcaf0'],
+        'shipping'  => ['class' => 'bg-primary text-white', 'icon' => 'bi-truck',                'label' => 'Đang giao hàng',     'color' => '#0d6efd'],
+        'delivered' => ['class' => 'bg-success text-white', 'icon' => 'bi-bag-check',            'label' => 'Hoàn tất',           'color' => '#198754'],
+        'cancelled' => ['class' => 'bg-danger text-white',  'icon' => 'bi-x-circle',             'label' => 'Đã hủy',             'color' => '#dc3545'],
+        'failed'    => ['class' => 'bg-dark text-white',    'icon' => 'bi-exclamation-triangle', 'label' => 'Giao hàng thất bại', 'color' => '#212529'],
+        default     => ['class' => 'bg-secondary text-white','icon' => 'bi-question-circle',     'label' => ucfirst($status),      'color' => '#6c757d'],
     };
 }
+
+// ── KHAI BÁO CÁC TAB LỌC TRẠNG THÁI ─────────────────────────────────────────
+$tabs = [
+    ''          => 'Tất cả',
+    'pending'   => 'Chờ xác nhận',
+    'confirmed' => 'Đã xác nhận',
+    'shipping'  => 'Đang giao',
+    'delivered' => 'Hoàn tất',
+    'cancelled' => 'Đã hủy'
+];
 ?>
 
 <main class="container my-5">
 
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <h3 class="fw-bold mb-0">
-            <i class="bi bi-bag-check me-2 text-warning"></i>Đơn hàng của tôi
+    <div class="page-header-custom mb-4">
+        <h3 class="title">
+            <i class="bi bi-bag-check"></i> Đơn hàng của tôi
         </h3>
-        <?php if (!empty($orders)): ?>
-            <span class="badge bg-warning text-dark rounded-pill fs-6">
-                <?= count($orders) ?> đơn hàng
-            </span>
-        <?php endif; ?>
+        <span class="badge-custom">
+            <?= count($orders) ?> đơn hàng <?= $statusFilter ? 'được tìm thấy' : '' ?>
+        </span>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4 pb-3 border-bottom">
+        <?php foreach ($tabs as $key => $label): ?>
+            <a href="?status=<?= $key ?>" 
+               class="btn btn-sm rounded-pill px-3 <?= ($statusFilter === $key || (!$statusFilter && $key === '')) ? 'btn-warning fw-bold shadow-sm' : 'btn-light text-muted border' ?>">
+                <?= $label ?>
+            </a>
+        <?php endforeach; ?>
     </div>
 
     <?php if (empty($orders)): ?>
         <div class="text-center py-5">
             <i class="bi bi-bag-x text-muted" style="font-size: 5rem;"></i>
-            <h5 class="text-muted mt-3">Bạn chưa có đơn hàng nào</h5>
-            <p class="text-muted small">Hãy chọn sách và đặt hàng ngay!</p>
+            <h5 class="text-muted mt-3">Không có đơn hàng nào</h5>
+            <p class="text-muted small">Bạn chưa có đơn hàng nào thuộc trạng thái này!</p>
             <a href="/bookstore/index.php" class="btn btn-warning fw-bold px-4 mt-2">
                 <i class="bi bi-book me-2"></i>Khám phá sách ngay
             </a>
@@ -100,39 +135,45 @@ function getStatusBadge(string $status): array {
                 $badge   = getStatusBadge($order['status']);
                 $items   = $detailsMap[$order['id']] ?? [];
                 $collapseId = 'order-' . $order['id'];
-                // Đơn đầu tiên (mới nhất) mặc định mở ra
                 $isFirst = ($index === 0);
             ?>
 
-            <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+            <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden" 
+                 style="border-left: 4px solid #ffc107 !important;">
 
                 <h2 class="accordion-header">
                     <button
-                        class="accordion-button <?= $isFirst ? '' : 'collapsed' ?> py-3 px-4"
+                        class="accordion-button <?= $isFirst ? '' : 'collapsed' ?> py-2 px-3"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#<?= $collapseId ?>"
                         aria-expanded="<?= $isFirst ? 'true' : 'false' ?>"
+                        style="min-height: 50px;"
                     >
-                        <div class="d-flex align-items-center justify-content-between w-100 me-3 flex-wrap gap-2">
-
-                            <div>
-                                <span class="fw-bold text-dark">
-                                    Đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
-                                </span>
-                                <?php if (!empty($order['created_at'])): ?>
-                                    <span class="text-muted small ms-2">
-                                        <i class="bi bi-calendar3 me-1"></i>
-                                        <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
+                        <div class="d-flex align-items-center justify-content-between w-100 me-2 flex-wrap gap-2">
 
                             <div class="d-flex align-items-center gap-2">
-                                <span class="fw-bold text-danger">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 32px; height: 32px; background-color: #fff8e1; color: #ffc107;">
+                                    <i class="bi bi-box-seam fs-6"></i>
+                                </div>
+                                <div class="lh-sm">
+                                    <span class="fw-bold text-dark d-block" style="font-size: 0.95rem;">
+                                        Đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
+                                    </span>
+                                    <?php if (!empty($order['created_at'])): ?>
+                                        <span class="text-muted" style="font-size: 0.75rem;">
+                                            <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="fw-bold text-danger" style="font-size: 1rem;">
                                     <?= number_format($order['total_price'], 0, ',', '.') ?>₫
                                 </span>
-                                <span class="badge <?= $badge['class'] ?> px-3 py-2 rounded-pill">
+                                <span class="badge <?= $badge['class'] ?> px-2 py-1 rounded-pill shadow-sm fw-medium" style="font-size: 0.75rem;">
                                     <i class="bi <?= $badge['icon'] ?> me-1"></i>
                                     <?= $badge['label'] ?>
                                 </span>
@@ -175,7 +216,7 @@ function getStatusBadge(string $status): array {
                                                     style="width: 52px; height: 70px; object-fit: cover;"
                                                 >
                                                 <div class="flex-grow-1 overflow-hidden">
-                                                    <p class="fw-semibold mb-0 text-truncate">
+                                                    <p class="fw-semibold mb-0 text-truncate" style="font-size: 0.95rem;">
                                                         <?= htmlspecialchars($item['title']) ?>
                                                     </p>
                                                     <p class="text-muted small mb-0">
@@ -214,7 +255,7 @@ function getStatusBadge(string $status): array {
                                             <i class="bi bi-telephone-fill me-2 text-warning"></i>
                                             <?= htmlspecialchars($order['phone']) ?>
                                         </li>
-                                        <li>
+                                        <li class="lh-sm">
                                             <i class="bi bi-map-fill me-2 text-warning"></i>
                                             <?= htmlspecialchars($order['address']) ?>
                                         </li>
@@ -233,14 +274,14 @@ function getStatusBadge(string $status): array {
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="fw-bold">Tổng cộng</span>
-                                            <span class="fw-bold text-danger fs-5">
+                                            <span class="fw-bold text-danger fs-6">
                                                 <?= number_format($order['total_price'], 0, ',', '.') ?>₫
                                             </span>
                                         </div>
                                     </div>
 
                                     <div class="mt-3 text-center">
-                                        <span class="badge <?= $badge['class'] ?> px-4 py-2 rounded-pill fs-6 w-100">
+                                        <span class="badge <?= $badge['class'] ?> px-4 py-2 rounded-pill fs-6 w-100 shadow-sm fw-medium">
                                             <i class="bi <?= $badge['icon'] ?> me-1"></i>
                                             <?= $badge['label'] ?>
                                         </span>

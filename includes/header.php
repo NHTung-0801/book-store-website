@@ -32,7 +32,7 @@ $baseUrl = '/bookstore';
           rel="stylesheet">
 
     <!-- CSS tùy chỉnh riêng của dự án -->
-    <link href="<?= $baseUrl ?>/assets/css/style.css" rel="stylesheet">
+    <link href="<?= $baseUrl ?>/assets/css/style.css?v=<?= time() ?>" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>

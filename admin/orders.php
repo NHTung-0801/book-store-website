@@ -74,9 +74,9 @@ $stmtCount->execute($whereParams);
 $totalOrders = (int) $stmtCount->fetchColumn();
 $totalPages  = (int) ceil($totalOrders / $perPage);
 
-// Lấy danh sách đơn hàng
+// Lấy danh sách đơn hàng (Đã thêm o.note vào SELECT)
 $stmtOrders = $pdo->prepare("
-    SELECT  o.id, o.fullname, o.phone, o.address, o.total_price, o.status, o.created_at, COUNT(od.book_id) AS item_count
+    SELECT  o.id, o.fullname, o.phone, o.address, o.note, o.total_price, o.status, o.created_at, COUNT(od.book_id) AS item_count
     FROM    orders o
     LEFT JOIN order_details od ON od.order_id = o.id
     $whereSQL
@@ -340,6 +340,16 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <li class="mb-2"><i class="bi bi-person-fill text-warning me-2"></i><strong><?= htmlspecialchars($order['fullname']) ?></strong></li>
                             <li class="mb-2"><i class="bi bi-telephone-fill text-warning me-2"></i><?= htmlspecialchars($order['phone']) ?></li>
                             <li class="mb-3"><i class="bi bi-map-fill text-warning me-2"></i><?= htmlspecialchars($order['address']) ?></li>
+                            <li class="mb-0">
+                                <div class="text-muted mb-1"><i class="bi bi-pencil-square text-warning me-2"></i><strong>Ghi chú:</strong></div>
+                                <?php if (!empty($order['note'])): ?>
+                                    <div class="bg-warning-subtle text-dark border border-warning px-2 py-2 rounded small fw-semibold">
+                                        <?= nl2br(htmlspecialchars($order['note'])) ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="text-muted fst-italic small">Không có ghi chú</div>
+                                <?php endif; ?>
+                            </li>
                         </ul>
                         <h6 class="fw-bold text-muted text-uppercase small mb-3 mt-4">Thông tin đơn hàng</h6>
                         <ul class="list-unstyled small text-muted">

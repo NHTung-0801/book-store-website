@@ -249,20 +249,18 @@ $totalPrice = array_sum(array_column($cartItems, 'subtotal'));
                             </span>
                         </div>
 
-                        <div class="d-grid">
+                        <div class="d-grid gap-3">
                             <button type="submit" class="btn btn-warning btn-lg fw-bold py-3 shadow-sm rounded-pill checkout-btn d-flex align-items-center justify-content-center border-0 text-dark">
                                 <i class="bi bi-check2-circle fs-4 me-2"></i> XÁC NHẬN ĐẶT HÀNG
                             </button>
+                            
+                            <a href="/bookstore/cart.php" class="btn btn-light btn-lg border border-secondary-subtle fw-semibold py-2 shadow-sm rounded-pill d-flex align-items-center justify-content-center text-muted transition-hover">
+                                <i class="bi bi-arrow-left me-2"></i>Quay lại Giỏ hàng
+                            </a>
                         </div>
                     </div>
 
                 </div>
-            </div>
-
-            <div class="mt-4 text-center">
-                <a href="/bookstore/cart.php" class="btn btn-light border text-secondary rounded-pill shadow-sm fw-normal px-4">
-                    <i class="bi bi-arrow-left me-2"></i>Quay lại giỏ hàng
-                </a>
             </div>
         </div>
         
@@ -278,6 +276,8 @@ $totalPrice = array_sum(array_column($cartItems, 'subtotal'));
         box-shadow: 0 .5rem 1rem rgba(255, 193, 7, 0.4)!important; 
         background-color: #ffca2c; 
     }
+    .transition-hover { transition: all 0.2s ease; }
+    .transition-hover:hover { background-color: #f8f9fa; color: #0f3460 !important; }
 </style>
 
 <script>

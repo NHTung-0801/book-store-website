@@ -31,16 +31,9 @@ if (!$user) {
 }
 
 // ── THỐNG KÊ CÁ NHÂN ─────────────────────────────────────────────────────────
-// Tổng đơn hàng
-$totalOrders = (int) $pdo->prepare("
-    SELECT COUNT(*) FROM orders WHERE user_id = ?
-")->execute([$userId]) ? $pdo->prepare("
-    SELECT COUNT(*) FROM orders WHERE user_id = ?
-") : 0;
-
 $stmtStats = $pdo->prepare("
     SELECT
-        COUNT(*)                                            AS total_orders,
+        COUNT(*)                                           AS total_orders,
         COALESCE(SUM(total_price), 0)                      AS total_spent,
         SUM(CASE WHEN status = 'delivered'  THEN 1 ELSE 0 END) AS delivered,
         SUM(CASE WHEN status = 'pending'    THEN 1 ELSE 0 END) AS pending,
@@ -50,6 +43,8 @@ $stmtStats = $pdo->prepare("
 ");
 $stmtStats->execute([$userId]);
 $stats = $stmtStats->fetch();
+
+$totalOrders = (int) $stats['total_orders'];
 
 // ── 3 ĐƠN HÀNG GẦN NHẤT ──────────────────────────────────────────────────────
 $stmtRecent = $pdo->prepare("
@@ -63,11 +58,11 @@ $stmtRecent->execute([$userId]);
 $recentOrders = $stmtRecent->fetchAll();
 
 // ════════════════════════════════════════════════════════════
-// XỬ LÝ POST
+// XỬ LÝ POST (CẬP NHẬT THÔNG TIN & ĐỔI MẬT KHẨU)
 // ════════════════════════════════════════════════════════════
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $tab = $_POST['tab'] ?? 'info'; // 'info' | 'password'
+    $tab = $_POST['tab'] ?? 'info';
 
     // ────────────────────────────────────────────────────────
     // TAB 1: CẬP NHẬT THÔNG TIN CÁ NHÂN
@@ -96,9 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Kiểm tra email trùng với người khác
         if (empty($errors['email'])) {
-            $stmtDup = $pdo->prepare("
-                SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1
-            ");
+            $stmtDup = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1");
             $stmtDup->execute([$email, $userId]);
             if ($stmtDup->fetch()) {
                 $errors['email'] = 'Email này đã được sử dụng bởi tài khoản khác.';
@@ -187,490 +180,289 @@ function getStatusBadge(string $status): array {
 $activeTab = ($_POST['tab'] ?? '') === 'password' ? 'password' : 'info';
 ?>
 
-<!-- ========== NỘI DUNG TRANG HỒ SƠ ========== -->
 <main class="container my-5">
+    
+    <?php if (!empty($success)): ?>
+        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3 d-flex align-items-center mb-4 border-0" style="background-color: #d1e7dd; color: #0f5132;" role="alert">
+            <img src="https://img.icons8.com/3d-fluency/94/ok.png" width="28" class="me-2" alt="Success">
+            <div class="fw-medium">
+                <?= $success === 'info' ? 'Cập nhật thông tin cá nhân thành công!' : 'Đổi mật khẩu thành công! Vui lòng dùng mật khẩu mới cho lần đăng nhập tiếp theo.' ?>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
 
-    <!-- Tiêu đề trang -->
-    <div class="d-flex align-items-center gap-3 mb-4">
-        <h3 class="fw-bold mb-0">
-            <i class="bi bi-person-circle me-2 text-warning"></i>Hồ sơ cá nhân
-        </h3>
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-3 mb-4 border-0" style="background-color: #f8d7da; color: #842029;" role="alert">
+            <div class="d-flex align-items-center mb-2">
+                <img src="https://img.icons8.com/3d-fluency/94/cancel.png" width="28" class="me-2" alt="Error">
+                <strong>Vui lòng kiểm tra lại:</strong>
+            </div>
+            <ul class="mb-0 ps-4 small fw-medium">
+                <?php foreach ($errors as $err): ?>
+                    <li><?= htmlspecialchars($err) ?></li>
+                <?php endforeach; ?>
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="top: 10px;"></button>
+        </div>
+    <?php endif; ?>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+        <div style="height: 140px; background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%); position: relative;">
+            <div style="position: absolute; right: 20px; top: -20px; opacity: 0.08;">
+                <i class="bi bi-book-half" style="font-size: 8rem; color: #fff;"></i>
+            </div>
+        </div>
+        
+        <div class="card-body px-4 pb-4 position-relative">
+            <div class="position-absolute" style="top: -50px; left: 30px;">
+                <img src="https://ui-avatars.com/api/?name=<?= urlencode($user['fullname']) ?>&background=ffc107&color=0f3460&size=100&bold=true&rounded=true" 
+                     alt="Avatar" class="border border-4 border-white shadow-sm bg-white" style="border-radius: 50%;">
+            </div>
+            
+            <div class="mt-5 d-flex justify-content-between align-items-end flex-wrap gap-3 ms-2">
+                <div>
+                    <h4 class="fw-bolder mb-1" style="color: #0f3460; font-size: 1.6rem;">
+                        <?= htmlspecialchars($user['fullname']) ?>
+                    </h4>
+                    <p class="text-muted mb-0 fw-medium">
+                        <i class="bi bi-envelope-at me-2 text-warning"></i><?= htmlspecialchars($user['email']) ?>
+                    </p>
+                </div>
+                <div>
+                    <?php if ($user['role'] == 1): ?>
+                        <span class="badge bg-danger px-3 py-2 rounded-pill shadow-sm fw-bold border border-danger" style="font-size: 0.85rem;">
+                            <i class="bi bi-shield-fill-check me-1"></i> Quản trị viên
+                        </span>
+                    <?php else: ?>
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm fw-bold border border-warning" style="font-size: 0.85rem;">
+                            <i class="bi bi-star-fill me-1"></i> Thành viên hệ thống
+                        </span>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-4">
-
-        <!-- ══ CỘT TRÁI: AVATAR + THỐNG KÊ ══ -->
-        <div class="col-lg-3">
-
-            <!-- Card Avatar -->
-            <div class="card border-0 shadow-sm text-center mb-3">
+        
+        <div class="col-lg-4">
+            
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
-
-                    <!-- Avatar chữ cái -->
-                    <div class="profile-avatar mx-auto mb-3">
-                        <?= mb_strtoupper(mb_substr($user['fullname'] ?: $user['username'], 0, 1)) ?>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm border border-light" style="width: 48px; height: 48px; background-color: #e0f7fa;">
+                            <img src="https://img.icons8.com/3d-fluency/94/shopping-cart.png" width="28" alt="Cart">
+                        </div>
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.75rem;">Đơn hàng đã đặt</div>
+                            <div class="fw-bolder fs-5" style="color: #0f3460 !important;"><?= $totalOrders ?> đơn</div>
+                        </div>
+                    </div>
+                    
+                    <hr class="text-muted opacity-15 my-3">
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm border border-light" style="width: 48px; height: 48px; background-color: #fff3e0;">
+                            <img src="https://img.icons8.com/3d-fluency/94/money-bag.png" width="28" alt="Money">
+                        </div>
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.75rem;">Tổng chi tiêu</div>
+                            <div class="fw-bolder fs-5 text-danger"><?= number_format($stats['total_spent'], 0, ',', '.') ?>₫</div>
+                        </div>
                     </div>
 
-                    <h5 class="fw-bold mb-1">
-                        <?= htmlspecialchars($user['fullname'] ?: $user['username']) ?>
-                    </h5>
-                    <p class="text-muted small mb-2">
-                        @<?= htmlspecialchars($user['username']) ?>
-                    </p>
+                    <hr class="text-muted opacity-15 my-3">
 
-                    <!-- Badge vai trò -->
-                    <?php if ($user['role'] == 1): ?>
-                        <span class="badge bg-danger px-3 py-2 rounded-pill">
-                            <i class="bi bi-shield-fill-check me-1"></i>Quản trị viên
-                        </span>
-                    <?php else: ?>
-                        <span class="badge bg-primary px-3 py-2 rounded-pill">
-                            <i class="bi bi-person-fill me-1"></i>Thành viên
-                        </span>
-                    <?php endif; ?>
-
-                    <!-- Ngày tham gia -->
-                    <?php if (!empty($user['created_at'])): ?>
-                    <p class="text-muted small mt-3 mb-0">
-                        <i class="bi bi-calendar3 me-1"></i>
-                        Tham gia: <?= date('d/m/Y', strtotime($user['created_at'])) ?>
-                    </p>
-                    <?php endif; ?>
-
-                </div>
-            </div>
-
-            <!-- Card thống kê đơn hàng -->
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-dark text-white fw-bold py-2 px-3 small">
-                    <i class="bi bi-bar-chart me-1 text-warning"></i>Thống kê mua hàng
-                </div>
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small">Tổng đơn hàng</span>
-                        <span class="fw-bold"><?= $stats['total_orders'] ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small">Đã giao thành công</span>
-                        <span class="fw-bold text-success"><?= $stats['delivered'] ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small">Đang chờ xử lý</span>
-                        <span class="fw-bold text-warning"><?= $stats['pending'] ?></span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted small">Đã hủy</span>
-                        <span class="fw-bold text-danger"><?= $stats['cancelled'] ?></span>
-                    </div>
-                    <hr class="my-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Tổng chi tiêu</span>
-                        <span class="fw-bold text-danger small">
-                            <?= number_format($stats['total_spent'], 0, ',', '.') ?>₫
-                        </span>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm border border-light" style="width: 48px; height: 48px; background-color: #fce4ec;">
+                            <img src="https://img.icons8.com/3d-fluency/94/calendar.png" width="28" alt="Date">
+                        </div>
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.75rem;">Ngày tham gia</div>
+                            <div class="fw-bold text-dark"><?= date('d/m/Y', strtotime($user['created_at'])) ?></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Liên kết nhanh -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3 d-grid gap-2">
-                    <a href="/bookstore/my_orders.php"
-                       class="btn btn-outline-warning btn-sm fw-semibold">
-                        <i class="bi bi-bag-check me-2"></i>Đơn hàng của tôi
-                    </a>
-                    <a href="/bookstore/cart.php"
-                       class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-cart3 me-2"></i>Giỏ hàng
-                    </a>
-                    <a href="/bookstore/logout.php"
-                       class="btn btn-outline-danger btn-sm btn-logout"
-                       data-confirm="Bạn có chắc muốn đăng xuất?">
-                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                    </a>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-2">
+                    <div class="nav flex-column nav-pills profile-nav" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                        <button class="nav-link <?= $activeTab === 'info' ? 'active' : '' ?> text-start fw-semibold py-3 px-4 mb-1 rounded-3" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab">
+                            <i class="bi bi-person-lines-fill me-2 fs-5"></i> Thông tin cá nhân
+                        </button>
+                        <button class="nav-link <?= $activeTab === 'password' ? 'active' : '' ?> text-start fw-semibold py-3 px-4 mb-1 rounded-3" id="v-pills-password-tab" data-bs-toggle="pill" data-bs-target="#v-pills-password" type="button" role="tab">
+                            <i class="bi bi-shield-lock-fill me-2 fs-5"></i> Đổi mật khẩu
+                        </button>
+                        <a href="/bookstore/my_orders.php" class="nav-link text-start fw-semibold py-3 px-4 mb-1 rounded-3 text-dark">
+                            <i class="bi bi-bag-check-fill me-2 fs-5 text-success"></i> Quản lý đơn hàng
+                        </a>
+                        <hr class="opacity-15 my-2">
+                        <a href="/bookstore/logout.php" class="nav-link text-start fw-semibold py-3 px-4 rounded-3 text-danger btn-logout" data-confirm="Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?">
+                            <i class="bi bi-box-arrow-right me-2 fs-5"></i> Đăng xuất
+                        </a>
+                    </div>
                 </div>
             </div>
+        </div>
 
-        </div><!-- /.col-lg-3 -->
-
-        <!-- ══ CỘT PHẢI: TABS NỘI DUNG ══ -->
-        <div class="col-lg-9">
-
-            <!-- Tab Navigation -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom px-4 pt-3 pb-0">
-                    <ul class="nav nav-tabs card-header-tabs" id="profileTabs">
-                        <li class="nav-item">
-                            <a class="nav-link <?= $activeTab === 'info' ? 'active fw-semibold' : '' ?>"
-                               href="#tab-info" data-bs-toggle="tab">
-                                <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?= $activeTab === 'password' ? 'active fw-semibold' : '' ?>"
-                               href="#tab-password" data-bs-toggle="tab">
-                                <i class="bi bi-lock me-2"></i>Đổi mật khẩu
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#tab-orders" data-bs-toggle="tab">
-                                <i class="bi bi-clock-history me-2"></i>Đơn hàng gần đây
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="card-body p-4">
-                    <div class="tab-content">
-
-                        <!-- ── TAB 1: THÔNG TIN CÁ NHÂN ── -->
-                        <div class="tab-pane fade <?= $activeTab === 'info' ? 'show active' : '' ?>"
-                             id="tab-info">
-
-                            <!-- Thông báo thành công -->
-                            <?php if ($success === 'info'): ?>
-                                <div class="alert alert-success d-flex align-items-center gap-2">
-                                    <i class="bi bi-check-circle-fill flex-shrink-0"></i>
-                                    <span>Cập nhật thông tin cá nhân thành công!</span>
-                                </div>
-                            <?php endif; ?>
-
-                            <form method="POST" action="" novalidate>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100" style="border-top: 5px solid #ffc107 !important;">
+                <div class="card-body p-4 p-md-5">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        
+                        <div class="tab-pane fade <?= $activeTab === 'info' ? 'show active' : '' ?>" id="v-pills-profile" role="tabpanel" tabindex="0">
+                            <h5 class="fw-bolder mb-4" style="color: #0f3460;">
+                                <img src="https://img.icons8.com/3d-fluency/94/resume.png" width="30" class="me-2 mb-1" alt="Profile">
+                                Cập nhật Hồ sơ
+                            </h5>
+                            
+                            <form action="" method="POST">
                                 <input type="hidden" name="tab" value="info">
-
-                                <div class="row g-3">
-
-                                    <!-- Username (chỉ đọc) -->
+                                
+                                <div class="row g-3 mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold small">
-                                            Tên đăng nhập
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="bi bi-at text-muted"></i>
-                                            </span>
-                                            <input type="text"
-                                                   class="form-control bg-light"
-                                                   value="<?= htmlspecialchars($user['username']) ?>"
-                                                   readonly>
+                                        <label class="form-label text-muted small fw-semibold text-uppercase">Tên đăng nhập</label>
+                                        <div class="input-group bg-light rounded-3 px-3 py-2 border border-secondary-subtle shadow-sm">
+                                            <i class="bi bi-person-badge text-secondary me-2 mt-1"></i>
+                                            <span class="text-secondary fw-bold"><?= htmlspecialchars($user['username']) ?></span>
                                         </div>
-                                        <div class="text-muted small mt-1">
-                                            Tên đăng nhập không thể thay đổi.
-                                        </div>
+                                        <div class="form-text" style="font-size: 0.75rem;">* Tên đăng nhập cố định, không thể thay đổi.</div>
                                     </div>
-
-                                    <!-- Họ và tên -->
                                     <div class="col-md-6">
-                                        <label for="fullname" class="form-label fw-semibold small">
-                                            Họ và tên <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="bi bi-person text-muted"></i>
-                                            </span>
-                                            <input type="text"
-                                                   id="fullname" name="fullname"
-                                                   class="form-control <?= isset($errors['fullname']) ? 'is-invalid' : '' ?>"
-                                                   value="<?= htmlspecialchars($_POST['fullname'] ?? $user['fullname'] ?? '') ?>"
-                                                   placeholder="Nguyễn Văn A">
-                                            <?php if (isset($errors['fullname'])): ?>
-                                                <div class="invalid-feedback">
-                                                    <?= htmlspecialchars($errors['fullname']) ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
+                                        <label for="fullname" class="form-label text-muted small fw-semibold text-uppercase">Họ và tên <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-lg bg-light shadow-none border-secondary-subtle fs-6 shadow-sm <?= isset($errors['fullname']) ? 'is-invalid' : '' ?>" id="fullname" name="fullname" value="<?= htmlspecialchars($_POST['fullname'] ?? $user['fullname'] ?? '') ?>" required>
                                     </div>
-
-                                    <!-- Email -->
-                                    <div class="col-md-6">
-                                        <label for="email" class="form-label fw-semibold small">
-                                            Email <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="bi bi-envelope text-muted"></i>
-                                            </span>
-                                            <input type="email"
-                                                   id="email" name="email"
-                                                   class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"
-                                                   value="<?= htmlspecialchars($_POST['email'] ?? $user['email'] ?? '') ?>"
-                                                   placeholder="example@email.com">
-                                            <?php if (isset($errors['email'])): ?>
-                                                <div class="invalid-feedback">
-                                                    <?= htmlspecialchars($errors['email']) ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <!-- Số điện thoại -->
-                                    <div class="col-md-6">
-                                        <label for="phone" class="form-label fw-semibold small">
-                                            Số điện thoại
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="bi bi-telephone text-muted"></i>
-                                            </span>
-                                            <input type="tel"
-                                                   id="phone" name="phone"
-                                                   class="form-control <?= isset($errors['phone']) ? 'is-invalid' : '' ?>"
-                                                   value="<?= htmlspecialchars($_POST['phone'] ?? $user['phone'] ?? '') ?>"
-                                                   placeholder="0901 234 567">
-                                            <?php if (isset($errors['phone'])): ?>
-                                                <div class="invalid-feedback">
-                                                    <?= htmlspecialchars($errors['phone']) ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <!-- Địa chỉ -->
-                                    <div class="col-12">
-                                        <label for="address" class="form-label fw-semibold small">
-                                            Địa chỉ giao hàng mặc định
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light align-items-start pt-2">
-                                                <i class="bi bi-geo-alt text-muted"></i>
-                                            </span>
-                                            <textarea id="address" name="address"
-                                                      rows="3"
-                                                      class="form-control"
-                                                      placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"
-                                            ><?= htmlspecialchars($_POST['address'] ?? $user['address'] ?? '') ?></textarea>
-                                        </div>
-                                        <div class="text-muted small mt-1">
-                                            <i class="bi bi-info-circle me-1"></i>
-                                            Địa chỉ này sẽ được tự động điền khi thanh toán.
-                                        </div>
-                                    </div>
-
-                                </div><!-- /.row -->
-
-                                <hr class="my-4">
-
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button type="reset" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
-                                    </button>
-                                    <button type="submit" class="btn btn-warning fw-bold px-4">
-                                        <i class="bi bi-check-circle me-2"></i>Lưu thay đổi
-                                    </button>
                                 </div>
 
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label text-muted small fw-semibold text-uppercase">Email <span class="text-danger">*</span></label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-light border-secondary-subtle text-muted"><i class="bi bi-envelope"></i></span>
+                                            <input type="email" class="form-control bg-light shadow-none border-secondary-subtle <?= isset($errors['email']) ? 'is-invalid' : '' ?>" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? $user['email'] ?? '') ?>" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="phone" class="form-label text-muted small fw-semibold text-uppercase">Số điện thoại</label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-light border-secondary-subtle text-muted"><i class="bi bi-telephone"></i></span>
+                                            <input type="tel" class="form-control bg-light shadow-none border-secondary-subtle <?= isset($errors['phone']) ? 'is-invalid' : '' ?>" id="phone" name="phone" value="<?= htmlspecialchars($_POST['phone'] ?? $user['phone'] ?? '') ?>">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="address" class="form-label text-muted small fw-semibold text-uppercase">Địa chỉ giao hàng mặc định</label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-light border-secondary-subtle text-muted align-items-start pt-3"><i class="bi bi-geo-alt"></i></span>
+                                        <textarea class="form-control bg-light shadow-none border-secondary-subtle" id="address" name="address" rows="3"><?= htmlspecialchars($_POST['address'] ?? $user['address'] ?? '') ?></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-warning btn-lg fw-bold rounded-pill px-5 shadow-sm btn-hover-effect text-dark">
+                                        <i class="bi bi-floppy-fill me-2"></i> Lưu thay đổi
+                                    </button>
+                                </div>
                             </form>
-                        </div>
 
-                        <!-- ── TAB 2: ĐỔI MẬT KHẨU ── -->
-                        <div class="tab-pane fade <?= $activeTab === 'password' ? 'show active' : '' ?>"
-                             id="tab-password">
+                            <hr class="my-5 opacity-15">
 
-                            <?php if ($success === 'password'): ?>
-                                <div class="alert alert-success d-flex align-items-center gap-2">
-                                    <i class="bi bi-check-circle-fill flex-shrink-0"></i>
-                                    <span>Đổi mật khẩu thành công! Vui lòng dùng mật khẩu mới cho lần đăng nhập tiếp theo.</span>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="row justify-content-center">
-                                <div class="col-md-8">
-
-                                    <div class="alert alert-info d-flex gap-2 mb-4">
-                                        <i class="bi bi-shield-lock-fill flex-shrink-0 mt-1"></i>
-                                        <div class="small">
-                                            Mật khẩu mạnh nên có ít nhất <strong>6 ký tự</strong>,
-                                            kết hợp chữ hoa, chữ thường và số.
-                                        </div>
-                                    </div>
-
-                                    <form method="POST" action="" novalidate>
-                                        <input type="hidden" name="tab" value="password">
-
-                                        <!-- Mật khẩu hiện tại -->
-                                        <div class="mb-3">
-                                            <label for="current_password"
-                                                   class="form-label fw-semibold small">
-                                                Mật khẩu hiện tại <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-light">
-                                                    <i class="bi bi-lock text-muted"></i>
-                                                </span>
-                                                <input type="password"
-                                                       id="current_password"
-                                                       name="current_password"
-                                                       class="form-control <?= isset($errors['current_password']) ? 'is-invalid' : '' ?>"
-                                                       placeholder="Nhập mật khẩu hiện tại"
-                                                       autocomplete="current-password">
-                                                <button type="button"
-                                                        class="btn btn-outline-secondary toggle-password"
-                                                        data-target="current_password">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <?php if (isset($errors['current_password'])): ?>
-                                                    <div class="invalid-feedback">
-                                                        <i class="bi bi-exclamation-circle me-1"></i>
-                                                        <?= htmlspecialchars($errors['current_password']) ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-
-                                        <!-- Mật khẩu mới -->
-                                        <div class="mb-3">
-                                            <label for="new_password"
-                                                   class="form-label fw-semibold small">
-                                                Mật khẩu mới <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-light">
-                                                    <i class="bi bi-key text-muted"></i>
-                                                </span>
-                                                <input type="password"
-                                                       id="new_password"
-                                                       name="new_password"
-                                                       class="form-control <?= isset($errors['new_password']) ? 'is-invalid' : '' ?>"
-                                                       placeholder="Tối thiểu 6 ký tự"
-                                                       autocomplete="new-password">
-                                                <button type="button"
-                                                        class="btn btn-outline-secondary toggle-password"
-                                                        data-target="new_password">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <?php if (isset($errors['new_password'])): ?>
-                                                    <div class="invalid-feedback">
-                                                        <i class="bi bi-exclamation-circle me-1"></i>
-                                                        <?= htmlspecialchars($errors['new_password']) ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                            <!-- Thanh độ mạnh mật khẩu -->
-                                            <div class="mt-2">
-                                                <div class="progress" style="height:4px;">
-                                                    <div id="pwStrengthBar"
-                                                         class="progress-bar"
-                                                         style="width:0%;transition:width .3s,background .3s;">
-                                                    </div>
-                                                </div>
-                                                <p id="pwStrengthText"
-                                                   class="text-muted small mt-1 mb-0"></p>
-                                            </div>
-                                        </div>
-
-                                        <!-- Xác nhận mật khẩu mới -->
-                                        <div class="mb-4">
-                                            <label for="confirm_password"
-                                                   class="form-label fw-semibold small">
-                                                Xác nhận mật khẩu mới <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-light">
-                                                    <i class="bi bi-key-fill text-muted"></i>
-                                                </span>
-                                                <input type="password"
-                                                       id="confirm_password"
-                                                       name="confirm_password"
-                                                       class="form-control <?= isset($errors['confirm_password']) ? 'is-invalid' : '' ?>"
-                                                       placeholder="Nhập lại mật khẩu mới"
-                                                       autocomplete="new-password">
-                                                <button type="button"
-                                                        class="btn btn-outline-secondary toggle-password"
-                                                        data-target="confirm_password">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <?php if (isset($errors['confirm_password'])): ?>
-                                                    <div class="invalid-feedback">
-                                                        <i class="bi bi-exclamation-circle me-1"></i>
-                                                        <?= htmlspecialchars($errors['confirm_password']) ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-
-                                        <div class="d-grid">
-                                            <button type="submit"
-                                                    class="btn btn-warning fw-bold py-2">
-                                                <i class="bi bi-shield-lock me-2"></i>Đổi mật khẩu
-                                            </button>
-                                        </div>
-
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- ── TAB 3: ĐƠN HÀNG GẦN ĐÂY ── -->
-                        <div class="tab-pane fade" id="tab-orders">
-
+                            <h6 class="fw-bold text-muted text-uppercase mb-3"><i class="bi bi-clock-history me-2"></i>Đơn hàng gần đây</h6>
                             <?php if (empty($recentOrders)): ?>
-                                <div class="text-center py-5">
-                                    <i class="bi bi-bag-x text-muted" style="font-size:3.5rem;"></i>
-                                    <p class="text-muted mt-3">Bạn chưa có đơn hàng nào.</p>
-                                    <a href="/bookstore/index.php"
-                                       class="btn btn-warning fw-bold px-4">
-                                        <i class="bi bi-book me-2"></i>Mua sách ngay
-                                    </a>
+                                <div class="text-center py-4 bg-light rounded-4 border">
+                                    <p class="text-muted mb-0">Bạn chưa có đơn hàng nào.</p>
                                 </div>
                             <?php else: ?>
                                 <div class="d-flex flex-column gap-3">
                                     <?php foreach ($recentOrders as $order):
                                         $badge = getStatusBadge($order['status']);
                                     ?>
-                                    <div class="d-flex align-items-center justify-content-between
-                                                p-3 rounded-3 border bg-light">
+                                    <div class="d-flex align-items-center justify-content-between p-3 rounded-4 border bg-light shadow-sm">
                                         <div>
-                                            <p class="fw-bold mb-1">
-                                                Đơn hàng
-                                                #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
+                                            <p class="fw-bold mb-1 text-dark">
+                                                Đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
                                             </p>
                                             <p class="text-muted small mb-0">
                                                 <i class="bi bi-calendar3 me-1"></i>
-                                                <?= !empty($order['created_at'])
-                                                    ? date('d/m/Y H:i', strtotime($order['created_at']))
-                                                    : '—' ?>
+                                                <?= !empty($order['created_at']) ? date('d/m/Y H:i', strtotime($order['created_at'])) : '—' ?>
                                             </p>
                                         </div>
                                         <div class="text-end">
-                                            <p class="fw-bold text-danger mb-1">
+                                            <p class="fw-bold text-danger mb-1 fs-6">
                                                 <?= number_format($order['total_price'], 0, ',', '.') ?>₫
                                             </p>
-                                            <span class="badge <?= $badge['class'] ?> rounded-pill">
-                                                <i class="bi <?= $badge['icon'] ?> me-1"></i>
-                                                <?= $badge['label'] ?>
+                                            <span class="badge <?= $badge['class'] ?> rounded-pill fw-medium">
+                                                <i class="bi <?= $badge['icon'] ?> me-1"></i> <?= $badge['label'] ?>
                                             </span>
                                         </div>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
-
-                                <div class="text-center mt-4">
-                                    <a href="/bookstore/my_orders.php"
-                                       class="btn btn-outline-warning fw-semibold">
-                                        <i class="bi bi-bag-check me-2"></i>
-                                        Xem tất cả đơn hàng
-                                    </a>
-                                </div>
                             <?php endif; ?>
-
                         </div>
 
-                    </div><!-- /.tab-content -->
-                </div><!-- /.card-body -->
-            </div><!-- /.card tabs -->
+                        <div class="tab-pane fade <?= $activeTab === 'password' ? 'show active' : '' ?>" id="v-pills-password" role="tabpanel" tabindex="0">
+                            <h5 class="fw-bolder mb-4" style="color: #0f3460;">
+                                <img src="https://img.icons8.com/3d-fluency/94/key.png" width="30" class="me-2 mb-1" alt="Key">
+                                Đổi Mật khẩu
+                            </h5>
 
-        </div><!-- /.col-lg-9 -->
-    </div><!-- /.row -->
+                            <form action="" method="POST">
+                                <input type="hidden" name="tab" value="password">
+                                
+                                <div class="mb-4">
+                                    <label for="current_password" class="form-label text-muted small fw-semibold text-uppercase">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-light border-secondary-subtle"><i class="bi bi-unlock text-muted"></i></span>
+                                        <input type="password" class="form-control bg-light shadow-none border-secondary-subtle <?= isset($errors['current_password']) ? 'is-invalid' : '' ?>" id="current_password" name="current_password" required placeholder="Nhập mật khẩu cũ">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label for="new_password" class="form-label text-muted small fw-semibold text-uppercase">Mật khẩu mới <span class="text-danger">*</span></label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-light border-secondary-subtle"><i class="bi bi-key text-info"></i></span>
+                                            <input type="password" class="form-control bg-light shadow-none border-secondary-subtle <?= isset($errors['new_password']) ? 'is-invalid' : '' ?>" id="new_password" name="new_password" required placeholder="Mật khẩu mới">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="confirm_password" class="form-label text-muted small fw-semibold text-uppercase">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-light border-secondary-subtle"><i class="bi bi-check-circle text-success"></i></span>
+                                            <input type="password" class="form-control bg-light shadow-none border-secondary-subtle <?= isset($errors['confirm_password']) ? 'is-invalid' : '' ?>" id="confirm_password" name="confirm_password" required placeholder="Nhập lại mật khẩu mới">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-dark btn-lg fw-bold rounded-pill px-5 shadow-sm btn-hover-effect">
+                                        <i class="bi bi-shield-lock me-2"></i> Cập nhật Mật khẩu
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
 </main>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Script thông báo xác nhận Đăng xuất
     document.querySelectorAll('.btn-logout').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            var msg = btn.getAttribute('data-confirm') || 'Bạn có chắc muốn tiếp tục?';
+            var msg = btn.getAttribute('data-confirm') || 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?';
             var href = btn.href;
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
@@ -678,8 +470,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     text: msg,
                     icon: 'question',
                     showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
                     confirmButtonText: 'Đăng xuất',
-                    cancelButtonText: 'Hủy'
+                    cancelButtonText: 'Hủy',
+                    border_radius: '15px'
                 }).then(function(result) {
                     if (result.isConfirmed) {
                         window.location.href = href;

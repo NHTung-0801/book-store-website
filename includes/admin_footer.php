@@ -2,7 +2,8 @@
 // includes/admin_footer.php
 $currentYear = date('Y');
 ?>
-    </div> <footer class="py-3 bg-white border-top mt-auto">
+    </div> 
+    <footer class="py-3 bg-white border-top mt-auto">
         <div class="container-fluid px-4">
             <div class="d-flex align-items-center justify-content-between small">
                 <div class="text-muted">
@@ -15,7 +16,8 @@ $currentYear = date('Y');
         </div>
     </footer>
 
-</div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</div> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // 1. Toggle sidebar trên mobile
@@ -88,6 +90,35 @@ $currentYear = date('Y');
                 });
             }, 3500);
         }
+
+        // 4. Xác nhận đăng xuất
+        document.querySelectorAll('.logout-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault(); 
+                const logoutUrl = this.getAttribute('href'); 
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Xác nhận đăng xuất',
+                        text: "Bạn có chắc chắn muốn đăng xuất khỏi trang Quản trị không?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="bi bi-box-arrow-right me-1"></i> Có, Đăng xuất',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = logoutUrl;
+                        }
+                    });
+                } else {
+                    if (confirm("Bạn có chắc chắn muốn đăng xuất khỏi trang Quản trị không?")) {
+                        window.location.href = logoutUrl;
+                    }
+                }
+            });
+        });
     });
 </script>
 </body>

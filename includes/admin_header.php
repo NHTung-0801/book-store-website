@@ -32,6 +32,8 @@ $pendingOrdersCount = (int) $stmtPending->fetchColumn();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?= $baseUrl ?>/assets/css/style.css" rel="stylesheet">
     <link href="<?= $baseUrl ?>/assets/css/admin_style.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -75,7 +77,8 @@ $pendingOrdersCount = (int) $stmtPending->fetchColumn();
         <a href="<?= $baseUrl ?>/index.php" class="nav-link" target="_blank">
             <i class="bi bi-box-arrow-up-right"></i>Xem website
         </a>
-        <a href="<?= $baseUrl ?>/pages/auth/logout.php" class="nav-link text-danger-emphasis">
+        
+        <a href="<?= $baseUrl ?>/pages/auth/logout.php" class="nav-link text-danger-emphasis logout-link">
             <i class="bi bi-box-arrow-right"></i>Đăng xuất
         </a>
     </nav>

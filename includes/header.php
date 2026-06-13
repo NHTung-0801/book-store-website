@@ -69,14 +69,14 @@ $baseUrl = '/bookstore';
                 <?php if ($isLoggedIn): ?>
                     <!-- Giỏ hàng — chỉ hiện khi đã đăng nhập -->
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $baseUrl ?>/cart.php">
+                        <a class="nav-link" href="<?= $baseUrl ?>/pages/shop/cart.php">
                             <i class="bi bi-cart3 me-1"></i>Giỏ hàng
                         </a>
                     </li>
 
                     <!-- Đơn hàng của tôi -->
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $baseUrl ?>/my_orders.php">
+                        <a class="nav-link" href="<?= $baseUrl ?>/pages/user/my_orders.php">
                             <i class="bi bi-bag-check me-1"></i>Đơn hàng của tôi
                         </a>
                     </li>
@@ -99,13 +99,13 @@ $baseUrl = '/bookstore';
                 <?php if (!$isLoggedIn): ?>
                     <!-- Chưa đăng nhập: hiện Đăng nhập + Đăng ký -->
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $baseUrl ?>/login.php">
+                        <a class="nav-link" href="<?= $baseUrl ?>/pages/auth/login.php">
                             <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-warning btn-sm ms-2 px-3"
-                           href="<?= $baseUrl ?>/register.php">
+                           href="<?= $baseUrl ?>/pages/auth/register.php">
                             <i class="bi bi-person-plus me-1"></i>Đăng ký
                         </a>
                     </li>
@@ -121,15 +121,14 @@ $baseUrl = '/bookstore';
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow">
                             <li>
-                                <a class="dropdown-item" href="<?= $baseUrl ?>/profile.php">
+                                <a class="dropdown-item" href="<?= $baseUrl ?>/pages/user/profile.php">
                                     <i class="bi bi-pencil-square me-2"></i>Hồ sơ cá nhân
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <!-- Đăng xuất — dùng thẻ a trỏ tới logout.php để xóa session -->
-                                <a class="dropdown-item text-danger"
-                                   href="<?= $baseUrl ?>/logout.php">
+                                <a class="dropdown-item text-danger logout-link"
+                                href="<?= $baseUrl ?>/pages/auth/logout.php">
                                     <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
                                 </a>
                             </li>

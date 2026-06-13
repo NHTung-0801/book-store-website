@@ -1,8 +1,8 @@
 <?php
 // product.php
 
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../config/db.php';
 
 // ── 1. LẤY VÀ VALIDATE THAM SỐ ID TỪ URL ────────────────────────────────────
 $bookId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -77,7 +77,7 @@ $cartStatus = $_GET['status'] ?? '';
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-cart-check-fill me-2"></i>
             Đã thêm sách vào giỏ hàng thành công!
-            <a href="/bookstore/cart.php" class="alert-link ms-2">Xem giỏ hàng →</a>
+            <a href="/bookstore/pages/shop/cart.php" class="alert-link ms-2">Xem giỏ hàng →</a>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php elseif ($cartStatus === 'error'): ?>
@@ -89,7 +89,7 @@ $cartStatus = $_GET['status'] ?? '';
     <?php elseif ($cartStatus === 'login'): ?>
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <i class="bi bi-person-lock me-2"></i>
-            Bạn cần <a href="/bookstore/login.php" class="alert-link">đăng nhập</a>
+            Bạn cần <a href="/bookstore/pages/auth/login.php" class="alert-link">đăng nhập</a>
             để thêm sách vào giỏ hàng.
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -278,7 +278,7 @@ $cartStatus = $_GET['status'] ?? '';
 
                     <!-- Ảnh bìa -->
                     <div class="book-card__img-wrap">
-                        <a href="/bookstore/product.php?id=<?= $rel['id'] ?>">
+                        <a href="/bookstore/pages/shop/product.php?id=<?= $rel['id'] ?>">
                             <img src="<?= htmlspecialchars($relSrc) ?>"
                                  alt="<?= htmlspecialchars($rel['title']) ?>"
                                  class="card-img-top book-card__img"
@@ -297,7 +297,7 @@ $cartStatus = $_GET['status'] ?? '';
 
                         <!-- Tên sách -->
                         <h6 class="fw-bold small mb-1 book-card__title">
-                            <a href="/bookstore/product.php?id=<?= $rel['id'] ?>"
+                            <a href="/bookstore/pages/shop/product.php?id=<?= $rel['id'] ?>"
                                class="text-dark text-decoration-none">
                                 <?= htmlspecialchars($rel['title']) ?>
                             </a>
@@ -335,7 +335,7 @@ $cartStatus = $_GET['status'] ?? '';
                             <p class="fw-bold text-danger fs-6 mb-2">
                                 <?= number_format($rel['price'], 0, ',', '.') ?>₫
                             </p>
-                            <a href="/bookstore/product.php?id=<?= $rel['id'] ?>"
+                            <a href="/bookstore/pages/shop/product.php?id=<?= $rel['id'] ?>"
                                class="btn btn-warning btn-sm w-100 fw-semibold
                                       <?= $rel['stock_quantity'] <= 0 ? 'disabled' : '' ?>">
                                 <i class="bi bi-eye me-1"></i>Xem chi tiết
@@ -386,4 +386,4 @@ $cartStatus = $_GET['status'] ?? '';
 
 </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

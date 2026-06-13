@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id'])) {
         'title' => 'Chưa đăng nhập',
         'text'  => 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.'
     ];
-    header('Location: ../login.php');
+    header('Location: ../pages/auth/login.php');
     exit;
 }
 
@@ -72,7 +72,7 @@ if ($book['stock_quantity'] <= 0) {
         'title' => 'Hết hàng',
         'text'  => 'Rất tiếc, sản phẩm này hiện đã hết hàng.'
     ];
-    header("Location: ../product.php?id={$bookId}");
+    header("Location: ../pages/shop/product.php?id={$bookId}");
     exit;
 }
 
@@ -121,5 +121,5 @@ $_SESSION['sweet_alert'] = [
     'position' => 'top-end'       // Hiển thị ở góc trên bên phải
 ];
 
-header('Location: ../cart.php');
+header('Location: ../pages/shop/cart.php');
 exit;

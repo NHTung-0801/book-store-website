@@ -1,12 +1,12 @@
 <?php
 // profile.php
 
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../config/db.php';
 
 // ── KIỂM TRA ĐĂNG NHẬP ───────────────────────────────────────────────────────
 if (!$isLoggedIn) {
-    header('Location: /bookstore/login.php');
+    header('Location: /bookstore/pages/auth/login.php');
     exit;
 }
 
@@ -26,7 +26,7 @@ $user = $stmtUser->fetch();
 
 if (!$user) {
     // Tài khoản không tồn tại → đăng xuất
-    header('Location: /bookstore/logout.php');
+    header('Location: /bookstore/pages/auth/logout.php');
     exit;
 }
 
@@ -295,11 +295,11 @@ $activeTab = ($_POST['tab'] ?? '') === 'password' ? 'password' : 'info';
                         <button class="nav-link <?= $activeTab === 'password' ? 'active' : '' ?> text-start fw-semibold py-3 px-4 mb-1 rounded-3" id="v-pills-password-tab" data-bs-toggle="pill" data-bs-target="#v-pills-password" type="button" role="tab">
                             <i class="bi bi-shield-lock-fill me-2 fs-5"></i> Đổi mật khẩu
                         </button>
-                        <a href="/bookstore/my_orders.php" class="nav-link text-start fw-semibold py-3 px-4 mb-1 rounded-3 text-dark">
+                        <a href="/bookstore/pages/user/my_orders.php" class="nav-link text-start fw-semibold py-3 px-4 mb-1 rounded-3 text-dark">
                             <i class="bi bi-bag-check-fill me-2 fs-5 text-success"></i> Quản lý đơn hàng
                         </a>
                         <hr class="opacity-15 my-2">
-                        <a href="/bookstore/logout.php" class="nav-link text-start fw-semibold py-3 px-4 rounded-3 text-danger btn-logout" data-confirm="Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?">
+                        <a href="/bookstore/pages/auth/logout.php" class="nav-link text-start fw-semibold py-3 px-4 rounded-3 text-danger btn-logout" data-confirm="Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?">
                             <i class="bi bi-box-arrow-right me-2 fs-5"></i> Đăng xuất
                         </a>
                     </div>
@@ -454,7 +454,7 @@ $activeTab = ($_POST['tab'] ?? '') === 'password' ? 'password' : 'info';
     </div>
 </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

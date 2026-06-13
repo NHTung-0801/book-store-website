@@ -1,22 +1,25 @@
 // main.js — Toggle hiện/ẩn mật khẩu
-document.querySelectorAll('.toggle-password').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target');
-        const input    = document.getElementById(targetId);
-        const icon     = this.querySelector('i');
-
-        if (input.type === 'password') {
-            input.type  = 'text';
-            icon.classList.replace('bi-eye', 'bi-eye-slash');
-        } else {
-            input.type  = 'password';
-            icon.classList.replace('bi-eye-slash', 'bi-eye');
-        }
-    });
-});
-
 // ── QUANTITY CONTROL (trang product.php) ─────────────────
 document.addEventListener('DOMContentLoaded', function () {
+
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const targetId = this.getAttribute('data-target');
+            const input    = document.getElementById(targetId);
+            const icon     = this.querySelector('i');
+
+            if (input) {
+                if (input.type === 'password') {
+                    input.type  = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type  = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            }
+        });
+    });
+
     document.querySelectorAll('.qty-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             const input  = this.closest('.quantity-control').querySelector('.qty-input');
@@ -55,6 +58,30 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// ── XÁC NHẬN ĐĂNG XUẤT ───────────────────────────────────
+    document.querySelectorAll('.logout-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault(); // Ngăn chặn chuyển trang ngay lập tức
+            const logoutUrl = this.getAttribute('href'); // Lấy đường dẫn logout.php
+
+            Swal.fire({
+                title: 'Xác nhận đăng xuất',
+                text: "Bạn có chắc chắn muốn đăng xuất không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545', // Màu đỏ cảnh báo
+                cancelButtonColor: '#6c757d',  // Màu xám cho nút hủy
+                confirmButtonText: '<i class="bi bi-box-arrow-right me-1"></i> Có, Đăng xuất',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Nếu người dùng nhấn "Có, Đăng xuất", thực hiện chuyển hướng
+                    window.location.href = logoutUrl;
+                }
+            });
+        });
+    });
+
 // ── PASSWORD STRENGTH METER ───────────────────────────────
 const newPwInput = document.getElementById('new_password');
 if (newPwInput) {
@@ -83,4 +110,5 @@ if (newPwInput) {
         bar.style.background = lv.bg;
         txt.textContent      = lv.text;
     });
+
 }

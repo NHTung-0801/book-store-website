@@ -113,12 +113,12 @@ Website bán sách xây dựng bằng PHP thuần + MySQL + Bootstrap 5.
 ### Các bước chạy dự án
 
 1. Tải mã nguồn dự án
-Clone repository này về máy tính của bạn và di chuyển thư mục dự án vào phân vùng chạy web của XAMPP (htdocs):
-cd C:\xampp\htdocs
-git clone [https://github.com/nhtung-0801/book-store-website.git](https://github.com/nhtung-0801/book-store-website.git) bookstore
+   - Clone repository này về máy tính của bạn và di chuyển thư mục dự án vào phân vùng chạy web của XAMPP (htdocs):
+   - cd C:\xampp\htdocs
+   - git clone [https://github.com/nhtung-0801/book-store-website.git](https://github.com/nhtung-0801/book-store-website.git) bookstore
 
 2. Cài đặt các thư viện phụ thuộc (Dependencies)
-Mở terminal/cmd tại thư mục gốc của dự án (C:/xampp/htdocs/bookstore) và chạy lệnh cài đặt Composer để tự động thiết lập thư viện gửi thư PHPMailer:
+   - Mở terminal/cmd tại thư mục gốc của dự án (C:/xampp/htdocs/bookstore) và chạy lệnh cài đặt Composer để tự động thiết lập thư viện gửi thư PHPMailer:
 composer install
 
 3. Thiết lập Cơ sở dữ liệu
@@ -131,13 +131,13 @@ composer install
    - Di chuyển vào thư mục config/ của dự án.
    - Sao chép file mẫu mail.example.php và đổi tên thành mail.php.
    - Mở file mail.php lên và tiến hành cấu hình thông tin tài khoản SMTP của bạn:
-     
-define('MAIL_USERNAME', 'email_cua_ban@gmail.com'); // Nhập Gmail dùng làm server gửi thư
-define('MAIL_PASSWORD', 'xxxx xxxx xxxx xxxx');    // Nhập Mật khẩu ứng dụng (App Password) gồm 16 ký tự của Gmail
-define('APP_URL',       'http://localhost/bookstore'); // Đường dẫn cơ sở của dự án dưới localhost
+        
+      - define('MAIL_USERNAME', 'email_cua_ban@gmail.com'); // Nhập Gmail dùng làm server gửi thư
+      - define('MAIL_PASSWORD', 'xxxx xxxx xxxx xxxx');    // Nhập Mật khẩu ứng dụng (App Password) gồm 16 ký tự của Gmail
+      - define('APP_URL',       'http://localhost/bookstore'); // Đường dẫn cơ sở của dự án dưới localhost
 
 5. Khởi chạy và kiểm tra hệ thống
-http://localhost/bookstore/index.php 
+   - http://localhost/bookstore/index.php 
 
 ## Tài khoản Admin mặc định
 - Username: `admin`

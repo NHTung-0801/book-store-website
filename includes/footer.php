@@ -31,19 +31,19 @@ $currentYear = date('Y');
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="/bookstore/cart.php"
+                        <a href="/bookstore/pages/shop/cart.php"
                            class="text-secondary text-decoration-none footer-link">
                             <i class="bi bi-chevron-right me-1"></i>Giỏ hàng
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="/bookstore/my_orders.php"
+                        <a href="/bookstore/pages/user/my_orders.php"
                            class="text-secondary text-decoration-none footer-link">
                             <i class="bi bi-chevron-right me-1"></i>Đơn hàng
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="/bookstore/profile.php"
+                        <a href="/bookstore/pages/user/profile.php"
                            class="text-secondary text-decoration-none footer-link">
                             <i class="bi bi-chevron-right me-1"></i>Tài khoản
                         </a>
@@ -134,6 +134,7 @@ $currentYear = date('Y');
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 
+<script src="/bookstore/assets/js/main.js?v=<?= time() ?>"></script>
 <?php if (isset($_SESSION['sweet_alert'])): ?>
 <script>
     document.addEventListener("DOMContentLoaded", function() {

@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // 2. BỨC TƯỜNG BẢO MẬT
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 1) {
-    header('Location: /bookstore/login.php');
+    header('Location: /bookstore/pages/auth/login.php');
     exit;
 }
 
@@ -75,7 +75,7 @@ $pendingOrdersCount = (int) $stmtPending->fetchColumn();
         <a href="<?= $baseUrl ?>/index.php" class="nav-link" target="_blank">
             <i class="bi bi-box-arrow-up-right"></i>Xem website
         </a>
-        <a href="<?= $baseUrl ?>/logout.php" class="nav-link text-danger-emphasis">
+        <a href="<?= $baseUrl ?>/pages/auth/logout.php" class="nav-link text-danger-emphasis">
             <i class="bi bi-box-arrow-right"></i>Đăng xuất
         </a>
     </nav>

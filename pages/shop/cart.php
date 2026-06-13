@@ -1,12 +1,12 @@
 <?php
 // cart.php
 
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../config/db.php';
 
 // ── KIỂM TRA ĐĂNG NHẬP ───────────────────────────────────────────────────────
 if (!$isLoggedIn) {
-    header('Location: /bookstore/login.php');
+    header('Location: /bookstore/pages/auth/login.php');
     exit;
 }
 
@@ -94,7 +94,7 @@ $totalPrice = array_sum(array_column($cartItems, 'subtotal'));
                                     </td>
 
                                     <td class="py-4">
-                                        <a href="/bookstore/product.php?id=<?= $item['book_id'] ?>">
+                                        <a href="/bookstore/pages/shop/product.php?id=<?= $item['book_id'] ?>">
                                             <img src="<?= htmlspecialchars($imgSrc) ?>"
                                                  alt="<?= htmlspecialchars($item['title']) ?>"
                                                  class="cart-book-img rounded-3 shadow-sm border border-light" style="width: 60px; height: 85px; object-fit: cover;">
@@ -102,7 +102,7 @@ $totalPrice = array_sum(array_column($cartItems, 'subtotal'));
                                     </td>
 
                                     <td class="py-4">
-                                        <a href="/bookstore/product.php?id=<?= $item['book_id'] ?>"
+                                        <a href="/bookstore/pages/shop/product.php?id=<?= $item['book_id'] ?>"
                                            class="fw-bold text-decoration-none cart-title" style="color: #2b2b2b; font-size: 1.05rem;">
                                             <?= htmlspecialchars($item['title']) ?>
                                         </a>
@@ -194,7 +194,7 @@ $totalPrice = array_sum(array_column($cartItems, 'subtotal'));
                         </div>
 
                         <div class="d-grid">
-                            <form id="checkoutForm" action="/bookstore/checkout.php" method="POST">
+                            <form id="checkoutForm" action="/bookstore/pages/shop/checkout.php" method="POST">
                                 <button type="submit" id="btn-checkout" class="btn btn-warning w-100 btn-lg fw-bold py-3 shadow-sm rounded-pill">
                                     <i class="bi bi-credit-card me-2"></i>Tiến hành thanh toán
                                 </button>
@@ -346,4 +346,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

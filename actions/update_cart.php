@@ -15,13 +15,13 @@ if (!isset($_SESSION['user_id'])) {
         'title' => 'Chưa đăng nhập',
         'text'  => 'Vui lòng đăng nhập để thao tác với giỏ hàng.'
     ];
-    header('Location: ../login.php');
+    header('Location: ../pages/auth/login.php');
     exit;
 }
 
 // ── 2. CHỈ NHẬN POST ──────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../cart.php');
+    header('Location: ../pages/shop/cart.php');
     exit;
 }
 
@@ -38,7 +38,7 @@ if (!$bookId || $bookId <= 0 || !$quantity || $quantity <= 0) {
         'toast'    => true,
         'position' => 'top-end'
     ];
-    header('Location: ../cart.php');
+    header('Location: ../pages/shop/cart.php');
     exit;
 }
 
@@ -56,7 +56,7 @@ if (!$book) {
         'toast'    => true,
         'position' => 'top-end'
     ];
-    header('Location: ../cart.php');
+    header('Location: ../pages/shop/cart.php');
     exit;
 }
 
@@ -82,5 +82,5 @@ $_SESSION['sweet_alert'] = [
     'position' => 'top-end'
 ];
 
-header('Location: ../cart.php');
+header('Location: ../pages/shop/cart.php');
 exit;

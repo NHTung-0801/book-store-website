@@ -1,12 +1,12 @@
 <?php
 // checkout.php
 
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../config/db.php';
 
 // ── 1. KIỂM TRA ĐĂNG NHẬP ───────────────────────────────────────────────────
 if (!$isLoggedIn) {
-    header('Location: /bookstore/login.php');
+    header('Location: /bookstore/pages/auth/login.php');
     exit;
 }
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Kiểm tra dữ liệu đầu vào
     if (empty($fullname) || empty($phone) || empty($address)) {
         $_SESSION['error'] = "Vui lòng nhập đầy đủ thông tin giao hàng.";
-        header('Location: /bookstore/checkout.php');
+        header('Location: /bookstore/pages/shop/checkout.php');
         exit;
     }
 
@@ -78,13 +78,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Chuyển hướng sang trang quản lý đơn hàng
         $_SESSION['success'] = "Đặt hàng thành công!";
-        header('Location: /bookstore/my_orders.php');
+        header('Location: /bookstore/pages/user/my_orders.php');
         exit;
 
     } catch (Exception $e) {
         $pdo->rollBack(); // Hoàn tác nếu có bất kỳ lỗi nào xảy ra
         $_SESSION['error'] = "Lỗi khi xử lý đơn hàng: " . $e->getMessage();
-        header('Location: /bookstore/checkout.php');
+        header('Location: /bookstore/pages/shop/checkout.php');
         exit;
     }
 }
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM cart WHERE user_id = ?");
 $stmtCount->execute([$userId]);
 if ($stmtCount->fetchColumn() == 0) {
-    header('Location: /bookstore/cart.php');
+    header('Location: /bookstore/pages/shop/cart.php');
     exit;
 }
 
@@ -254,7 +254,7 @@ $totalPrice = array_sum(array_column($cartItems, 'subtotal'));
                                 <i class="bi bi-check2-circle fs-4 me-2"></i> XÁC NHẬN ĐẶT HÀNG
                             </button>
                             
-                            <a href="/bookstore/cart.php" class="btn btn-light btn-lg border border-secondary-subtle fw-semibold py-2 shadow-sm rounded-pill d-flex align-items-center justify-content-center text-muted transition-hover">
+                            <a href="/bookstore/pages/shop/cart.php" class="btn btn-light btn-lg border border-secondary-subtle fw-semibold py-2 shadow-sm rounded-pill d-flex align-items-center justify-content-center text-muted transition-hover">
                                 <i class="bi bi-arrow-left me-2"></i>Quay lại Giỏ hàng
                             </a>
                         </div>
@@ -294,4 +294,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

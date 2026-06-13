@@ -1,12 +1,12 @@
 <?php
 // my_orders.php
 
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../config/db.php';
 
 // ── KIỂM TRA ĐĂNG NHẬP ───────────────────────────────────────────────────────
 if (!$isLoggedIn) {
-    header('Location: /bookstore/login.php');
+    header('Location: /bookstore/pages/auth/login.php');
     exit;
 }
 
@@ -322,4 +322,4 @@ $tabs = [
 
 </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

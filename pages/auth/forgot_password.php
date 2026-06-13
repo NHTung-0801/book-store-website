@@ -1,10 +1,10 @@
 <?php
 // forgot_password.php
 
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/config/db.php';
-require_once __DIR__ . '/config/mail.php';
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../config/mail.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -42,16 +42,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([$email]);
 
             // ── 4. TẠO TOKEN NGẪU NHIÊN AN TOÀN (64 hex chars = 32 bytes) ────
-            $token     = bin2hex(random_bytes(32));
-            $expiresAt = date('Y-m-d H:i:s', time() + 30 * 60); // Hết hạn sau 30 phút
+            $token = bin2hex(random_bytes(32));
 
+            // Sử dụng DATE_ADD(NOW(), ...) của MySQL để tự động cộng 30 phút theo đúng múi giờ
             $pdo->prepare("
                 INSERT INTO password_resets (email, token, expires_at)
-                VALUES (?, ?, ?)
-            ")->execute([$email, $token, $expiresAt]);
+                VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE))
+            ")->execute([$email, $token]);
 
             // ── 5. GỬI EMAIL QUA GMAIL SMTP ──────────────────────────────────
-            $resetLink = APP_URL . '/reset_password.php?token=' . $token;
+            $resetLink = APP_URL . '/pages/auth/reset_password.php?token=' . $token;
 
             $mail = new PHPMailer(true);
             try {
@@ -81,14 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 border-radius:12px;overflow:hidden;
                                 box-shadow:0 4px 16px rgba(0,0,0,.08);'>
 
-                        <!-- Header -->
                         <div style='background:#1a1a2e;padding:28px 32px;text-align:center;'>
                             <h1 style='color:#ffc107;margin:0;font-size:1.4rem;'>
                                 📚 Book Store
                             </h1>
                         </div>
 
-                        <!-- Body -->
                         <div style='padding:32px;'>
                             <h2 style='color:#1a1a2e;margin-top:0;'>
                                 Xin chào, {$user['fullname']}!
@@ -102,7 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 Link này sẽ <strong>hết hạn sau 30 phút</strong>.
                             </p>
 
-                            <!-- CTA Button -->
                             <div style='text-align:center;margin:32px 0;'>
                                 <a href='{$resetLink}'
                                    style='display:inline-block;background:#ffc107;color:#000;
@@ -118,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 Tài khoản của bạn vẫn an toàn.
                             </p>
 
-                            <!-- Link dự phòng -->
                             <div style='background:#f8f9fa;border-radius:8px;
                                         padding:12px 16px;margin-top:20px;'>
                                 <p style='color:#888;font-size:.78rem;margin:0 0 4px;'>
@@ -131,7 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
 
-                        <!-- Footer -->
                         <div style='background:#f8f9fa;padding:16px 32px;
                                     text-align:center;border-top:1px solid #e9ecef;'>
                             <p style='color:#aaa;font-size:.78rem;margin:0;'>
@@ -163,103 +158,104 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!-- ========== GIAO DIỆN QUÊN MẬT KHẨU ========== -->
-<main class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4 p-md-5">
+<main class="container auth-wrapper my-5">
+    <div class="card auth-card">
+        <div class="row g-0 h-100">
+            
+            <div class="col-md-5 auth-sidebar d-none d-md-flex flex-column justify-content-center align-items-center text-center">
+                <div class="auth-sidebar-content">
+                    <img src="https://img.icons8.com/3d-fluency/180/key.png" alt="Khôi phục mật khẩu" class="mb-4" style="filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
+                    <h2 class="fw-bold text-white mb-3">Quên mật khẩu?</h2>
+                    <p class="text-white-50 px-4" style="font-size: 0.95rem; line-height: 1.6;">
+                        Đừng lo lắng! Hãy nhập email của bạn, chúng tôi sẽ gửi liên kết an toàn để bạn đặt lại mật khẩu mới một cách nhanh chóng.
+                    </p>
+                </div>
+            </div>
 
+            <div class="col-md-7 bg-white">
+                <div class="auth-form-wrap">
+                    
                     <?php if ($success): ?>
-                        <!-- Trạng thái đã gửi email -->
-                        <div class="text-center">
+                        <div class="text-center py-4">
                             <div class="mb-4">
-                                <div class="rounded-circle bg-success bg-opacity-15 d-inline-flex
-                                            align-items-center justify-content-center"
-                                     style="width:80px;height:80px;">
-                                    <i class="bi bi-envelope-check-fill text-success"
-                                       style="font-size:2.2rem;"></i>
+                                <div class="rounded-circle bg-success bg-opacity-15 d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                    <i class="bi bi-envelope-check-fill text-success" style="font-size: 3rem;"></i>
                                 </div>
                             </div>
-                            <h4 class="fw-bold mb-2">Kiểm tra hộp thư!</h4>
-                            <p class="text-muted mb-1">
-                                Nếu địa chỉ email của bạn đã được đăng ký,
-                                chúng tôi đã gửi link đặt lại mật khẩu.
+                            <h3 class="fw-bolder mb-3" style="color: #0f3460;">Kiểm tra hộp thư!</h3>
+                            <p class="text-muted mb-4 fs-6 px-md-4">
+                                Nếu địa chỉ email của bạn đã được đăng ký, chúng tôi đã gửi một liên kết an toàn để đặt lại mật khẩu.
                             </p>
-                            <p class="text-muted small mb-4">
-                                <i class="bi bi-clock me-1"></i>
-                                Link có hiệu lực trong <strong>30 phút</strong>.
-                                Kiểm tra cả thư mục <strong>Spam</strong> nếu không thấy.
-                            </p>
-                            <a href="/bookstore/login.php"
-                               class="btn btn-warning fw-bold px-4">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Về trang đăng nhập
+                            
+                            <div class="alert border-warning border-start border-4 bg-warning bg-opacity-10 text-start mx-auto mb-5 shadow-sm" style="max-width: 450px;">
+                                <p class="mb-0 small text-dark d-flex align-items-center">
+                                    <i class="bi bi-clock-history text-warning me-3 fs-3"></i>
+                                    <span>Link có hiệu lực trong <strong>30 phút</strong>. Vui lòng kiểm tra cả thư mục <strong>Spam / Thư rác</strong> nếu không thấy ở hộp thư chính.</span>
+                                </p>
+                            </div>
+
+                            <a href="/bookstore/pages/auth/login.php" class="btn btn-warning btn-auth text-dark fw-bold px-5 py-3 rounded-pill shadow-sm transition-hover">
+                                <i class="bi bi-box-arrow-in-right me-2 fs-5 align-middle"></i> QUAY LẠI ĐĂNG NHẬP
                             </a>
                         </div>
 
                     <?php else: ?>
-                        <!-- Form nhập email -->
-                        <div class="text-center mb-4">
-                            <div class="rounded-circle bg-warning bg-opacity-15 d-inline-flex
-                                        align-items-center justify-content-center mb-3"
-                                 style="width:64px;height:64px;">
-                                <i class="bi bi-key-fill text-warning fs-2"></i>
-                            </div>
-                            <h4 class="fw-bold mb-1">Quên mật khẩu?</h4>
-                            <p class="text-muted small">
-                                Nhập email đã đăng ký — chúng tôi sẽ gửi link
-                                để bạn tạo mật khẩu mới.
-                            </p>
+                        <div class="text-center d-md-none mb-4">
+                            <img src="https://img.icons8.com/3d-fluency/80/key.png" alt="Khôi phục mật khẩu" class="mb-2">
+                            <h3 class="fw-bolder" style="color: #0f3460;">Khôi phục mật khẩu</h3>
                         </div>
 
+                        <h3 class="fw-bolder d-none d-md-block mb-1" style="color: #0f3460;">Khôi phục mật khẩu</h3>
+                        <p class="text-muted small mb-4 d-none d-md-block">Nhập email đã đăng ký để nhận liên kết tạo mật khẩu mới.</p>
+
                         <?php if ($error): ?>
-                            <div class="alert alert-danger d-flex align-items-center gap-2">
-                                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
-                                <span><?= htmlspecialchars($error) ?></span>
+                            <div class="alert alert-danger d-flex align-items-center p-3 rounded-3 mb-4 border-0 bg-danger-subtle text-danger shadow-sm" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                                <div class="small fw-medium"><?= htmlspecialchars($error) ?></div>
                             </div>
                         <?php endif; ?>
 
                         <form method="POST" action="" novalidate>
                             <div class="mb-4">
-                                <label for="email" class="form-label fw-semibold">
+                                <label for="email" class="form-label fw-bold text-secondary small text-uppercase">
                                     Địa chỉ Email <span class="text-danger">*</span>
                                 </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light">
-                                        <i class="bi bi-envelope text-muted"></i>
-                                    </span>
-                                    <input type="email"
-                                           id="email"
-                                           name="email"
-                                           class="form-control"
-                                           placeholder="Nhập email đã đăng ký"
-                                           value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                                           autofocus>
+                                <div class="input-group input-group-lg auth-input-group shadow-sm">
+                                    <span class="input-group-text"><i class="bi bi-envelope text-muted"></i></span>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        class="form-control fs-6 <?= $error ? 'is-invalid border-danger' : 'border-secondary-subtle' ?>"
+                                        placeholder="Ví dụ: example@email.com"
+                                        value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                                        autofocus
+                                    >
                                 </div>
                             </div>
 
-                            <div class="d-grid mb-3">
-                                <button type="submit" class="btn btn-warning fw-bold py-2">
-                                    <i class="bi bi-send me-2"></i>Gửi link đặt lại mật khẩu
+                            <div class="d-grid mt-5">
+                                <button type="submit" class="btn btn-warning btn-auth text-dark fs-5 fw-bold">
+                                    <i class="bi bi-send me-2"></i>GỬI LIÊN KẾT
                                 </button>
                             </div>
                         </form>
 
-                        <hr class="my-4">
-                        <p class="text-center text-muted small mb-0">
-                            Nhớ mật khẩu rồi?
-                            <a href="/bookstore/login.php"
-                               class="text-warning fw-semibold text-decoration-none">
-                                Đăng nhập ngay
-                            </a>
-                        </p>
-
+                        <div class="text-center mt-5 pt-3">
+                            <p class="text-muted small mb-0">
+                                Bạn đã nhớ mật khẩu? 
+                                <a href="/bookstore/pages/auth/login.php" class="text-dark fw-bold text-decoration-none border-bottom border-warning border-2 pb-1 ms-1 transition-hover">
+                                    Đăng nhập ngay
+                                </a>
+                            </p>
+                        </div>
                     <?php endif; ?>
 
-                </div><!-- /.card-body -->
-            </div><!-- /.card -->
+                </div>
+            </div>
+            
         </div>
     </div>
 </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

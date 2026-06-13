@@ -205,7 +205,7 @@ function getCategoryStyle($id) {
                                             ? $imgPath
                                             : '/bookstore/assets/images/books/placeholder.png';
                             ?>
-                            <a href="/bookstore/product.php?id=<?= $book['id'] ?>">
+                            <a href="/bookstore/pages/shop/product.php?id=<?= $book['id'] ?>">
                                 <img
                                     src="<?= htmlspecialchars($imgSrc) ?>"
                                     alt="Bìa sách: <?= htmlspecialchars($book['title']) ?>"
@@ -230,7 +230,7 @@ function getCategoryStyle($id) {
                         <div class="card-body d-flex flex-column p-3">
 
                             <h6 class="card-title fw-bold mb-1 book-card__title">
-                                <a href="/bookstore/product.php?id=<?= $book['id'] ?>"
+                                <a href="/bookstore/pages/shop/product.php?id=<?= $book['id'] ?>"
                                    class="text-dark text-decoration-none stretched-link-title" style="color: #0f3460 !important;">
                                     <?= htmlspecialchars($book['title']) ?>
                                 </a>
@@ -247,7 +247,7 @@ function getCategoryStyle($id) {
                                     <span class="fs-6">₫</span>
                                 </p>
 
-                                <a href="/bookstore/product.php?id=<?= $book['id'] ?>"
+                                <a href="/bookstore/pages/shop/product.php?id=<?= $book['id'] ?>"
                                    class="btn btn-warning btn-sm w-100 fw-semibold shadow-sm
                                           <?= $book['stock_quantity'] <= 0 ? 'disabled' : '' ?>">
                                     <i class="bi bi-eye me-1"></i>Xem chi tiết

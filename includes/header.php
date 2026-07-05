@@ -11,6 +11,11 @@ $isLoggedIn = isset($_SESSION['user_id']);
 $isAdmin    = $isLoggedIn && $_SESSION['role'] == 1;
 $fullname   = $isLoggedIn ? htmlspecialchars($_SESSION['fullname']) : '';
 
+// Rút gọn tên hiển thị để tránh vỡ layout (rớt dòng) trên menu
+if ($isAdmin && $fullname === 'Quản trị viên') {
+    $fullname = 'Admin';
+}
+
 // Xác định đường dẫn gốc để dùng cho href (tránh lỗi đường dẫn tương đối)
 $baseUrl = '/bookstore';
 

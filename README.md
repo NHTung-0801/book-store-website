@@ -1,5 +1,7 @@
 # 📚 NOVELTY Website
 
+🔗 **Live Demo (Đã triển khai):** [http://novelty-bookstore.lovestoblog.com](http://novelty-bookstore.lovestoblog.com)
+
 Một hệ thống website thương mại điện tử quy mô nhỏ, tập trung vào việc giới thiệu và kinh doanh sách trực tuyến. Dự án được thiết kế với tiêu chí tối giản, hiệu năng cao, dễ dàng triển khai và bảo trì.
 
 ## 🎯 Mục tiêu dự án

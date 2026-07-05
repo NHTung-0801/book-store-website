@@ -13,13 +13,26 @@ $fullname   = $isLoggedIn ? htmlspecialchars($_SESSION['fullname']) : '';
 
 // Xác định đường dẫn gốc để dùng cho href (tránh lỗi đường dẫn tương đối)
 $baseUrl = '/bookstore';
+
+require_once __DIR__ . '/../config/db.php';
+
+$cartCount = 0;
+if ($isLoggedIn) {
+    try {
+        $stmtCartCount = $pdo->prepare("SELECT SUM(quantity) FROM cart WHERE user_id = ?");
+        $stmtCartCount->execute([$_SESSION['user_id']]);
+        $cartCount = (int) $stmtCartCount->fetchColumn();
+    } catch (Exception $e) {
+        $cartCount = 0;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Store</title>
+    <title><?= $pageTitle ?? 'NOVELTY - Thế giới Sách & Tri thức' ?></title>
 
     <!-- Bootstrap 5 CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -31,113 +44,126 @@ $baseUrl = '/bookstore';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
           rel="stylesheet">
 
+    <!-- Google Fonts: Syne & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Syne:wght@400..800&display=swap" rel="stylesheet">
+
     <!-- CSS tùy chỉnh riêng của dự án -->
     <link href="<?= $baseUrl ?>/assets/css/style.css?v=<?= time() ?>" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
-<!-- ========== NAVBAR ========== -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow">
-    <div class="container">
-
-        <!-- Logo / Tên thương hiệu -->
-        <a class="navbar-brand fw-bold fs-4" href="<?= $baseUrl ?>/index.php">
-            <i class="bi bi-book-half me-2 text-warning"></i>Book Store
+<!-- ========== SMART MORPHING DOCK ========== -->
+<nav class="smart-dock">
+    <div class="dock-container">
+        
+        <!-- Logo -->
+        <a href="<?= $baseUrl ?>/index.php" class="dock-logo">
+            <span class="logo-text">NOVELTY</span>
         </a>
 
-        <!-- Nút toggle cho màn hình nhỏ (mobile) -->
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-                aria-controls="mainNavbar" aria-expanded="false"
-                aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <!-- Links -->
+        <div class="dock-links-wrapper d-none d-lg-flex">
+            <div class="dock-indicator"></div>
+            <a class="dock-link" href="<?= $baseUrl ?>/index.php">Trang chủ</a>
+            <?php if ($isLoggedIn): ?>
+                <a class="dock-link" href="<?= $baseUrl ?>/pages/user/my_orders.php">Đơn hàng</a>
+                <?php if ($isAdmin): ?>
+                    <a class="dock-link admin-link text-danger" href="<?= $baseUrl ?>/admin/index.php">Quản trị</a>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
 
-        <!-- Nội dung Navbar (co lại trên mobile) -->
-        <div class="collapse navbar-collapse" id="mainNavbar">
+        <!-- Auth & Cart Actions -->
+        <div class="dock-actions">
+            <?php if (!$isLoggedIn): ?>
+                <a class="dock-action-link d-none d-sm-block" href="<?= $baseUrl ?>/pages/auth/login.php">Đăng nhập</a>
+                <a class="dock-btn" href="<?= $baseUrl ?>/pages/auth/register.php">Đăng ký</a>
+            <?php else: ?>
+                <div class="dropdown">
+                    <button class="dock-action-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-6 me-1"></i> <?= $fullname ?>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px; padding: 0.5rem;">
+                        <li><a class="dropdown-item rounded" href="<?= $baseUrl ?>/pages/user/profile.php">Hồ sơ cá nhân</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item rounded text-danger logout-link" href="<?= $baseUrl ?>/pages/auth/logout.php">Đăng xuất</a></li>
+                    </ul>
+                </div>
+            <?php endif; ?>
 
-            <!-- Menu bên trái -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= $baseUrl ?>/index.php">
-                        <i class="bi bi-house-door me-1"></i>Trang chủ
-                    </a>
-                </li>
-
-                <?php if ($isLoggedIn): ?>
-                    <!-- Giỏ hàng — chỉ hiện khi đã đăng nhập -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= $baseUrl ?>/pages/shop/cart.php">
-                            <i class="bi bi-cart3 me-1"></i>Giỏ hàng
-                        </a>
-                    </li>
-
-                    <!-- Đơn hàng của tôi -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= $baseUrl ?>/pages/user/my_orders.php">
-                            <i class="bi bi-bag-check me-1"></i>Đơn hàng của tôi
-                        </a>
-                    </li>
-
-                    <?php if ($isAdmin): ?>
-                        <!-- Chỉ Admin mới thấy link vào trang quản trị -->
-                        <li class="nav-item">
-                            <a class="nav-link text-warning fw-semibold"
-                               href="<?= $baseUrl ?>/admin/index.php">
-                                <i class="bi bi-shield-lock me-1"></i>Quản trị
-                            </a>
-                        </li>
+            <?php if ($isLoggedIn): ?>
+                <a href="<?= $baseUrl ?>/pages/shop/cart.php" class="dock-cart relative inline-flex items-center justify-center">
+                    <i class="bi bi-bag"></i>
+                    <?php if ($cartCount > 0): ?>
+                        <span class="absolute top-0 right-0 -mt-1 -mr-1 bg-[#FF4500] text-white text-[10px] font-bold px-[5px] py-[1px] rounded-full border-2 border-white min-w-[20px] flex items-center justify-center shadow-sm z-10">
+                            <?= $cartCount ?>
+                        </span>
                     <?php endif; ?>
-                <?php endif; ?>
-            </ul>
+                </a>
+            <?php endif; ?>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="dock-cart d-lg-none border-0 bg-transparent ms-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
 
-            <!-- Menu bên phải (auth actions) -->
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
-
-                <?php if (!$isLoggedIn): ?>
-                    <!-- Chưa đăng nhập: hiện Đăng nhập + Đăng ký -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= $baseUrl ?>/pages/auth/login.php">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-warning btn-sm ms-2 px-3"
-                           href="<?= $baseUrl ?>/pages/auth/register.php">
-                            <i class="bi bi-person-plus me-1"></i>Đăng ký
-                        </a>
-                    </li>
-
-                <?php else: ?>
-                    <!-- Đã đăng nhập: hiện dropdown tên User -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
-                           href="#" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle fs-5"></i>
-                            <span>Xin chào, <strong><?= $fullname ?></strong></span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li>
-                                <a class="dropdown-item" href="<?= $baseUrl ?>/pages/user/profile.php">
-                                    <i class="bi bi-pencil-square me-2"></i>Hồ sơ cá nhân
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item text-danger logout-link"
-                                href="<?= $baseUrl ?>/pages/auth/logout.php">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                <?php endif; ?>
-
-            </ul>
-        </div><!-- /.collapse -->
-    </div><!-- /.container -->
+    </div>
 </nav>
-<!-- ========== /NAVBAR ========== -->
+
+<!-- Mobile Menu Offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" style="background-color: var(--bg-paper);">
+  <div class="offcanvas-header border-bottom border-dark border-opacity-10">
+    <h5 class="offcanvas-title fw-bold" style="font-family: var(--font-heading);">NOVELTY MENU</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column gap-3 mt-3">
+    <a href="<?= $baseUrl ?>/index.php" class="text-dark fs-4 text-decoration-none fw-bold" style="font-family: var(--font-heading);">Trang chủ</a>
+    <?php if ($isLoggedIn): ?>
+        <a href="<?= $baseUrl ?>/pages/user/my_orders.php" class="text-dark fs-4 text-decoration-none fw-bold" style="font-family: var(--font-heading);">Đơn hàng</a>
+        <?php if ($isAdmin): ?>
+            <a href="<?= $baseUrl ?>/admin/index.php" class="text-danger fs-4 text-decoration-none fw-bold" style="font-family: var(--font-heading);">Quản trị</a>
+        <?php endif; ?>
+    <?php else: ?>
+        <a href="<?= $baseUrl ?>/pages/auth/login.php" class="text-dark fs-4 text-decoration-none fw-bold" style="font-family: var(--font-heading);">Đăng nhập</a>
+    <?php endif; ?>
+  </div>
+</div>
+<!-- ========== /SMART MORPHING DOCK ========== -->
+
+<script>
+// Logic for Smart Morphing Dock Slider
+document.addEventListener('DOMContentLoaded', () => {
+    const wrapper = document.querySelector('.dock-links-wrapper');
+    const indicator = document.querySelector('.dock-indicator');
+    const links = document.querySelectorAll('.dock-link');
+
+    if(wrapper && indicator && links.length > 0) {
+        links.forEach(link => {
+            link.addEventListener('mouseenter', (e) => {
+                const rect = e.target.getBoundingClientRect();
+                const wrapperRect = wrapper.getBoundingClientRect();
+                
+                indicator.style.opacity = '1';
+                indicator.style.width = `${rect.width}px`;
+                indicator.style.left = `${rect.left - wrapperRect.left}px`;
+                
+                links.forEach(l => l.classList.remove('active-hover'));
+                e.target.classList.add('active-hover');
+            });
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+            indicator.style.opacity = '0';
+            links.forEach(l => l.classList.remove('active-hover'));
+        });
+    }
+});
+</script>

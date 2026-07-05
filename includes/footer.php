@@ -12,7 +12,7 @@ $currentYear = date('Y');
             <!-- Cột 1: Thương hiệu + mô tả ngắn -->
             <div class="col-lg-4 col-md-6">
                 <h5 class="fw-bold mb-3">
-                    <i class="bi bi-book-half me-2 text-warning"></i>Book Store
+                    <i class="bi bi-book-half me-2 text-warning"></i>NOVELTY
                 </h5>
                 <p class="text-secondary small">
                     Nơi quy tụ hàng nghìn đầu sách chất lượng — từ văn học, khoa học
@@ -115,15 +115,11 @@ $currentYear = date('Y');
         <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
                 <p class="small text-secondary mb-0">
-                    &copy; <?= $currentYear ?> <strong class="text-light">Book Store</strong>.
-                    Tất cả quyền được bảo lưu.
-                </p>
-            </div>
-            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
-                <p class="small text-secondary mb-0">
-                    Thiết kế với <i class="bi bi-heart-fill text-danger mx-1"></i>
-                    bởi <strong class="text-light">Book Store Team</strong>
-                </p>
+                    &copy; <?= $currentYear ?> NOVELTY. Tất cả quyền được bảo lưu.<br>
+                    <small class="text-muted" style="font-size: 0.8rem;">
+                        Thiết kế bằng <i class="bi bi-heart-fill text-danger mx-1"></i> 
+                        bởi <strong class="text-light">NOVELTY Team</strong>
+                    </small>
             </div>
         </div>
 

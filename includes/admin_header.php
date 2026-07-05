@@ -26,7 +26,7 @@ $pendingOrdersCount = (int) $stmtPending->fetchColumn();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản trị - Book Store</title>
+    <title><?= $pageTitle ?? 'Quản trị | NOVELTY' ?></title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -42,7 +42,7 @@ $pendingOrdersCount = (int) $stmtPending->fetchColumn();
         <a href="<?= $baseUrl ?>/admin/index.php" class="text-decoration-none d-flex align-items-center gap-2">
             <i class="bi bi-book-half text-warning fs-4"></i>
             <div>
-                <div class="text-white fw-bold lh-1">Book Store</div>
+                <div class="text-white fw-bold lh-1">NOVELTY</div>
                 <div class="text-warning" style="font-size:.7rem;">Admin Panel</div>
             </div>
         </a>

@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <img src="https://img.icons8.com/3d-fluency/180/shield.png" alt="Bảo mật tài khoản" class="mb-4" style="filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
                     <h2 class="fw-bold text-white mb-3">Bảo mật tài khoản</h2>
                     <p class="text-white-50 px-4" style="font-size: 0.95rem; line-height: 1.6;">
-                        Tạo một mật khẩu mới mạnh mẽ để bảo vệ thông tin cá nhân và lịch sử mua sắm của bạn tại Book Store.
+                        Tạo một mật khẩu mới mạnh mẽ để bảo vệ thông tin cá nhân và lịch sử mua sắm của bạn tại NOVELTY.
                     </p>
                 </div>
             </div>

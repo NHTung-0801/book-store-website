@@ -1,5 +1,6 @@
 <?php
 // product.php
+$pageTitle = 'Chi tiết Sách | NOVELTY';
 
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../config/db.php';
@@ -59,35 +60,24 @@ $cartStatus = $_GET['status'] ?? '';
 ?>
 
 <!-- ========== NỘI DUNG TRANG CHI TIẾT SÁCH ========== -->
-<main class="container my-5">
-
-    <div class="page-header-custom">
-        <h3 class="title">
-            <i class="bi bi-journal-bookmark-fill"></i> Chi tiết sách
-        </h3>
-        <?php if (!empty($book['category_name'])): ?>
-            <span class="badge-custom">
-                <i class="bi bi-tag-fill me-1"></i> <?= htmlspecialchars($book['category_name']) ?>
-            </span>
-        <?php endif; ?>
-    </div>
+<main class="container mx-auto px-4 pt-[76px] pb-16 min-h-screen" style="max-width: 1152px;">
 
     <!-- Thông báo thêm giỏ hàng -->
     <?php if ($cartStatus === 'added'): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
             <i class="bi bi-cart-check-fill me-2"></i>
             Đã thêm sách vào giỏ hàng thành công!
             <a href="/bookstore/pages/shop/cart.php" class="alert-link ms-2">Xem giỏ hàng →</a>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php elseif ($cartStatus === 'error'): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             Có lỗi xảy ra, vui lòng thử lại.
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php elseif ($cartStatus === 'login'): ?>
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
             <i class="bi bi-person-lock me-2"></i>
             Bạn cần <a href="/bookstore/pages/auth/login.php" class="alert-link">đăng nhập</a>
             để thêm sách vào giỏ hàng.
@@ -95,169 +85,207 @@ $cartStatus = $_GET['status'] ?? '';
         </div>
     <?php endif; ?>
 
-    <!-- ── LAYOUT 2 CỘT CHÍNH ── -->
-    <div class="row g-5">
+    <!-- ── IMMERSIVE SPLIT SCREEN LAYOUT ── -->
+    <div class="row g-5 align-items-start">
 
-        <!-- ══ CỘT TRÁI: ẢNH BÌA SÁCH ══ -->
-        <div class="col-lg-4 col-md-5">
-            <div class="product-img-wrap shadow rounded-3 overflow-hidden">
-                <img
-                    src="<?= htmlspecialchars($imgSrc) ?>"
-                    alt="Bìa sách: <?= htmlspecialchars($book['title']) ?>"
-                    class="img-fluid w-100 product-img"
-                >
+        <!-- ══ CỘT TRÁI: STICKY VISUAL STAGE ══ -->
+        <div class="col-md-5">
+            <div class="sticky-md-top" style="top: 120px; z-index: 10;">
+                <div class="book-glow-wrapper">
+                    <img
+                        src="<?= htmlspecialchars($imgSrc) ?>"
+                        alt="Bìa sách: <?= htmlspecialchars($book['title']) ?>"
+                        class="img-fluid w-100 book-cover-image"
+                        style="object-fit: cover; aspect-ratio: 3/4;"
+                    >
+                </div>
             </div>
-
-            <!-- Thể loại bên dưới ảnh -->
-            <?php if (!empty($book['category_name'])): ?>
-            <div class="mt-3 text-center">
-                <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill">
-                    <i class="bi bi-tag me-1"></i>
-                    <?= htmlspecialchars($book['category_name']) ?>
-                </span>
-            </div>
-            <?php endif; ?>
         </div>
 
-        <!-- ══ CỘT PHẢI: THÔNG TIN CHI TIẾT + FORM ══ -->
-        <div class="col-lg-8 col-md-7">
+        <!-- ══ CỘT PHẢI: EDITORIAL INFORMATION ══ -->
+        <div class="col-md-7">
+            
+            <?php if (!empty($book['category_name'])): ?>
+                <span style="display: inline-block; background-color: rgba(0,0,0,0.05); color: rgba(0,0,0,0.8); font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <?= htmlspecialchars($book['category_name']) ?>
+                </span>
+            <?php endif; ?>
 
-            <!-- Tên sách -->
-            <h2 class="fw-bold mb-1"><?= htmlspecialchars($book['title']) ?></h2>
-
-            <!-- Tác giả -->
-            <p class="text-muted mb-3">
-                <i class="bi bi-person-circle me-1"></i>
-                Tác giả: <strong><?= htmlspecialchars($book['author']) ?></strong>
+            <h1 style="font-family: var(--font-heading); font-size: clamp(1.875rem, 4vw, 2.25rem); font-weight: 700; letter-spacing: -0.02em; color: #111111; margin-bottom: 0.5rem; line-height: 1.3;">
+                <?= htmlspecialchars($book['title']) ?>
+            </h1>
+            
+            <p style="font-size: 1rem; color: #4b5563; margin-bottom: 0.75rem; font-weight: 500;">
+                Tác giả: <?= htmlspecialchars($book['author']) ?>
             </p>
 
-            <!-- Giá bán -->
-            <div class="product-price mb-3">
-                <span class="fs-2 fw-bold text-danger">
+            <div class="d-flex align-items-center mb-2" style="gap: 1rem;">
+                <div style="font-size: 1.875rem; font-weight: 800; color: #FF4500;">
                     <?= number_format($book['price'], 0, ',', '.') ?>₫
-                </span>
-            </div>
-
-            <!-- Trạng thái tồn kho -->
-            <div class="mb-3">
-                <?php if ($book['stock_quantity'] > 10): ?>
-                    <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
-                        <i class="bi bi-check-circle me-1"></i>
-                        Còn hàng (<?= $book['stock_quantity'] ?> cuốn)
-                    </span>
-                <?php elseif ($book['stock_quantity'] > 0): ?>
-                    <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-2">
-                        <i class="bi bi-exclamation-circle me-1"></i>
-                        Sắp hết hàng (còn <?= $book['stock_quantity'] ?> cuốn)
-                    </span>
+                </div>
+                
+                <?php if ($book['stock_quantity'] > 0): ?>
+                    <div style="border: 1px solid #198754; color: #198754; background-color: rgba(25, 135, 84, 0.1); padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="pulse-dot-green"></span> IN STOCK
+                    </div>
                 <?php else: ?>
-                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2">
-                        <i class="bi bi-x-circle me-1"></i>
-                        Hết hàng
-                    </span>
+                    <div style="border: 1px solid #dc3545; color: #dc3545; background-color: rgba(220, 53, 69, 0.1); padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem;">
+                        OUT OF STOCK
+                    </div>
                 <?php endif; ?>
             </div>
 
-            <hr class="my-4">
+            <hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(0,0,0,0.05);">
 
-            <!-- Mô tả sách -->
             <?php if (!empty($book['description'])): ?>
-            <div class="mb-4">
-                <h6 class="fw-bold text-uppercase text-muted small mb-2 ls-1">
-                    <i class="bi bi-card-text me-1"></i>Mô tả sách
-                </h6>
-                <div class="product-description text-secondary lh-lg">
-                    <?= nl2br(htmlspecialchars($book['description'])) ?>
-                </div>
+            <div class="editorial-description mb-3">
+                <p><?= nl2br(htmlspecialchars($book['description'])) ?></p>
             </div>
             <?php endif; ?>
 
-            <!-- ── FORM THÊM VÀO GIỎ HÀNG ── -->
+            <!-- ── INTERACTIVE BUY BOX ── -->
             <?php if ($book['stock_quantity'] > 0): ?>
-            <form method="POST"
-                  action="/bookstore/actions/add_to_cart.php"
-                  class="add-to-cart-form">
-
+            <form method="POST" action="/bookstore/actions/add_to_cart.php" style="background-color: rgba(248, 246, 240, 0.6); border: 1px solid rgba(0,0,0,0.05); border-radius: 1rem; padding: 1rem; margin: 1rem 0; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);">
                 <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
 
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-
-                    <!-- Input số lượng -->
-                    <div class="quantity-control d-flex align-items-center border rounded-3 overflow-hidden">
-                        <button type="button" class="btn btn-light px-3 py-2 qty-btn"
-                                data-action="decrease" aria-label="Giảm số lượng">
-                            <i class="bi bi-dash-lg"></i>
-                        </button>
-
-                        <input
-                            type="number"
-                            id="quantity"
-                            name="quantity"
-                            class="form-control border-0 text-center fw-bold qty-input"
-                            value="1"
-                            min="1"
-                            max="<?= $book['stock_quantity'] ?>"
-                            style="width: 60px;"
-                            aria-label="Số lượng"
-                        >
-
-                        <button type="button" class="btn btn-light px-3 py-2 qty-btn"
-                                data-action="increase"
-                                data-max="<?= $book['stock_quantity'] ?>"
-                                aria-label="Tăng số lượng">
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center" style="gap: 1rem;">
+                    <!-- Pill Quantity Selector -->
+                    <div style="display: inline-flex; align-items: center; border: 1px solid rgba(0,0,0,0.15); background-color: #fff; border-radius: 9999px; padding: 0.25rem; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06);">
+                        <button type="button" onclick="updateQty(-1)" aria-label="Giảm" style="width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; border: none; background: transparent; cursor: pointer; font-weight: bold; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(0,0,0,0.05)'" onmouseout="this.style.backgroundColor='transparent'">-</button>
+                        
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?= $book['stock_quantity'] ?>" readonly style="width: 3rem; text-align: center; font-weight: 600; font-size: 0.875rem; background: transparent; border: none; outline: none; appearance: none;">
+                        
+                        <button type="button" onclick="updateQty(1)" aria-label="Tăng" style="width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; border: none; background: transparent; cursor: pointer; font-weight: bold; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(0,0,0,0.05)'" onmouseout="this.style.backgroundColor='transparent'">+</button>
                     </div>
 
-                    <!-- Nút thêm vào giỏ hàng -->
-                    <button type="submit" class="btn btn-warning btn-lg fw-bold px-4 flex-grow-1">
-                        <i class="bi bi-cart-plus me-2"></i>Thêm vào giỏ hàng
+                    <!-- Add to Cart Button -->
+                    <style>
+                        .btn-shimmer-pro {
+                            position: relative;
+                            overflow: hidden;
+                            background-color: #111111;
+                            color: #ffffff;
+                            font-weight: 600;
+                            padding: 0.875rem 2rem;
+                            border-radius: 9999px;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 0.875rem;
+                            letter-spacing: 0.025em;
+                            text-transform: uppercase;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 0.5rem;
+                            transition: all 0.3s ease;
+                            flex: 1;
+                        }
+                        .btn-shimmer-pro:hover {
+                            background-color: #000000;
+                            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                        }
+                        .btn-shimmer-pro:active {
+                            transform: scale(0.98);
+                        }
+                        .btn-shimmer-pro::after {
+                            content: "";
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 50%;
+                            height: 100%;
+                            background-color: rgba(255, 255, 255, 0.15);
+                            transform: skewX(-20deg) translateX(-150%);
+                            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+                        }
+                        .btn-shimmer-pro:hover::after {
+                            transform: skewX(-20deg) translateX(300%);
+                        }
+                        .btn-shimmer-pro i {
+                            transition: transform 0.3s ease;
+                        }
+                        .btn-shimmer-pro:hover i {
+                            transform: translateY(-2px);
+                        }
+                    </style>
+                    <button type="submit" class="btn-shimmer-pro">
+                        <i class="bi bi-cart2 fs-5"></i> THÊM VÀO GIỎ HÀNG
                     </button>
-
                 </div>
-
-                <p class="text-muted small mt-2 mb-0">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Tối đa <?= $book['stock_quantity'] ?> cuốn mỗi đơn hàng
+                
+                <p class="text-muted small mt-3 fw-bold mb-0">
+                    * Đã bao gồm thuế & phí giao hàng tiêu chuẩn.
                 </p>
-
             </form>
-
             <?php else: ?>
-                <div class="alert alert-secondary d-flex align-items-center gap-2">
-                    <i class="bi bi-bell fs-5"></i>
-                    <span>Sách tạm thời hết hàng. Vui lòng quay lại sau!</span>
+                <div class="alert alert-secondary d-flex align-items-center gap-2 border-0 bg-light p-4 rounded-4">
+                    <i class="bi bi-bell-fill fs-5"></i>
+                    <span class="fw-bold">Tác phẩm này đang tạm hết hàng. Chúng tôi sẽ sớm bổ sung!</span>
                 </div>
             <?php endif; ?>
+
+        </div>
+    </div>
+
+    <!-- Script xử lý Magnetic Button & Quantity -->
+    <script>
+        // Quantity Logic
+        function updateQty(change) {
+            const input = document.getElementById('quantity');
+            let val = parseInt(input.value) + change;
+            const max = parseInt(input.getAttribute('max'));
+            if (val >= 1 && val <= max) {
+                input.value = val;
+                // Scale animation
+                input.style.transform = 'scale(1.2)';
+                setTimeout(() => { input.style.transform = 'scale(1)'; }, 150);
+            }
+        }
+
+        // Magnetic Button Logic
+        const btn = document.getElementById('magnetic-btn');
+        if (btn) {
+            btn.addEventListener('mousemove', function(e) {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+                btn.querySelector('.btn-text').style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+            });
+
+            btn.addEventListener('mouseleave', function() {
+                btn.style.transform = 'translate(0px, 0px)';
+                btn.querySelector('.btn-text').style.transform = 'translate(0px, 0px)';
+            });
+        }
+    </script>
 
         </div><!-- /.col cột phải -->
     </div><!-- /.row -->
 
 <!-- ── SÁCH CÙNG THỂ LOẠI ── -->
-<section class="related-section mt-5 pt-5 border-top">
+<section style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 2rem; margin-top: 2.5rem;">
 
     <!-- Tiêu đề — luôn hiển thị dù có sách hay không -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-5">
         <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bi bi-grid me-2 text-warning"></i>
-                Sách cùng thể loại
-            </h4>
+            <h2 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: #111111; margin-bottom: 0.5rem;">
+                SÁCH CÙNG THỂ LOẠI
+            </h2>
             <p class="text-muted small mb-0">
                 Các cuốn sách thuộc thể loại
                 <a href="/bookstore/index.php?category=<?= $book['category_id'] ?>"
-                   class="text-warning fw-semibold text-decoration-none">
+                   class="text-decoration-underline text-dark fw-medium">
                     <?= htmlspecialchars($book['category_name']) ?>
                 </a>
-                bạn có thể quan tâm
             </p>
         </div>
         <?php if (!empty($relatedBooks)): ?>
             <!-- Nút xem tất cả — chỉ hiện khi có sách, desktop -->
             <a href="/bookstore/index.php?category=<?= $book['category_id'] ?>"
-               class="btn btn-outline-warning fw-semibold d-none d-md-inline-flex
-                      align-items-center gap-2 flex-shrink-0">
-                <i class="bi bi-grid-3x3-gap me-1"></i>Xem tất cả
+               style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; border: 1px solid rgba(0,0,0,0.1); color: #111; font-weight: 600; font-size: 0.875rem; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='transparent'">
+                Xem tất cả
                 <i class="bi bi-arrow-right"></i>
             </a>
         <?php endif; ?>
@@ -274,77 +302,43 @@ $cartStatus = $_GET['status'] ?? '';
                            : '/bookstore/assets/images/books/placeholder.png';
             ?>
             <div class="col">
-                <div class="card h-100 border-0 shadow-sm book-card related-card">
-
-                    <!-- Ảnh bìa -->
-                    <div class="book-card__img-wrap">
+                <div class="gallery-card">
+                    <div class="gallery-card__img-wrap">
                         <a href="/bookstore/pages/shop/product.php?id=<?= $rel['id'] ?>">
-                            <img src="<?= htmlspecialchars($relSrc) ?>"
-                                 alt="<?= htmlspecialchars($rel['title']) ?>"
-                                 class="card-img-top book-card__img"
-                                 loading="lazy">
+                            <img src="<?= htmlspecialchars($relSrc) ?>" alt="<?= htmlspecialchars($rel['title']) ?>" class="gallery-card__img" loading="lazy">
                         </a>
-                        <!-- Badge hết hàng -->
+                        
                         <?php if ($rel['stock_quantity'] <= 0): ?>
-                            <div class="book-card__overlay-soldout">
-                                <span>Hết hàng</span>
-                            </div>
+                            <div class="gallery-card__soldout"><span>Hết hàng</span></div>
+                        <?php endif; ?>
+                        
+                        <?php if ($rel['stock_quantity'] > 0): ?>
+                        <form method="POST" action="/bookstore/actions/add_to_cart.php" class="gallery-card__form">
+                            <input type="hidden" name="book_id" value="<?= $rel['id'] ?>">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="gallery-card__btn-add" title="Thêm vào giỏ">
+                                <i class="bi bi-cart-plus"></i>
+                            </button>
+                        </form>
                         <?php endif; ?>
                     </div>
 
-                    <!-- Nội dung card -->
-                    <div class="card-body d-flex flex-column p-3">
-
-                        <!-- Tên sách -->
-                        <h6 class="fw-bold small mb-1 book-card__title">
-                            <a href="/bookstore/pages/shop/product.php?id=<?= $rel['id'] ?>"
-                               class="text-dark text-decoration-none">
+                    <div class="gallery-card__info">
+                        <h3 class="gallery-card__title">
+                            <a href="/bookstore/pages/shop/product.php?id=<?= $rel['id'] ?>">
                                 <?= htmlspecialchars($rel['title']) ?>
                             </a>
-                        </h6>
+                        </h3>
+                        <p class="gallery-card__author"><?= htmlspecialchars($rel['author']) ?></p>
+                        
+                        <span class="gallery-card__category">CÙNG THỂ LOẠI</span>
 
-                        <!-- Tác giả -->
-                        <p class="text-muted mb-2" style="font-size:.78rem;">
-                            <i class="bi bi-person me-1"></i>
-                            <?= htmlspecialchars($rel['author']) ?>
-                        </p>
-
-                        <!-- Badge tồn kho -->
-                        <div class="mb-2">
-                            <?php if ($rel['stock_quantity'] > 10): ?>
-                                <span class="badge bg-success-subtle text-success"
-                                      style="font-size:.68rem;">
-                                    <i class="bi bi-check-circle me-1"></i>Còn hàng
-                                </span>
-                            <?php elseif ($rel['stock_quantity'] > 0): ?>
-                                <span class="badge bg-warning-subtle text-warning"
-                                      style="font-size:.68rem;">
-                                    <i class="bi bi-exclamation-circle me-1"></i>
-                                    Còn <?= $rel['stock_quantity'] ?> cuốn
-                                </span>
-                            <?php else: ?>
-                                <span class="badge bg-danger-subtle text-danger"
-                                      style="font-size:.68rem;">
-                                    <i class="bi bi-x-circle me-1"></i>Hết hàng
-                                </span>
-                            <?php endif; ?>
+                        <div class="gallery-card__price">
+                            <?= number_format($rel['price'], 0, ',', '.') ?>₫
                         </div>
-
-                        <!-- Giá + nút -->
-                        <div class="mt-auto">
-                            <p class="fw-bold text-danger fs-6 mb-2">
-                                <?= number_format($rel['price'], 0, ',', '.') ?>₫
-                            </p>
-                            <a href="/bookstore/pages/shop/product.php?id=<?= $rel['id'] ?>"
-                               class="btn btn-warning btn-sm w-100 fw-semibold
-                                      <?= $rel['stock_quantity'] <= 0 ? 'disabled' : '' ?>">
-                                <i class="bi bi-eye me-1"></i>Xem chi tiết
-                            </a>
-                        </div>
-
-                    </div><!-- /.card-body -->
-                </div><!-- /.card -->
-            </div><!-- /.col -->
+                    </div>
+                </div>
+            </div>
             <?php endforeach; ?>
         </div><!-- /.row -->
 
@@ -360,23 +354,23 @@ $cartStatus = $_GET['status'] ?? '';
     <?php else: ?>
 
         <!-- Trạng thái chưa có sách cùng thể loại -->
-        <div class="related-empty text-center py-5">
-            <div class="related-empty__icon mx-auto mb-3">
-                <i class="bi bi-hourglass-split text-warning" style="font-size:2.5rem;"></i>
+        <div style="border: 2px dashed rgba(0,0,0,0.1); border-radius: 1rem; padding: 2rem; text-align: center; max-width: 36rem; margin: 1.5rem auto; background-color: rgba(255,255,255,0.4);">
+            <div class="mx-auto mb-3" style="width: 64px; height: 64px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-book text-muted" style="font-size: 1.5rem;"></i>
             </div>
-            <h6 class="fw-bold text-muted mb-1">
+            <h6 style="font-weight: 700; color: #111; margin-bottom: 0.25rem;">
                 Sách cùng thể loại sẽ được cập nhật sau
             </h6>
-            <p class="text-muted small mb-4">
+            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1.5rem;">
                 Chúng tôi đang bổ sung thêm sách thuộc thể loại
-                <strong class="text-warning">
+                <strong style="color: #111;">
                     <?= htmlspecialchars($book['category_name']) ?>
                 </strong>.
                 Hãy quay lại sau nhé!
             </p>
             <a href="/bookstore/index.php"
-               class="btn btn-warning fw-semibold px-4">
-                <i class="bi bi-house me-2"></i>Về trang chủ
+               style="display: inline-flex; align-items: center; gap: 0.5rem; background-color: #111111; color: #ffffff; font-weight: 500; padding: 0.75rem 1.5rem; border-radius: 9999px; font-size: 0.875rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.3s;" onmouseover="this.style.background='#1f2937'; this.querySelector('.arrow-icon').style.transform='translateX(-4px)'" onmouseout="this.style.background='#111111'; this.querySelector('.arrow-icon').style.transform='translateX(0)'">
+                <i class="bi bi-arrow-left arrow-icon" style="transition: transform 0.3s;"></i> VỀ TRANG CHỦ
             </a>
         </div>
 

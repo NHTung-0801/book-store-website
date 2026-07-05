@@ -144,6 +144,8 @@ $totalNormal = $totalAll - $totalAdmins;
 
 // ── MAP THÔNG BÁO VỚI ICON 3D MỚI ────────────────────────────────────────────
 $msgMap = [
+    'created'         => ['type' => 'success', 'text' => 'Đã thêm thành viên mới thành công.', 'icon' => 'ok'],
+    'username_exists' => ['type' => 'warning', 'text' => 'Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.', 'icon' => 'box-important'],
     'promoted'    => ['type' => 'success', 'text' => 'Đã cấp quyền Admin cho tài khoản.', 'icon' => 'ok'],
     'demoted'     => ['type' => 'warning', 'text' => 'Đã hạ quyền tài khoản xuống User.', 'icon' => 'user-male-circle'],
     'deleted'     => ['type' => 'danger',  'text' => 'Đã xóa tài khoản khỏi hệ thống.', 'icon' => 'close-window'],
@@ -258,9 +260,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
             Danh sách tài khoản
             <span class="badge bg-secondary ms-2"><?= $totalUsers ?></span>
         </h6>
-        <span class="text-muted small d-none d-md-block">
-            <i class="bi bi-info-circle me-1"></i>Tài khoản đang đăng nhập được đánh dấu <span class="text-warning fw-semibold">màu vàng</span>
-        </span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted small d-none d-md-block">
+                <i class="bi bi-info-circle me-1"></i>Tài khoản đang đăng nhập được đánh dấu <span class="text-warning fw-semibold">màu vàng</span>
+            </span>
+        </div>
     </div>
 
     <div class="card-body p-0">
@@ -392,6 +396,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
     </div>
 </div>
+
 
 <?php
 // ── 4. GỌI FOOTER ADMIN ───────────────────────────────────────────────────────

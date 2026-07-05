@@ -30,8 +30,8 @@ $pendingOrdersCount = (int) $stmtPending->fetchColumn();
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="<?= $baseUrl ?>/assets/css/style.css" rel="stylesheet">
-    <link href="<?= $baseUrl ?>/assets/css/admin_style.css" rel="stylesheet">
+    <link href="<?= $baseUrl ?>/assets/css/style.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= $baseUrl ?>/assets/css/admin_style.css?v=<?= time() ?>" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -84,37 +84,37 @@ $pendingOrdersCount = (int) $stmtPending->fetchColumn();
     </nav>
 </aside>
 
-<div class="admin-main">
-    <div class="admin-topbar d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
-                <i class="bi bi-list fs-5"></i>
-            </button>
-            <div>
-                <h5 class="mb-0 fw-bold">
-                    <?php 
-                        $titles = [
-                            'index.php' => 'Dashboard',
-                            'books.php' => 'Quản lý sách',
-                            'categories.php' => 'Quản lý thể loại',
-                            'orders.php' => 'Quản lý đơn hàng',
-                            'users.php' => 'Quản lý thành viên'
-                        ];
-                        echo $titles[$current_page] ?? 'Bảng điều khiển';
-                    ?>
-                </h5>
-                <p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i><?= date('d/m/Y') ?></p>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <div class="text-end d-none d-sm-block">
-                <p class="mb-0 fw-semibold small"><?= $adminName ?></p>
-                <p class="text-muted mb-0" style="font-size:.75rem;">Quản trị viên</p>
-            </div>
-            <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center fw-bold text-dark" style="width:38px;height:38px;font-size:.9rem;">
-                <?= strtoupper(mb_substr($adminName, 0, 1)) ?>
-            </div>
+<div class="admin-topbar d-flex align-items-center justify-content-between" style="box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+    <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+        <div>
+            <h5 class="mb-0 fw-bold">
+                <?php 
+                    $titles = [
+                        'index.php' => 'Dashboard',
+                        'books.php' => 'Quản lý sách',
+                        'categories.php' => 'Quản lý thể loại',
+                        'orders.php' => 'Quản lý đơn hàng',
+                        'users.php' => 'Quản lý thành viên'
+                    ];
+                    echo $titles[$current_page] ?? 'Bảng điều khiển';
+                ?>
+            </h5>
+            <p class="text-muted small mb-0"><i class="bi bi-calendar3 me-1"></i><?= date('d/m/Y') ?></p>
         </div>
     </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="text-end d-none d-sm-block">
+            <p class="mb-0 fw-semibold small"><?= $adminName ?></p>
+            <p class="text-muted mb-0" style="font-size:.75rem;">Quản trị viên</p>
+        </div>
+        <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center fw-bold text-dark" style="width:38px;height:38px;font-size:.9rem;">
+            <?= strtoupper(mb_substr($adminName, 0, 1)) ?>
+        </div>
+    </div>
+</div>
 
+<div class="admin-main">
     <div class="p-4 flex-grow-1">

@@ -431,6 +431,7 @@ a:hover {
 }
 
 .dock-link {
+    white-space: nowrap;
     padding: 0.5rem 1rem;
     color: var(--text-ink);
     font-family: var(--font-body);
@@ -468,6 +469,7 @@ a:hover {
 }
 
 .dock-action-link {
+    white-space: nowrap;
     color: var(--text-ink);
     font-weight: 600;
     font-size: 0.9rem;

@@ -97,21 +97,29 @@ $tabs = [
 ];
 ?>
 
-<main class="container my-5">
+<main class="max-w-6xl mx-auto px-4 pt-[76px] pb-20 min-h-screen">
 
-    <div class="page-header-custom mb-4">
-        <h3 class="title">
-            <i class="bi bi-bag-check"></i> Đơn hàng của tôi
-        </h3>
-        <span class="badge-custom">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <!-- Cụm Bên Trái (Icon + Tiêu đề chính) -->
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+                <i class="bi bi-bag-check text-base"></i>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] m-0 uppercase" style="font-family: var(--font-body) !important;">ĐƠN HÀNG CỦA TÔI</h1>
+        </div>
+
+        <!-- Cụm Bên Phải (Badge Đếm số lượng đơn) -->
+        <div class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#F8F6F0] border border-black/10 font-bold text-sm text-[#111111] shadow-sm self-start sm:self-auto">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <?= count($orders) ?> đơn hàng <?= $statusFilter ? 'được tìm thấy' : '' ?>
-        </span>
+        </div>
     </div>
 
-    <div class="d-flex flex-wrap gap-2 mb-4 pb-3 border-bottom">
+    <div class="flex flex-nowrap items-center gap-2 pb-6 border-b border-black/10 mb-6 overflow-x-auto hide-scrollbar">
         <?php foreach ($tabs as $key => $label): ?>
+            <?php $isActive = ($statusFilter === $key || (!$statusFilter && $key === '')); ?>
             <a href="?status=<?= $key ?>" 
-               class="btn btn-sm rounded-pill px-3 <?= ($statusFilter === $key || (!$statusFilter && $key === '')) ? 'btn-warning fw-bold shadow-sm' : 'btn-light text-muted border' ?>">
+               class="rounded-full px-4 sm:px-5 py-2 text-[13px] sm:text-sm whitespace-nowrap transition-all duration-300 ease-in-out cursor-pointer inline-block <?= $isActive ? 'bg-[#111111] text-white shadow-md scale-105 font-semibold' : 'bg-white border border-black/10 text-gray-600 hover:border-black/30 hover:bg-black/5 hover:text-black hover:-translate-y-0.5 font-medium' ?>" style="text-decoration: none;">
                 <?= $label ?>
             </a>
         <?php endforeach; ?>
@@ -129,6 +137,18 @@ $tabs = [
 
     <?php else: ?>
 
+        <style>
+            .accordion-button::after {
+                display: none !important;
+            }
+            .accordion-btn-custom i.chevron-icon {
+                transition: transform 0.3s ease;
+            }
+            .accordion-btn-custom:not(.collapsed) i.chevron-icon {
+                transform: rotate(-180deg);
+            }
+        </style>
+        
         <div class="accordion accordion-flush order-accordion" id="orderAccordion">
 
             <?php foreach ($orders as $index => $order):
@@ -143,21 +163,21 @@ $tabs = [
 
                 <h2 class="accordion-header">
                     <button
-                        class="accordion-button <?= $isFirst ? '' : 'collapsed' ?> py-2 px-3"
+                        class="accordion-button accordion-btn-custom <?= $isFirst ? '' : 'collapsed' ?> py-2 px-3"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#<?= $collapseId ?>"
                         aria-expanded="<?= $isFirst ? 'true' : 'false' ?>"
                         style="min-height: 50px;"
                     >
-                        <div class="d-flex align-items-center justify-content-between w-100 me-2 flex-wrap gap-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full cursor-pointer pr-2">
 
                             <div class="d-flex align-items-center gap-2">
                                 <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
                                      style="width: 32px; height: 32px; background-color: #fff8e1; color: #ffc107;">
                                     <i class="bi bi-box-seam fs-6"></i>
                                 </div>
-                                <div class="lh-sm">
+                                <div class="lh-sm" style="text-align: left;">
                                     <span class="fw-bold text-dark d-block" style="font-size: 0.95rem;">
                                         Đơn hàng #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?>
                                     </span>
@@ -169,14 +189,19 @@ $tabs = [
                                 </div>
                             </div>
 
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="fw-bold text-danger" style="font-size: 1rem;">
+                            <div class="flex items-center justify-end gap-3 sm:gap-4 self-end sm:self-auto shrink-0">
+                                <span class="font-extrabold text-base sm:text-lg text-[#FF4500] text-right w-[110px] whitespace-nowrap shrink-0">
                                     <?= number_format($order['total_price'], 0, ',', '.') ?>₫
                                 </span>
-                                <span class="badge <?= $badge['class'] ?> px-2 py-1 rounded-pill shadow-sm fw-medium" style="font-size: 0.75rem;">
+                                <span class="<?= $badge['class'] ?> inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold leading-none whitespace-nowrap h-7 w-[130px] shrink-0">
                                     <i class="bi <?= $badge['icon'] ?> me-1"></i>
                                     <?= $badge['label'] ?>
                                 </span>
+                                
+                                <!-- Custom Chevron Icon -->
+                                <div class="flex items-center justify-center shrink-0 ml-1 text-gray-500">
+                                    <i class="bi bi-chevron-down chevron-icon text-lg"></i>
+                                </div>
                             </div>
 
                         </div>
@@ -187,136 +212,130 @@ $tabs = [
                      class="accordion-collapse collapse <?= $isFirst ? 'show' : '' ?>"
                      data-bs-parent="#orderAccordion">
 
-                    <div class="accordion-body p-0">
+                    <div class="accordion-body p-0 border-t border-black/5 bg-[#FAFAFA]">
 
-                        <div class="row g-0">
-
-                            <div class="col-lg-8 border-end">
-                                <div class="p-4">
-                                    <h6 class="fw-bold text-muted text-uppercase small mb-3">
-                                        <i class="bi bi-box-seam me-1"></i>
-                                        Sản phẩm (<?= count($items) ?> cuốn)
-                                    </h6>
-
-                                    <?php if (empty($items)): ?>
-                                        <p class="text-muted small">Không có dữ liệu sản phẩm.</p>
-                                    <?php else: ?>
-                                        <div class="d-flex flex-column gap-3">
-                                            <?php foreach ($items as $item):
-                                                $imgPath = '/bookstore/assets/images/books/' . $item['image'];
-                                                $imgSrc  = (!empty($item['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $imgPath))
-                                                            ? $imgPath
-                                                            : '/bookstore/assets/images/books/placeholder.png';
-                                            ?>
-                                            <div class="d-flex gap-3 align-items-center">
-                                                <img
-                                                    src="<?= htmlspecialchars($imgSrc) ?>"
-                                                    alt="<?= htmlspecialchars($item['title']) ?>"
-                                                    class="rounded flex-shrink-0"
-                                                    style="width: 52px; height: 70px; object-fit: cover;"
-                                                >
-                                                <div class="flex-grow-1 overflow-hidden">
-                                                    <p class="fw-semibold mb-0 text-truncate" style="font-size: 0.95rem;">
-                                                        <?= htmlspecialchars($item['title']) ?>
-                                                    </p>
-                                                    <p class="text-muted small mb-0">
-                                                        <i class="bi bi-person me-1"></i>
-                                                        <?= htmlspecialchars($item['author']) ?>
-                                                    </p>
-                                                    <p class="text-muted small mb-0">
-                                                        <?= number_format($item['price'], 0, ',', '.') ?>₫
-                                                        × <?= $item['quantity'] ?> cuốn
-                                                    </p>
-                                                </div>
-                                                <span class="fw-bold text-danger flex-shrink-0">
-                                                    <?= number_format($item['subtotal'], 0, ',', '.') ?>₫
-                                                </span>
-                                            </div>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php endif; ?>
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+                            
+                            <!-- Cột Trái: Danh sách Sản phẩm -->
+                            <div class="col-span-1 lg:col-span-7 p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-black/5">
+                                <div class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">
+                                    Sản phẩm (<?= count($items) ?> cuốn)
                                 </div>
-                            </div>
-
-                            <div class="col-lg-4 bg-light">
-                                <div class="p-4">
-
-                                    <h6 class="fw-bold text-muted text-uppercase small mb-3">
-                                        <i class="bi bi-geo-alt me-1"></i>Thông tin giao hàng
-                                    </h6>
-                                    <ul class="list-unstyled small text-secondary mb-4">
-                                        <li class="mb-2">
-                                            <i class="bi bi-person-fill me-2 text-warning"></i>
-                                            <strong>
-                                                <?= htmlspecialchars($order['fullname']) ?>
-                                            </strong>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="bi bi-telephone-fill me-2 text-warning"></i>
-                                            <?= htmlspecialchars($order['phone']) ?>
-                                        </li>
-                                        <li class="lh-sm">
-                                            <i class="bi bi-map-fill me-2 text-warning"></i>
-                                            <?= htmlspecialchars($order['address']) ?>
-                                        </li>
-                                    </ul>
-
-                                    <div class="border-top pt-3">
-                                        <div class="d-flex justify-content-between small text-muted mb-1">
-                                            <span>Tạm tính</span>
-                                            <span>
-                                                <?= number_format($order['total_price'], 0, ',', '.') ?>₫
-                                            </span>
-                                        </div>
-                                        <div class="d-flex justify-content-between small text-muted mb-2">
-                                            <span>Phí vận chuyển</span>
-                                            <span class="text-success fw-semibold">Miễn phí</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold">Tổng cộng</span>
-                                            <span class="fw-bold text-danger fs-6">
-                                                <?= number_format($order['total_price'], 0, ',', '.') ?>₫
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-3 text-center">
-                                        <span class="badge <?= $badge['class'] ?> px-4 py-2 rounded-pill fs-6 w-100 shadow-sm fw-medium">
-                                            <i class="bi <?= $badge['icon'] ?> me-1"></i>
-                                            <?= $badge['label'] ?>
-                                        </span>
-                                    </div>
-
-                                    <?php if (!in_array($order['status'], ['cancelled', 'failed'])): ?>
-                                    <div class="mt-4">
-                                        <?php
-                                        // Xác định bước hiện tại trong tiến trình
-                                        $steps        = ['pending', 'confirmed', 'shipping', 'delivered'];
-                                        $currentStep  = array_search($order['status'], $steps);
-                                        $currentStep  = ($currentStep === false) ? 0 : $currentStep;
-                                        $stepLabels   = ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Hoàn tất'];
-                                        $stepIcons    = ['bi-clock', 'bi-check-circle', 'bi-truck', 'bi-bag-check'];
+                                
+                                <?php if (empty($items)): ?>
+                                    <p class="text-[15px] text-gray-500 italic">Không có dữ liệu sản phẩm.</p>
+                                <?php else: ?>
+                                    <div class="flex flex-col gap-3">
+                                        <?php foreach ($items as $item):
+                                            $imgPath = '/bookstore/assets/images/books/' . $item['image'];
+                                            $imgSrc  = (!empty($item['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $imgPath))
+                                                        ? $imgPath : '/bookstore/assets/images/books/placeholder.png';
                                         ?>
-                                        <div class="order-progress">
-                                            <?php foreach ($steps as $i => $step): ?>
-                                                <div class="progress-step <?= $i <= $currentStep ? 'done' : 'pending-step' ?>">
-                                                    <div class="step-dot">
-                                                        <i class="bi <?= $stepIcons[$i] ?>"></i>
+                                        <div class="flex items-start gap-4 p-3 rounded-xl bg-white border border-black/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.04)] transition-all duration-300">
+                                            <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="w-[72px] h-[100px] object-cover rounded-md shadow-sm border border-black/10 shrink-0">
+                                            <div class="flex-grow flex flex-col justify-between h-full py-1">
+                                                <div>
+                                                    <h4 class="font-bold text-base text-[#111111] mb-1.5 leading-tight line-clamp-2">
+                                                        <?= htmlspecialchars($item['title']) ?>
+                                                    </h4>
+                                                    <div class="text-[15px] text-gray-500 font-medium">
+                                                        <?= htmlspecialchars($item['author']) ?>
                                                     </div>
-                                                    <span class="step-label">
-                                                        <?= $stepLabels[$i] ?>
+                                                </div>
+                                                <div class="flex justify-between items-center mt-3">
+                                                    <span class="text-[14px] font-semibold px-2.5 py-1 bg-[#F8F6F0] rounded-md text-gray-700 border border-black/5">
+                                                        <?= number_format($item['price'], 0, ',', '.') ?>₫ &times; <?= $item['quantity'] ?>
+                                                    </span>
+                                                    <span class="font-extrabold text-[#FF4500] text-base">
+                                                        <?= number_format($item['subtotal'], 0, ',', '.') ?>₫
                                                     </span>
                                                 </div>
-                                                <?php if ($i < count($steps) - 1): ?>
-                                                    <div class="progress-line <?= $i < $currentStep ? 'done' : '' ?>"></div>
-                                                <?php endif; ?>
-                                            <?php endforeach; ?>
+                                            </div>
                                         </div>
+                                        <?php endforeach; ?>
                                     </div>
-                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
 
+                            <!-- Cột Phải: Thanh toán & Giao hàng -->
+                            <div class="col-span-1 lg:col-span-5 p-5 sm:p-6 bg-white">
+                                <div class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">
+                                    Thanh toán & Giao hàng
                                 </div>
-                            </div></div></div></div></div><?php endforeach; ?>
+                                
+                                <div class="bg-[#F8F6F0] rounded-xl p-4 mb-5 border border-black/5 shadow-inner">
+                                    <div class="flex justify-between text-[15px] mb-2 text-gray-600 font-medium">
+                                        <span>Tạm tính</span>
+                                        <span><?= number_format($order['total_price'], 0, ',', '.') ?>₫</span>
+                                    </div>
+                                    <div class="flex justify-between text-[15px] mb-3 text-gray-600 font-medium">
+                                        <span>Phí vận chuyển</span>
+                                        <span class="text-emerald-600 font-bold">Miễn phí</span>
+                                    </div>
+                                    <div class="border-t border-black/10 pt-3 flex justify-between items-center">
+                                        <span class="font-bold text-[14px] text-[#111111]">TỔNG CỘNG</span>
+                                        <span class="font-extrabold text-[22px] text-[#FF4500]">
+                                            <?= number_format($order['total_price'], 0, ',', '.') ?>₫
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="text-[15px] text-gray-700 space-y-2.5 mb-6 p-4 rounded-xl border border-black/5 bg-gray-50">
+                                    <div class="font-bold text-[#111111] text-base mb-1.5"><?= htmlspecialchars($order['fullname']) ?></div>
+                                    <div class="flex gap-2.5 items-center"><i class="bi bi-telephone-fill text-gray-400"></i> <?= htmlspecialchars($order['phone']) ?></div>
+                                    <div class="flex gap-2.5 items-start mt-1.5"><i class="bi bi-geo-alt-fill text-gray-400 mt-1"></i> <span class="leading-relaxed"><?= htmlspecialchars($order['address']) ?></span></div>
+                                </div>
+
+                                <div class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">
+                                    Trạng thái đơn hàng
+                                </div>
+                                <div class="relative pl-3 border-l-2 border-black/10 space-y-5 ml-2 mt-2">
+                                    <?php 
+                                        $isError = false;
+                                        if ($order['status'] === 'failed') {
+                                            $steps = ['pending', 'confirmed', 'shipping', 'failed'];
+                                            $stepLabels = ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao hàng', 'Giao hàng thất bại'];
+                                            $currentStep = 3;
+                                            $isError = true;
+                                        } elseif ($order['status'] === 'cancelled') {
+                                            $steps = ['pending', 'cancelled'];
+                                            $stepLabels = ['Chờ xác nhận', 'Đã hủy'];
+                                            $currentStep = 1;
+                                            $isError = true;
+                                        } else {
+                                            $steps = ['pending', 'confirmed', 'shipping', 'delivered'];
+                                            $stepLabels = ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao hàng', 'Giao thành công'];
+                                            $currentStep = array_search($order['status'], $steps);
+                                            if ($currentStep === false) {
+                                                if ($order['status'] === 'completed') $currentStep = 3;
+                                                else $currentStep = 0;
+                                            }
+                                        }
+                                    ?>
+                                    <?php foreach ($steps as $i => $step): 
+                                        $isDone = $i <= $currentStep;
+                                        $isCurrent = $i == $currentStep;
+                                        $dotColor = ($isError && $isCurrent) ? 'bg-[#FF4500]' : ($isDone ? 'bg-[#111111]' : 'bg-gray-300');
+                                        $pingColor = ($isError && $isCurrent) ? 'bg-[#FF4500]' : 'bg-[#111111]';
+                                        $textColor = ($isError && $isCurrent) ? 'text-[#FF4500]' : 'text-[#111111]';
+                                    ?>
+                                        <div class="relative">
+                                            <div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white <?= $dotColor ?>">
+                                                <?= $isCurrent ? '<span class="absolute -inset-1.5 rounded-full animate-ping ' . $pingColor . ' opacity-40"></span>' : '' ?>
+                                            </div>
+                                            <div class="pl-3">
+                                                <p class="text-[15px] <?= $isDone ? 'font-bold ' . $textColor : 'font-medium text-gray-400' ?>">
+                                                    <?= $stepLabels[$i] ?>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div></div></div></div></div><?php endforeach; ?>
 
         </div><?php endif; ?>
 

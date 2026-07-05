@@ -1,5 +1,6 @@
 <?php
 // cart.php
+$pageTitle = 'Giỏ hàng | NOVELTY';
 
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../config/db.php';
@@ -34,188 +35,185 @@ $cartItems = $stmt->fetchAll();
 $totalPrice = array_sum(array_column($cartItems, 'subtotal'));
 ?>
 
-<main class="container my-5">
+<main class="max-w-6xl mx-auto px-4 pt-[76px] pb-20 min-h-screen">
 
-    <div class="page-header-custom">
-        <h3 class="title">
-            <i class="bi bi-cart3"></i> Giỏ hàng của tôi
-        </h3>
+    <!-- Nâng cấp Hero Header Giỏ hàng -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/10 mb-6">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+                <i class="bi bi-cart3 text-base"></i>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] m-0 uppercase" style="font-family: var(--font-body) !important;">GIỎ HÀNG CỦA TÔI</h3>
+        </div>
         <?php if (!empty($cartItems)): ?>
-            <span class="badge-custom">
+            <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#F8F6F0] border border-black/10 font-bold text-sm text-[#111111] shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <?= count($cartItems) ?> sản phẩm
             </span>
         <?php endif; ?>
     </div>
 
     <?php if (empty($cartItems)): ?>
-        <div class="text-center py-5">
-            <img src="https://img.icons8.com/3d-fluency/94/shopping-cart.png" style="width: 120px; height: 120px; filter: grayscale(1); opacity: 0.7;" class="mb-3" alt="Empty Cart">
-            <h5 class="text-muted mt-3">Giỏ hàng của bạn đang trống</h5>
-            <p class="text-muted small">Hãy chọn thêm sách yêu thích để bắt đầu!</p>
-            <a href="/bookstore/index.php" class="btn btn-warning fw-bold px-4 mt-2 shadow-sm rounded-3">
-                <i class="bi bi-book me-2"></i>Khám phá sách ngay
+        <div class="text-center py-20 bg-white rounded-3xl border border-black/5 shadow-sm">
+            <img src="https://img.icons8.com/3d-fluency/94/shopping-cart.png" style="width: 120px; height: 120px; filter: grayscale(1); opacity: 0.7;" class="mb-4 mx-auto" alt="Empty Cart">
+            <h5 class="text-2xl font-bold text-[#111111] mb-2" style="font-family: var(--font-body) !important;">Giỏ hàng của bạn đang trống</h5>
+            <p class="text-gray-500 mb-6">Hãy chọn thêm sách yêu thích để bắt đầu!</p>
+            <a href="/bookstore/index.php" class="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-bold shadow-md hover:bg-gray-800 transition-colors text-decoration-none">
+                <i class="bi bi-book"></i> Khám phá sách ngay
             </a>
         </div>
 
     <?php else: ?>
-        <div class="row g-4">
+        <form id="checkoutForm" action="/bookstore/pages/shop/checkout.php" method="POST">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-32">
 
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0 bg-white">
+            <!-- Cột trái (Sản phẩm) -->
+            <div class="lg:col-span-7">
+                <div class="mb-6">
+                    <?php foreach ($cartItems as $item): ?>
+                    <?php
+                        $imgPath = '/bookstore/assets/images/books/' . $item['image'];
+                        $imgSrc  = (!empty($item['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $imgPath))
+                                    ? $imgPath
+                                    : '/bookstore/assets/images/books/placeholder.png';
+                    ?>
+                    
+                    <!-- Cart Item Card -->
+                    <div class="bg-white border border-black/10 rounded-2xl p-4 sm:p-5 mb-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-300 flex items-center gap-4 relative overflow-hidden group">
+                        
+                        <!-- Checkbox -->
+                        <div class="shrink-0 pl-1">
+                            <input type="checkbox" name="selected_books[]" value="<?= $item['book_id'] ?>" data-subtotal="<?= $item['subtotal'] ?>" checked class="item-check w-5 h-5 accent-black rounded cursor-pointer border-gray-300">
+                        </div>
+
+                        <!-- Image -->
+                        <a href="/bookstore/pages/shop/product.php?id=<?= $item['book_id'] ?>" class="shrink-0">
+                            <img src="<?= htmlspecialchars($imgSrc) ?>"
+                                 alt="<?= htmlspecialchars($item['title']) ?>"
+                                 class="w-20 h-28 object-cover rounded-xl shadow-sm hover:scale-105 transition-transform duration-300 border border-black/5">
+                        </a>
+
+                        <!-- Info -->
+                        <div class="flex-grow flex flex-col min-w-0 py-1">
+                            <a href="/bookstore/pages/shop/product.php?id=<?= $item['book_id'] ?>"
+                               class="text-lg font-bold text-[#111111] leading-snug line-clamp-1 hover:text-[#FF4500] transition-colors text-decoration-none">
+                                <?= htmlspecialchars($item['title']) ?>
+                            </a>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mt-0.5 line-clamp-1 mb-0">
+                                <?= htmlspecialchars($item['author']) ?>
+                            </p>
                             
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="ps-4 py-3 text-center border-bottom" style="background-color: #fff8e1 !important; width: 50px;">
-                                        <input class="form-check-input shadow-none" type="checkbox" id="selectAll" checked style="cursor: pointer; transform: scale(1.2);">
-                                    </th>
-                                    <th class="py-3 text-dark text-uppercase fw-bolder border-bottom" style="background-color: #fff8e1 !important; font-size: 0.85rem; letter-spacing: 0.5px; width: 90px;">Ảnh</th>
-                                    <th class="py-3 text-dark text-uppercase fw-bolder border-bottom" style="background-color: #fff8e1 !important; font-size: 0.85rem; letter-spacing: 0.5px;">Tên sách</th>
-                                    <th class="text-center py-3 text-dark text-uppercase fw-bolder border-bottom" style="background-color: #fff8e1 !important; font-size: 0.85rem; letter-spacing: 0.5px; width: 140px;">Số lượng</th>
-                                    <th class="text-end py-3 text-dark text-uppercase fw-bolder border-bottom" style="background-color: #fff8e1 !important; font-size: 0.85rem; letter-spacing: 0.5px; width: 110px;">Đơn giá</th>
-                                    <th class="text-end py-3 text-dark text-uppercase fw-bolder border-bottom" style="background-color: #fff8e1 !important; font-size: 0.85rem; letter-spacing: 0.5px; width: 120px;">Thành tiền</th>
-                                    <th class="text-center pe-4 py-3 border-bottom" style="background-color: #fff8e1 !important; width: 70px;"></th>
-                                </tr>
-                            </thead>
-                            
-                            <tbody>
-                                <?php foreach ($cartItems as $item): ?>
-                                <?php
-                                    $imgPath = '/bookstore/assets/images/books/' . $item['image'];
-                                    $imgSrc  = (!empty($item['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $imgPath))
-                                                ? $imgPath
-                                                : '/bookstore/assets/images/books/placeholder.png';
-                                ?>
-                                <tr style="transition: background-color 0.2s;">
-                                    
-                                    <td class="ps-4 py-4 text-center">
-                                        <input class="form-check-input item-check shadow-none" type="checkbox" name="selected_books[]" value="<?= $item['book_id'] ?>" data-subtotal="<?= $item['subtotal'] ?>" form="checkoutForm" checked style="cursor: pointer; transform: scale(1.2); border-color: #adb5bd;">
-                                    </td>
-
-                                    <td class="py-4">
-                                        <a href="/bookstore/pages/shop/product.php?id=<?= $item['book_id'] ?>">
-                                            <img src="<?= htmlspecialchars($imgSrc) ?>"
-                                                 alt="<?= htmlspecialchars($item['title']) ?>"
-                                                 class="cart-book-img rounded-3 shadow-sm border border-light" style="width: 60px; height: 85px; object-fit: cover;">
-                                        </a>
-                                    </td>
-
-                                    <td class="py-4">
-                                        <a href="/bookstore/pages/shop/product.php?id=<?= $item['book_id'] ?>"
-                                           class="fw-bold text-decoration-none cart-title" style="color: #2b2b2b; font-size: 1.05rem;">
-                                            <?= htmlspecialchars($item['title']) ?>
-                                        </a>
-                                        <p class="text-muted small mb-0 mt-2 d-inline-flex align-items-center bg-light px-2 py-1 rounded-pill border">
-                                            <span class="d-flex align-items-center justify-content-center rounded-circle bg-warning text-dark me-2" style="width: 18px; height: 18px;">
-                                                <i class="bi bi-person-fill" style="font-size: 0.65rem;"></i>
-                                            </span>
-                                            <?= htmlspecialchars($item['author']) ?>
-                                        </p>
-                                        <?php if ($item['quantity'] > $item['stock_quantity']): ?>
-                                            <div class="mt-2">
-                                                <span class="badge bg-danger-subtle text-danger small rounded-2">
-                                                    <i class="bi bi-exclamation-circle me-1"></i>
-                                                    Chỉ còn <?= $item['stock_quantity'] ?> cuốn
-                                                </span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <td class="text-center py-4">
-                                        <form method="POST" action="/bookstore/actions/update_cart.php" class="d-inline-flex align-items-center gap-1 update-form bg-white border rounded-pill p-1 shadow-sm">
-                                            <input type="hidden" name="book_id" value="<?= $item['book_id'] ?>">
-                                            
-                                            <button type="button" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center qty-btn text-secondary border-0" data-action="decrease" style="width: 28px; height: 28px; background-color: #f8f9fa;">
-                                                <i class="bi bi-dash fw-bold"></i>
-                                            </button>
-
-                                            <input type="number" name="quantity" class="form-control form-control-sm text-center fw-bold bg-transparent border-0 cart-qty-input shadow-none px-0" value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock_quantity'] ?>" style="width: 40px; font-size: 1rem;">
-
-                                            <button type="button" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center qty-btn text-secondary border-0" data-action="increase" data-max="<?= $item['stock_quantity'] ?>" style="width: 28px; height: 28px; background-color: #f8f9fa;">
-                                                <i class="bi bi-plus fw-bold"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-
-                                    <td class="text-end py-4 text-secondary fw-medium">
-                                        <?= number_format($item['price'], 0, ',', '.') ?>₫
-                                    </td>
-
-                                    <td class="text-end py-4 fw-bold text-danger" style="font-size: 1.05rem;">
+                            <!-- Action Row -->
+                            <div class="flex items-center justify-between w-full mt-4 pt-3 border-t border-black/5">
+                                <!-- Qty selector -->
+                                <div class="inline-flex items-center border border-black/15 bg-[#F8F6F0] rounded-full p-1 shadow-2xs">
+                                    <button type="button" class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/10 transition border-0 bg-transparent text-gray-700" onclick="updateQuantity(<?= $item['book_id'] ?>, 'decrease', <?= $item['stock_quantity'] ?>)">-</button>
+                                    <span class="w-8 text-center font-bold text-sm text-[#111111]"><?= $item['quantity'] ?></span>
+                                    <button type="button" class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/10 transition border-0 bg-transparent text-gray-700" onclick="updateQuantity(<?= $item['book_id'] ?>, 'increase', <?= $item['stock_quantity'] ?>)">+</button>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <!-- Price -->
+                                    <span class="text-lg font-extrabold text-[#FF4500]">
                                         <?= number_format($item['subtotal'], 0, ',', '.') ?>₫
-                                    </td>
-
-                                    <td class="text-center pe-4 py-4">
-                                        <form method="POST" action="/bookstore/actions/remove_cart.php" class="form-remove-cart">
-                                            <input type="hidden" name="book_id" value="<?= $item['book_id'] ?>">
-                                            <button type="submit" class="btn btn-sm rounded-3 shadow-sm d-inline-flex align-items-center justify-content-center" style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; width: 35px; height: 35px; transition: all 0.2s;" title="Xóa khỏi giỏ hàng" onmouseover="this.style.backgroundColor='#fca5a5'" onmouseout="this.style.backgroundColor='#fee2e2'">
-                                                <i class="bi bi-trash3"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                                    </span>
+                                    
+                                    <!-- Trash Button -->
+                                    <button type="button" onclick="document.getElementById('form-remove-<?= $item['book_id'] ?>').submit()" class="w-9 h-9 rounded-full bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-2xs ml-4 border-0">
+                                        <i class="bi bi-trash3 text-[15px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <?php endforeach; ?>
                 </div>
 
-                <div>
-                    <a href="/bookstore/index.php" class="btn btn-light border text-secondary rounded-pill shadow-sm fw-normal px-4">
-                        <i class="bi bi-arrow-left me-2"></i>Tiếp tục mua sắm
-                    </a>
-                </div>
+                <!-- Continue Shopping -->
+                <a href="/bookstore/index.php" class="inline-flex items-center gap-2 font-semibold text-sm text-gray-600 hover:text-[#111111] mt-2 transition-colors cursor-pointer group text-decoration-none px-2">
+                    <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i> Tiếp tục mua sắm
+                </a>
             </div>
 
-            <div class="col-lg-4">
-                <div class="card shadow-sm border-0 cart-summary sticky-top rounded-4 overflow-hidden" style="top: 100px;">
-                    <div class="card-header bg-dark text-white fw-bold py-3 border-0">
-                        <i class="bi bi-receipt me-2 text-warning"></i>Tóm tắt đơn hàng
+            <!-- ── ORDER SUMMARY ── -->
+            <div class="lg:col-span-5">
+                <div class="bg-[#FDFCF7] border border-black/10 rounded-3xl p-6 md:p-8 shadow-[0_15px_35px_rgba(0,0,0,0.05)] sticky top-32 h-fit z-10 transition-all duration-300 hover:border-black/30 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
+                    <h4 class="text-xl font-extrabold tracking-tight text-[#111111] mb-6 pb-4 border-b border-black/10" style="font-family: var(--font-body) !important;">TÓM TẮT ĐƠN HÀNG</h4>
+                    
+                    <div class="flex justify-between items-center text-sm font-medium text-gray-600 mb-4">
+                        <span id="summary-count">Tạm tính (<?= count($cartItems) ?> sản phẩm)</span>
+                        <span class="text-[#111111]" id="summary-subtotal"><?= number_format($totalPrice, 0, ',', '.') ?>₫</span>
                     </div>
-                    <div class="card-body p-4 bg-white">
-
-                        <div class="d-flex justify-content-between mb-3 text-secondary">
-                            <span id="summary-count">Tạm tính (<?= count($cartItems) ?> sản phẩm)</span>
-                            <span class="fw-medium text-dark" id="summary-subtotal"><?= number_format($totalPrice, 0, ',', '.') ?>₫</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 text-secondary">
-                            <span>Phí vận chuyển</span>
-                            <span class="text-success fw-semibold bg-success-subtle px-2 py-1 rounded-2" style="font-size: 0.85rem;">Miễn phí</span>
-                        </div>
-
-                        <hr class="border-secondary opacity-25 my-4">
-
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="fw-bold fs-5 text-dark">Tổng cộng</span>
-                            <span class="fw-bold fs-4 text-danger" id="summary-total">
-                                <?= number_format($totalPrice, 0, ',', '.') ?>₫
-                            </span>
-                        </div>
-
-                        <div class="d-grid">
-                            <form id="checkoutForm" action="/bookstore/pages/shop/checkout.php" method="POST">
-                                <button type="submit" id="btn-checkout" class="btn btn-warning w-100 btn-lg fw-bold py-3 shadow-sm rounded-pill">
-                                    <i class="bi bi-credit-card me-2"></i>Tiến hành thanh toán
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="mt-4 text-center text-muted small bg-light py-2 rounded-3 border">
-                            <i class="bi bi-shield-check text-success me-1"></i>
-                            Thanh toán an toàn &amp; bảo mật
-                        </div>
-
+                    <div class="flex justify-between items-center text-sm font-medium text-gray-600 mb-4">
+                        <span>Phí vận chuyển</span>
+                        <span class="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full text-xs">Miễn phí</span>
                     </div>
+
+                    <div class="border-t border-dashed border-black/15 pt-5 mt-4 flex justify-between items-center">
+                        <span class="text-base font-bold text-[#111]">TỔNG CỘNG</span>
+                        <span class="text-2xl sm:text-3xl font-extrabold text-[#FF4500]" id="summary-total">
+                            <?= number_format($totalPrice, 0, ',', '.') ?>₫
+                        </span>
+                    </div>
+
+                    <button type="submit" id="btn-checkout" class="w-full bg-[#111111] text-white font-semibold py-4 rounded-full text-sm tracking-wide uppercase hover:bg-black/80 hover:shadow-[0_15px_30px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 mt-6 cursor-pointer relative overflow-hidden group after:absolute after:inset-0 after:w-1/2 after:h-full after:bg-white/15 after:-skew-x-[20deg] after:-translate-x-full group-hover:after:translate-x-[300%] after:transition-transform after:duration-1000 border-0">
+                        TIẾN HÀNH THANH TOÁN
+                        <i class="bi bi-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
                 </div>
             </div>
 
         </div>
+        </form>
+
+        <!-- Hidden Forms for Actions -->
+        <?php foreach ($cartItems as $item): ?>
+            <form method="POST" action="/bookstore/actions/update_cart.php" id="form-qty-<?= $item['book_id'] ?>" class="d-none update-form">
+                <input type="hidden" name="book_id" value="<?= $item['book_id'] ?>">
+                <button type="submit" name="action" value="decrease" data-action="decrease"></button>
+                <input type="number" name="quantity" value="<?= $item['quantity'] ?>" class="cart-qty-input">
+                <button type="submit" name="action" value="increase" data-action="increase" data-max="<?= $item['stock_quantity'] ?>"></button>
+            </form>
+
+            <form method="POST" action="/bookstore/actions/remove_cart.php" id="form-remove-<?= $item['book_id'] ?>" class="d-none">
+                <input type="hidden" name="book_id" value="<?= $item['book_id'] ?>">
+            </form>
+        <?php endforeach; ?>
+
     <?php endif; ?>
 
 </main>
 
 <script>
+function updateQuantity(bookId, action, maxQty) {
+    const form = document.getElementById('form-qty-' + bookId);
+    if (!form) return;
+    const inputQty = form.querySelector('input[name="quantity"]');
+    if (!inputQty) return;
+
+    let currentVal = parseInt(inputQty.value) || 1;
+    if (action === 'decrease') {
+        if (currentVal > 1) {
+            inputQty.value = currentVal - 1;
+            form.submit();
+        }
+    } else if (action === 'increase') {
+        if (currentVal < maxQty) {
+            inputQty.value = currentVal + 1;
+            form.submit();
+        } else {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Chỉ còn ' + maxQty + ' cuốn trong kho!',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Xử lý Logic Checkbox Chọn Sản Phẩm Thanh Toán
     const selectAll = document.getElementById('selectAll');

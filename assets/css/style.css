@@ -1,392 +1,1355 @@
-/* Hover effect cho link trong footer */
-.footer-link:hover {
-    color: #ffc107 !important;
-    transition: color 0.2s ease;
+/* 
+=========================================================
+   THE LIVING PAPER & CYBER-INK : DESIGN SYSTEM
+=========================================================
+*/
+
+:root {
+    /* Color System */
+    --bg-paper: #F8F6F0;
+    /* Warm Alabaster */
+    --text-ink: #0D0D0D;
+    /* Deep Cyber Ink */
+    --accent-primary: #FF3300;
+    /* International Orange */
+    --accent-secondary: #CCFF00;
+    /* Electric Lime */
+
+    /* Typography */
+    --font-heading: 'Syne', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Hover effect cho nút mạng xã hội */
-.social-btn:hover {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #000 !important;
-    transition: all 0.2s ease;
-}
-
-/* ── HERO BANNER ───────────────────────────────────────── */
-.hero-banner {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-    border-bottom: 3px solid #ffc107;
-}
-
-/* ── BOOK CARD ─────────────────────────────────────────── */
-.book-card {
-    border-radius: 12px;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    overflow: hidden;
-}
-.book-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, .15) !important;
-}
-
-/* Wrapper ảnh — tỷ lệ cố định 3:4 cho mọi bìa sách */
-.book-card__img-wrap {
+/* â”€â”€ GLOBAL RESETS & BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+body {
+    background-color: var(--bg-paper) !important;
+    color: var(--text-ink) !important;
+    font-family: var(--font-body);
     position: relative;
-    overflow: hidden;
-    aspect-ratio: 3 / 4;
-    background: #f8f9fa;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
-.book-card__img {
+
+/* â”€â”€ THE LIVING PAPER : NOISE TEXTURE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Hiá»‡u á»©ng nhiá»…u SVG siÃªu nháº¹ Ä‘á»ƒ táº¡o cáº£m giÃ¡c máº·t giáº¥y */
+    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* â”€â”€ CUSTOM SELECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+::selection {
+    background-color: var(--accent-primary);
+    color: var(--bg-paper);
+}
+
+::-moz-selection {
+    background-color: var(--accent-primary);
+    color: var(--bg-paper);
+}
+
+/* â”€â”€ CUSTOM SCROLLBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--text-ink);
+    border-radius: 0px;
+}
+
+/* â”€â”€ TYPOGRAPHY: EDITORIAL STYLE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.04em !important;
+    color: var(--text-ink) !important;
+    text-transform: uppercase;
+    line-height: 1.1 !important;
+}
+
+p,
+span,
+div,
+a,
+li,
+input,
+button {
+    font-family: var(--font-body);
+}
+
+a {
+    color: var(--text-ink);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-primary);
+}
+
+/* â”€â”€ XÃ“A CÃC Äá»ŠNH Dáº NG CÅ¨ Cá»¦A BOOTSTRAP Äá»‚ CHUáº¨N Bá»Š LÃ€M Láº I â”€â”€ */
+.bg-dark {
+    background-color: var(--text-ink) !important;
+}
+
+.text-warning {
+    color: var(--accent-primary) !important;
+}
+
+.bg-warning {
+    background-color: var(--accent-primary) !important;
+    color: var(--bg-paper) !important;
+}
+
+.btn-warning {
+    background-color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--bg-paper) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.btn-warning:hover {
+    background-color: var(--text-ink) !important;
+    border-color: var(--text-ink) !important;
+    color: var(--bg-paper) !important;
+}
+
+/* â”€â”€ THE GALLERY CARD (LÆ¯á»šI Sáº¢N PHáº¨M) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.gallery-card {
+    border-radius: 24px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.gallery-card:hover {
+    transform: translateY(-8px);
+}
+
+/* Nth-child Pastel Colors */
+.col:nth-child(4n+1) .gallery-card {
+    background-color: #fce4ec;
+}
+
+/* Soft Pink */
+.col:nth-child(4n+2) .gallery-card {
+    background-color: #e3f2fd;
+}
+
+/* Soft Blue */
+.col:nth-child(4n+3) .gallery-card {
+    background-color: #e8f5e9;
+}
+
+/* Soft Green */
+.col:nth-child(4n+4) .gallery-card {
+    background-color: #fff3e0;
+}
+
+/* Soft Orange */
+
+.gallery-card__img-wrap {
+    width: 100%;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.gallery-card__img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.35s ease;
+    aspect-ratio: 3/4;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
-.book-card:hover .book-card__img {
+
+.gallery-card:hover .gallery-card__img {
     transform: scale(1.05);
 }
 
-/* Badge thể loại góc trên trái */
-.book-card__badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: .7rem;
-    border-radius: 20px;
+.gallery-card__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Overlay "Hết hàng" */
-.book-card__overlay-soldout {
+.gallery-card__title a {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-ink);
+    text-decoration: none;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: -0.01em;
+}
+
+.gallery-card__author {
+    font-size: 0.85rem;
+    color: rgba(13, 13, 13, 0.6);
+    margin-top: 0.2rem;
+    margin-bottom: 0;
+}
+
+.gallery-card__price {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    white-space: nowrap;
+    margin-top: auto;
+    /* Pushes price to the bottom if container grows */
+    padding-top: 0.8rem;
+}
+
+.gallery-card__category {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+    color: var(--text-ink);
+    opacity: 0.7;
+}
+
+/* â”€â”€ EDITORIAL CATEGORY PILLS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.category-item {
+    flex-shrink: 0;
+}
+
+.category-card {
+    border: 2px solid var(--text-ink) !important;
+    border-radius: 100px !important;
+    background: transparent !important;
+    box-shadow: 4px 4px 0px var(--text-ink) !important;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1.25rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0 !important;
+}
+
+.category-card .card-body {
+    flex-direction: row !important;
+    padding: 0 !important;
+    gap: 0.8rem;
+    display: flex;
+    align-items: center;
+}
+
+.category-card img {
+    width: 28px !important;
+    height: 28px !important;
+    margin-bottom: 0 !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.category-card h6 {
+    font-family: var(--font-heading) !important;
+    text-transform: uppercase;
+    font-size: 0.95rem !important;
+    letter-spacing: 0;
+    white-space: nowrap;
+    margin-bottom: 0 !important;
+    color: var(--text-ink) !important;
+}
+
+.category-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--accent-primary) !important;
+    border-color: var(--text-ink) !important;
+}
+
+.category-card.active {
+    background-color: var(--text-ink) !important;
+    color: var(--bg-paper) !important;
+    box-shadow: 4px 4px 0px var(--accent-primary) !important;
+}
+
+.category-card.active h6 {
+    color: var(--bg-paper) !important;
+}
+
+/* Hidden Pop-up Action Button */
+.gallery-card__form {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+.gallery-card__btn-add {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--text-ink);
+    color: var(--bg-paper);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+.gallery-card:hover .gallery-card__btn-add {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+.gallery-card__btn-add:hover {
+    background-color: var(--accent-primary);
+    color: var(--text-ink);
+    transform: scale(1.15) rotate(0deg) !important;
+}
+
+.gallery-card__soldout {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, .55);
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.gallery-card__soldout span {
+    background: var(--text-ink);
+    color: var(--bg-paper);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 6px 18px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* â”€â”€ SMART MORPHING DOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.smart-dock {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1030;
+    width: 90%;
+    max-width: 1000px;
+    display: flex;
+    justify-content: center;
+}
+
+.dock-container {
+    background-color: rgba(248, 246, 240, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(13, 13, 13, 0.08);
+    border-radius: 100px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+}
+
+.dock-logo {
+    text-decoration: none;
+    display: inline-block;
+    overflow: hidden;
+    padding-left: 0.5rem;
+}
+
+.logo-text {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--text-ink);
+    letter-spacing: -0.05em;
+    position: relative;
+    display: inline-block;
+    background: linear-gradient(to right, var(--accent-primary) 50%, var(--text-ink) 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: background-position 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.dock-logo:hover .logo-text {
+    background-position: 0 0;
+}
+
+.dock-links-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+}
+
+.dock-link {
+    padding: 0.5rem 1rem;
+    color: var(--text-ink);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    position: relative;
+    z-index: 2;
+    transition: color 0.3s ease;
+}
+
+.dock-indicator {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 36px;
+    background-color: var(--text-ink);
+    border-radius: 50px;
+    transform: translateY(-50%);
+    z-index: 1;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.dock-link.active-hover {
+    color: var(--bg-paper) !important;
+}
+
+.dock-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding-right: 0.2rem;
+}
+
+.dock-action-link {
+    color: var(--text-ink);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+}
+
+.dock-btn {
+    background-color: var(--text-ink);
+    color: var(--bg-paper);
+    padding: 0.6rem 1.4rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-family: var(--font-heading);
+}
+
+.dock-btn:hover {
+    transform: scale(1.05);
+    background-color: var(--accent-primary);
+    color: var(--text-ink);
+}
+
+.dock-cart {
+    position: relative;
+    color: var(--text-ink);
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(13, 13, 13, 0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.dock-cart:hover {
+    background-color: var(--text-ink);
+    color: var(--bg-paper);
+    border-color: var(--text-ink);
+}
+
+.cart-pulse {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--accent-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 0 rgba(255, 51, 0, 0.7);
+    animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 51, 0, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 8px rgba(255, 51, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 51, 0, 0);
+    }
+}
+
+
+
+/* â”€â”€ BÆ¯á»šC 2 FIX: SMART MORPHING DOCK (TRUE FLOATING) â”€â”€ */
+body {
+    padding-top: 128px;
+    /* pt-32 Ä‘á»ƒ trÃ¡nh Navbar che ná»™i dung */
+}
+
+.smart-dock {
+    position: fixed;
+    top: 1.5rem;
+    /* top-6 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    /* z-50 */
+    width: 90%;
+    max-width: 48rem;
+    /* max-w-3xl */
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    /* transition-all duration-300 */
+}
+
+.dock-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.dock-logo {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.dock-logo .logo-text {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--text-ink);
+    letter-spacing: -0.02em;
+    transition: color 0.3s;
+}
+
+.dock-logo:hover .logo-text {
+    color: var(--accent-primary);
+}
+
+.dock-links-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.dock-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--text-ink);
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.dock-link:hover {
+    color: var(--accent-primary);
+}
+
+.dock-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dock-action-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--text-ink);
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    background: transparent;
+    border: none;
+}
+
+.dock-action-link:hover {
+    color: var(--accent-primary);
+}
+
+.dock-btn {
+    text-decoration: none;
+    background-color: var(--text-ink);
+    color: #ffffff;
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.dock-btn:hover {
+    background-color: var(--accent-primary);
+    color: var(--text-ink);
+}
+
+.dock-cart {
+    position: relative;
+    color: var(--text-ink);
+    font-size: 1.25rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    transition: background 0.2s;
+}
+
+.dock-cart:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* â”€â”€ BÆ¯á»šC 3 FIX: KHÃM PHÃ THá»‚ LOáº I (CATEGORY PILLS) â”€â”€ */
+.category-pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    cursor: pointer;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-ink);
+    text-decoration: none;
+}
+
+.category-pill img {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.5rem;
+    object-fit: contain;
+}
+
+.category-pill:hover {
+    border-color: #000000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+    color: var(--text-ink);
+}
+
+.category-pill.active {
+    background-color: #111111;
+    color: #ffffff;
+    border-color: #111111;
+}
+
+.category-pill.active img {
+    filter: brightness(0) invert(1);
+}
+
+.category-pill.active:hover {
+    color: #ffffff;
+}
+
+/* â”€â”€ BÆ¯á»šC 6: ZEN CHECKOUT & CART â”€â”€ */
+.zen-cart-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.zen-cart-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    transition: background-color 0.3s;
+}
+
+.zen-cart-item:last-child {
+    border-bottom: none;
+}
+
+.zen-cart-item:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.zen-trash-btn {
+    background: transparent;
+    border: none;
+    color: #999;
+    font-size: 1.25rem;
+    transition: color 0.3s, transform 0.3s;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.zen-trash-btn:hover {
+    color: #ff3300;
+    animation: shake 0.4s;
+}
+
+@keyframes shake {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(10deg);
+    }
+
+    50% {
+        transform: rotate(-10deg);
+    }
+
+    75% {
+        transform: rotate(10deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.zen-summary {
+    background-color: #0D0D0D;
+    color: #F8F6F0;
+    border-radius: 24px;
+    padding: 2.5rem;
+}
+
+.zen-stepper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+}
+
+.zen-step {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.9rem;
+}
+
+.zen-step.active {
+    color: var(--text-ink);
+}
+
+.zen-step.active .step-num {
+    border-color: var(--text-ink);
+    background: var(--text-ink);
+    color: var(--accent-primary);
+    box-shadow: 0 0 15px rgba(204, 255, 0, 0.4);
+}
+
+.step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #aaa;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+}
+
+.step-divider {
+    width: 40px;
+    height: 2px;
+    background: #e0e0e0;
+}
+
+.zen-floating-group {
+    position: relative;
+    margin-bottom: 2.5rem;
+}
+
+.zen-floating-group input,
+.zen-floating-group textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+    font-size: 1.1rem;
+    color: var(--text-ink);
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.zen-floating-group input:focus,
+.zen-floating-group textarea:focus {
+    border-bottom-color: var(--accent-primary);
+}
+
+.zen-floating-group label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    font-size: 1.1rem;
+    color: #888;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.zen-floating-group input:focus~label,
+.zen-floating-group input:not(:placeholder-shown)~label,
+.zen-floating-group textarea:focus~label,
+.zen-floating-group textarea:not(:placeholder-shown)~label {
+    top: -22px;
+    font-size: 0.85rem;
+    color: var(--text-ink);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* â”€â”€ BÆ¯á»šC 5: IMMERSIVE READING ROOM (PRODUCT DETAIL) â”€â”€ */
+.book-stage-glow {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.glow-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(204, 255, 0, 0.25) 0%, rgba(248, 246, 240, 0) 70%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.book-cover-3d {
+    position: relative;
+    z-index: 1;
+    border-radius: 8px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    transition: transform 0.5s ease;
+}
+
+.book-cover-3d:hover {
+    transform: translateY(-10px) scale(1.02);
+}
+
+.editorial-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-ink);
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+}
+
+.editorial-author {
+    font-size: 1.25rem;
+    color: rgba(13, 13, 13, 0.7);
+}
+
+.editorial-price {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+}
+
+.stock-pulse-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--text-ink);
+    color: var(--bg-paper);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-secondary);
+    border-radius: 50%;
+    box-shadow: 0 0 0 rgba(204, 255, 0, 0.8);
+    animation: pulse-ring-green 2s infinite;
+}
+
+@keyframes pulse-ring-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(204, 255, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(204, 255, 0, 0);
+    }
+}
+
+.stock-pulse-badge.out-of-stock {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.stock-pulse-badge.out-of-stock .pulse-dot {
+    background-color: #999;
+    animation: none;
+}
+
+.editorial-divider {
+    border-top: 2px solid rgba(13, 13, 13, 0.1);
+    opacity: 1;
+}
+
+.editorial-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #444;
+}
+
+.buy-box-container {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.buy-box-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #f0f0f0;
+    border-radius: 100px;
+    padding: 4px;
+}
+
+.qty-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    color: var(--text-ink);
+    font-size: 1.25rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.qty-btn:hover {
+    background: var(--text-ink);
+    color: var(--bg-paper);
+}
+
+.qty-input {
+    width: 60px;
+    background: transparent;
+    border: none;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--text-ink);
+    pointer-events: none;
+    transition: transform 0.15s ease;
+}
+
+.btn-magnetic {
+    background: var(--text-ink);
+    color: var(--bg-paper);
+    border: none;
+    padding: 1.25rem 2rem;
+    border-radius: 100px;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s;
+    will-change: transform;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.book-card__overlay-soldout span {
-    background: #dc3545;
-    color: #fff;
-    font-weight: 700;
-    font-size: .9rem;
-    padding: 6px 18px;
-    border-radius: 20px;
-    letter-spacing: .5px;
-}
 
-/* Giới hạn 2 dòng cho tên sách dài */
-.book-card__title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 2.8rem;
-}
-
-/* ── PRODUCT PAGE ───────────────────────────────────────── */
-.product-img-wrap {
-    background: #f8f9fa;
-    aspect-ratio: 3 / 4;
-}
-.product-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-}
-.product-img:hover {
-    transform: scale(1.03);
-}
-.product-price {
-    background: #fff8e1;
-    border-left: 4px solid #ffc107;
-    padding: 10px 16px;
-    border-radius: 0 8px 8px 0;
+.btn-magnetic .btn-text {
     display: inline-block;
-}
-.product-description {
-    max-height: 200px;
-    overflow-y: auto;
-    padding-right: 4px;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+    pointer-events: none;
 }
 
-/* ── QUANTITY CONTROL ───────────────────────────────────── */
-.quantity-control {
-    background: #fff;
-    box-shadow: 0 1px 4px rgba(0,0,0,.08);
-}
-.qty-input:focus {
-    box-shadow: none;
-}
-.qty-btn:hover {
-    background: #ffc107;
-    color: #000;
+.btn-magnetic:hover {
+    background: var(--accent-primary);
+    color: var(--text-ink);
 }
 
-/* ── CART PAGE ──────────────────────────────────────────── */
-.cart-book-img {
-    width: 55px;
-    height: 75px;
-    object-fit: cover;
-}
-.cart-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.cart-qty-input {
-    width: 52px !important;
+/* â”€â”€ EDITORIAL HERO & BENTO GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.editorial-hero {
+    padding-top: 100px;
+    /* Offset for the floating dock */
 }
 
-/* ── CHECKOUT STEPS ─────────────────────────────────────── */
-.checkout-steps { font-size: .9rem; }
-.step-active  { font-weight: 700; color: #ffc107; }
-.step-done    { font-weight: 600; color: #198754; }
-.step-inactive{ color: #adb5bd; }
-
-/* ── SUCCESS CHECKMARK ANIMATION ───────────────────────── */
-.success-checkmark i {
-    animation: pop-in .4s cubic-bezier(.175,.885,.32,1.275) both;
-}
-@keyframes pop-in {
-    0%   { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* ── ORDER ACCORDION ────────────────────────────────────── */
-.order-accordion .accordion-button:not(.collapsed) {
-    background-color: #fff8e1;
-    color: #000;
-    box-shadow: none;
-}
-.order-accordion .accordion-button::after {
-    filter: brightness(0.5);
-}
-.order-accordion .accordion-item {
-    transition: box-shadow 0.2s ease;
-}
-.order-accordion .accordion-item:hover {
-    box-shadow: 0 6px 20px rgba(0,0,0,.1) !important;
-}
-
-/* ── ORDER PROGRESS BAR ─────────────────────────────────── */
-.order-progress {
-    display: flex;
+.bento-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
     align-items: center;
-    justify-content: space-between;
 }
-.progress-step {
+
+@media (min-width: 992px) {
+    .bento-grid {
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 4rem;
+    }
+}
+
+.hero-title {
+    font-size: clamp(3.5rem, 6vw, 6.5rem);
+    line-height: 0.95 !important;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.highlight-text {
+    background-color: var(--accent-secondary);
+    color: var(--text-ink);
+    padding: 0 12px;
+    display: inline-block;
+    transform: skew(-5deg);
+}
+
+.hero-desc {
+    font-size: 1.15rem;
+    max-width: 480px;
+    line-height: 1.7;
+    color: #333;
+}
+
+/* Neo-Brutalist CTA */
+.btn-neo-brutalist {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--text-ink);
+    color: var(--bg-paper);
+    padding: 1rem 2.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 3px solid var(--text-ink);
+    position: relative;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 4px 4px 0px var(--accent-primary);
+}
+
+.btn-neo-brutalist:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px var(--accent-primary);
+    color: var(--bg-paper);
+}
+
+.btn-neo-brutalist:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--accent-primary);
+}
+
+/* 3D Stage & Featured Book */
+.bento-right {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    flex: 0 0 auto;
-}
-.step-dot {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: .8rem;
-    background: #dee2e6;
-    color: #adb5bd;
-    transition: all .3s ease;
+    position: relative;
+    perspective: 1000px;
 }
-.progress-step.done .step-dot {
-    background: #ffc107;
-    color: #000;
+
+.featured-book-stage {
+    width: 280px;
+    aspect-ratio: 3/4;
+    border-radius: 4px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transform-style: preserve-3d;
+    cursor: grab;
+    z-index: 2;
+    background-color: var(--text-ink);
 }
-.step-label {
-    font-size: .65rem;
-    color: #adb5bd;
-    text-align: center;
+
+.featured-book-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+    transform: translateZ(40px);
+    /* Äáº©y sÃ¡ch lÃªn má»™t chÃºt trong khÃ´ng gian 3D */
+}
+
+.stage-shadow {
+    position: absolute;
+    bottom: -30px;
+    width: 220px;
+    height: 35px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    filter: blur(25px);
+    z-index: 1;
+}
+
+/* â”€â”€ INFINITE MARQUEE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.marquee-container {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    overflow: hidden;
+    background-color: var(--text-ink);
+    color: var(--bg-paper);
+    padding: 1.5rem 0;
+    border-top: 2px solid var(--accent-primary);
+    border-bottom: 2px solid var(--accent-primary);
+    display: flex;
     white-space: nowrap;
 }
-.progress-step.done .step-label {
-    color: #495057;
-    font-weight: 600;
-}
-.progress-line {
-    flex: 1;
-    height: 2px;
-    background: #dee2e6;
-    margin: 0 4px;
-    margin-bottom: 18px;
-    transition: background .3s ease;
-}
-.progress-line.done {
-    background: #ffc107;
-}
 
-/* ── RELATED SECTION ────────────────────────────────────── */
-.related-section {
-    background: linear-gradient(180deg, #fff 0%, #f8f9fa 100%);
-}
-.related-card {
-    border-radius: 12px;
-    transition: transform .25s ease, box-shadow .25s ease;
-}
-.related-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 24px rgba(0,0,0,.1) !important;
-}
-
-/* Trạng thái rỗng */
-.related-empty {
-    background: #f8f9fa;
-    border-radius: 16px;
-    border: 2px dashed #dee2e6;
-}
-.related-empty__icon {
-    width: 72px; height: 72px;
-    background: #fff8e1;
-    border-radius: 50%;
+.marquee-content {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    animation: marquee-scroll 15s linear infinite;
+    min-width: 200%;
 }
 
-/* ── PAGE HEADER ĐỒNG BỘ (Chi tiết sách, Giỏ hàng, Đơn hàng) ── */
-.page-header-custom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    
-    /* Tạo khối nổi bật ngăn cách với nội dung */
-    padding: 1.25rem 1.5rem; 
-    margin-bottom: 2.5rem;
-    background-color: #fffff7; /* Nền xám nhạt */
-    border-radius: 12px; /* Bo góc mềm mại */
-    border: 1px solid #e9ecef; /* Viền mỏng xung quanh */
-    border-left: 6px solid #ffc107; /* Vạch vàng nhấn mạnh bên trái */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03); /* Đổ bóng nhẹ nổi lên trên */
-}
-
-.page-header-custom .title {
-    font-weight: 800;
-    margin-bottom: 0;
-    color: #2b2b2b;
-    font-size: 1.75rem;
-    display: flex;
-    align-items: center;
-}
-
-.page-header-custom .title i {
-    color: #ffc107;
-    margin-right: 0.75rem;
-    font-size: 1.8rem;
-}
-
-/* Định dạng huy hiệu (Badge) - Trở về màu vàng gốc */
-.page-header-custom .badge-custom {
-    font-size: 0.95rem;
-    padding: 0.5rem 1.25rem;
-    background-color: #ffc107; /* Màu vàng nguyên bản */
-    color: #212529; /* Chữ màu đen/tối */
-    border-radius: 50rem;
+.marquee-content span {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
     font-weight: 700;
-    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.4); /* Đổ bóng vàng bắt mắt */
+    padding: 0 1.5rem;
+    display: inline-block;
+    text-transform: uppercase;
 }
 
-/* ── GIAO DIỆN TRANG PROFILE CÁ NHÂN ── */
-.profile-nav .nav-link {
-    color: #495057;
-    transition: all 0.3s ease;
-}
-.profile-nav .nav-link:hover {
-    background-color: #f8f9fa;
-    color: #0f3460;
-    transform: translateX(5px);
-}
-.profile-nav .nav-link.active {
-    background-color: #0f3460 !important;
-    color: #fff !important;
-    box-shadow: 0 4px 10px rgba(15, 52, 96, 0.3);
-}
-.btn-hover-effect {
-    transition: all 0.3s ease;
-}
-.btn-hover-effect:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1) !important;
+.marquee-content .separator {
+    color: var(--accent-primary);
 }
 
-/* ── GIAO DIỆN TRANG XÁC THỰC (ĐĂNG NHẬP, ĐĂNG KÝ, QUÊN MẬT KHẨU) ── */
-.auth-wrapper {
-    min-height: 80vh;
+@keyframes marquee-scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.book-glow-wrapper {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    transition: all 0.5s ease;
+}
+
+.book-glow-wrapper::before {
+    content: "";
+    position: absolute;
+    top: -0.5rem;
+    left: -0.5rem;
+    right: -0.5rem;
+    bottom: -0.5rem;
+    background: linear-gradient(to top right, rgba(245, 158, 11, 0.2), rgba(249, 115, 22, 0.2), transparent);
+    filter: blur(24px);
+    z-index: -1;
+    border-radius: 1.5rem;
+    transition: all 0.5s ease;
+}
+
+.book-glow-wrapper:hover {
+    transform: translateY(-8px);
+}
+
+.book-glow-wrapper:hover::before {
+    filter: blur(32px);
+    transform: scale(1.05);
+}
+
+.book-cover-image {
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    transition: all 0.5s ease;
+}
+
+.book-glow-wrapper:hover .book-cover-image {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.pulse-dot-green {
+    width: 8px;
+    height: 8px;
+    background-color: #198754;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 rgba(25, 135, 84, 0.7);
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(25, 135, 84, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+    }
+}
+
+
+/* %% HIÆU èNG NÚT MUA HÀNG (SHIMMER) %% */
+.btn-shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: #111111;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.auth-card {
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    border: none;
-    max-width: 950px;
-    width: 100%;
-}
-.auth-sidebar {
-    background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
-    position: relative;
-    padding: 3rem;
-}
-/* Hiệu ứng hạt bụi sao mờ trên nền xanh */
-.auth-sidebar::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: url('https://www.transparenttextures.com/patterns/stardust.png');
-    opacity: 0.2;
-}
-.auth-sidebar-content {
-    position: relative;
-    z-index: 2;
-}
-.auth-form-wrap {
-    padding: 4rem 3rem;
-}
-.auth-input-group .input-group-text {
-    background-color: #f8f9fa;
-    border-right: none;
-    border-radius: 12px 0 0 12px;
-}
-.auth-input-group .form-control {
-    background-color: #f8f9fa;
-    border-left: none;
-    border-radius: 0;
-}
-.auth-input-group .btn.toggle-password {
-    background-color: #f8f9fa;
-    border-left: none;
-    border-radius: 0 12px 12px 0;
-}
-/* Đổi viền vàng khi click vào ô nhập liệu */
-.auth-input-group .form-control:focus {
-    background-color: #fff;
-    box-shadow: none;
-    border-color: #ffc107;
-}
-.auth-input-group:focus-within .input-group-text,
-.auth-input-group:focus-within .form-control,
-.auth-input-group:focus-within .btn.toggle-password {
-    background-color: #fff;
-    border-color: #ffc107;
-}
-.btn-auth {
-    border-radius: 12px;
-    padding: 12px;
+    gap: 0.5rem;
     transition: all 0.3s ease;
 }
-.btn-auth:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+
+.btn-shimmer:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
-@media (max-width: 768px) {
-    .auth-form-wrap { padding: 2rem 1.5rem; }
+
+.btn-shimmer:active {
+    transform: scale(0.95);
+}
+
+.btn-shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: skewX(-20deg) translateX(-150%);
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-shimmer:hover::after {
+    transform: skewX(-20deg) translateX(300%);
+}
+
+/* Khắc phục xung đột giữa Bootstrap 5 và Tailwind CSS cho class .collapse */
+.collapse.show {
+    visibility: visible !important;
 }

@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Nội dung email HTML
                 $mail->isHTML(true);
-                $mail->Subject = '[Book Store] Đặt lại mật khẩu của bạn';
+                $mail->Subject = '[NOVELTY] Đặt lại mật khẩu của bạn';
                 $mail->Body    = "
                 <!DOCTYPE html>
                 <html lang='vi'>
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div style='background:#1a1a2e;padding:28px 32px;text-align:center;'>
                             <h1 style='color:#ffc107;margin:0;font-size:1.4rem;'>
-                                📚 Book Store
+                                📚 NOVELTY
                             </h1>
                         </div>
 
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div style='background:#f8f9fa;padding:16px 32px;
                                     text-align:center;border-top:1px solid #e9ecef;'>
                             <p style='color:#aaa;font-size:.78rem;margin:0;'>
-                                © " . date('Y') . " Book Store · Email này được gửi tự động, vui lòng không reply.
+                                © " . date('Y') . " NOVELTY · Email này được gửi tự động, vui lòng không reply.
                             </p>
                         </div>
                     </div>
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     . "Link đặt lại mật khẩu của bạn (hết hạn sau 30 phút):\n"
                     . $resetLink . "\n\n"
                     . "Nếu bạn không yêu cầu, hãy bỏ qua email này.\n\n"
-                    . "Book Store";
+                    . "NOVELTY";
 
                 $mail->send();
 

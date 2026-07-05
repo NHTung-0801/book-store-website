@@ -1,5 +1,6 @@
 <?php
 // index.php
+$pageTitle = 'Trang chủ | NOVELTY - Thế giới Sách & Tri thức';
 
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/config/db.php';
@@ -55,78 +56,95 @@ function getCategoryStyle($id) {
 ?>
 
 <style>
-    /* CSS cho vùng cuộn Thể loại sặc sỡ */
-    .category-scroll {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 10px;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch; /* Hỗ trợ vuốt mượt trên mobile */
+    /* ========== HERO BOOK 3D & GLOW ========== */
+    .featured-book-stage {
+        position: relative;
+        z-index: 1;
+        animation: floating-book 4s ease-in-out infinite;
     }
-    
-    /* Làm đẹp thanh cuộn ngang */
-    .category-scroll::-webkit-scrollbar {
-        height: 6px;
+
+    .featured-book-stage::before {
+        content: '';
+        position: absolute;
+        top: -1rem;
+        left: -1rem;
+        right: -1rem;
+        bottom: -1rem;
+        background: linear-gradient(to right, rgba(250, 204, 21, 0.4), rgba(249, 115, 22, 0.4));
+        filter: blur(30px);
+        z-index: -1;
+        border-radius: inherit;
     }
-    .category-scroll::-webkit-scrollbar-thumb {
-        background-color: #cecece;
-        border-radius: 10px;
-    }
-    .category-scroll::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    
-    .category-item {
-        flex: 0 0 auto;
-        width: 130px; /* Chiều rộng cố định để các khối đều nhau */
-    }
-    
-    .category-card {
-        transition: all 0.3s ease;
-        border: 2px solid transparent !important;
-        cursor: pointer;
-    }
-    
-    .category-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0,0,0,0.08) !important;
-        border-color: #ffc107 !important;
-    }
-    
-    /* Hiệu ứng nổi bật khi Thể loại đang được chọn */
-    .category-card.active {
-        border-color: #ffc107 !important;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4) !important;
-        background-color: #fff !important; 
+
+    @keyframes floating-book {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+        100% { transform: translateY(0px); }
     }
 </style>
 
-<section class="hero-banner bg-dark text-white py-5 mb-5">
+<!-- ========== EDITORIAL HERO SECTION ========== -->
+<section class="editorial-hero mb-0 pt-[76px]">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-7">
-                <span class="badge bg-warning text-dark mb-3 px-3 py-2 fs-6">
-                    🎉 Chào mừng đến với Book Store
-                </span>
-                <h1 class="display-5 fw-bold lh-sm mb-3">
-                    Khám phá thế giới <br>
-                    <span class="text-warning">tri thức bất tận</span>
+        <div class="bento-grid">
+            
+            <!-- Left Block: Kinetic Typography -->
+            <div class="bento-left">
+                <h1 class="hero-title">
+                    Khám phá <br> thế giới <br>
+                    <span class="highlight-text">tri thức</span> <br>
+                    bất tận.
                 </h1>
-                <p class="lead text-secondary mb-4">
-                    Hàng nghìn đầu sách chất lượng — văn học, khoa học, kỹ năng sống
-                    và nhiều thể loại khác đang chờ bạn khám phá.
+                <p class="hero-desc mt-4">
+                    NOVELTY — Không gian triển lãm nghệ thuật của ngôn từ. Hàng nghìn đầu sách chất lượng — văn học, khoa học, và nghệ thuật sống đang chờ bạn lật giở.
                 </p>
-                <a href="#book-list" class="btn btn-warning btn-lg fw-bold px-4">
-                    <i class="bi bi-book me-2"></i>Xem sách ngay
+                <a href="#book-list" class="btn-neo-brutalist mt-4">
+                    Khám phá ngay <i class="bi bi-arrow-down-right ms-2 fs-5"></i>
                 </a>
             </div>
-            <div class="col-lg-5 text-center d-none d-lg-block">
-                <i class="bi bi-book-half text-warning" style="font-size: 10rem; opacity: .15;"></i>
+
+            <!-- Right Block: 3D Stage -->
+            <div class="bento-right d-none d-md-flex">
+                <div class="featured-book-stage" data-tilt data-tilt-glare data-tilt-max-glare="0.5" data-tilt-scale="1.05" data-tilt-speed="400">
+                    <?php 
+                        // Lấy ngẫu nhiên một ảnh sách hoặc dùng bìa mới nhất làm Featured
+                        $featuredImg = (!empty($books) && !empty($books[0]['image'])) 
+                            ? '/bookstore/assets/images/books/' . $books[0]['image'] 
+                            : '/bookstore/assets/images/books/placeholder.png'; 
+                    ?>
+                    <img src="<?= htmlspecialchars($featuredImg) ?>" alt="Featured Book" class="featured-book-img">
+                </div>
+                <div class="stage-shadow"></div>
             </div>
+
         </div>
     </div>
 </section>
+
+<!-- ========== INFINITE MARQUEE ========== -->
+<div class="marquee-container mt-5 mb-5">
+    <div class="marquee-content">
+        <!-- Khối 1 -->
+        <span>⚡ NOVELTY — KHÔNG GIAN TRI THỨC BẤT TẬN</span><span class="separator">—</span>
+        <span>📚 HƠN 10,000 ĐẦU SÁCH CHỌN LỌC</span><span class="separator">—</span>
+        <span>🎨 TRẢI NGHIỆM ĐỌC ĐỈNH CAO</span><span class="separator">—</span>
+        <!-- Khối 2 -->
+        <span>⚡ NOVELTY — KHÔNG GIAN TRI THỨC BẤT TẬN</span><span class="separator">—</span>
+        <span>📚 HƠN 10,000 ĐẦU SÁCH CHỌN LỌC</span><span class="separator">—</span>
+        <span>🎨 TRẢI NGHIỆM ĐỌC ĐỈNH CAO</span><span class="separator">—</span>
+        <!-- Khối 3 (Để animation translateX(-50%) mượt mà) -->
+        <span>⚡ NOVELTY — KHÔNG GIAN TRI THỨC BẤT TẬN</span><span class="separator">—</span>
+        <span>📚 HƠN 10,000 ĐẦU SÁCH CHỌN LỌC</span><span class="separator">—</span>
+        <span>🎨 TRẢI NGHIỆM ĐỌC ĐỈNH CAO</span><span class="separator">—</span>
+        <!-- Khối 4 -->
+        <span>⚡ NOVELTY — KHÔNG GIAN TRI THỨC BẤT TẬN</span><span class="separator">—</span>
+        <span>📚 HƠN 10,000 ĐẦU SÁCH CHỌN LỌC</span><span class="separator">—</span>
+        <span>🎨 TRẢI NGHIỆM ĐỌC ĐỈNH CAO</span><span class="separator">—</span>
+    </div>
+</div>
+
+<!-- Vanilla Tilt JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js" integrity="sha512-wC/cunGGDjXSl9OHsu004bNJ3s3C9cO0kQvKx8E3o85X2F/H1K3jY/uBwF/nUulh/4P125o8bI19wY6wMwXnQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <?php if (!empty($categories)): ?>
 <section class="mb-5">
@@ -135,35 +153,21 @@ function getCategoryStyle($id) {
             <i class="bi bi-grid-3x3-gap-fill me-2 text-warning"></i>Khám phá Thể loại
         </h5>
         
-        <div class="category-scroll gap-3 mt-4">
+        <div class="category-pill-container mt-2">
             
-            <div class="category-item">
-                <a href="/bookstore/index.php" class="text-decoration-none">
-                    <div class="card h-100 rounded-4 text-center category-card <?= !$selectedCategoryId ? 'active' : 'shadow-sm' ?>" style="background-color: #f8f9fa;">
-                        <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center">
-                            <img src="https://img.icons8.com/3d-fluency/94/books.png" alt="Tất cả" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
-                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">Tất cả sách</h6>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            <a href="/bookstore/index.php" class="category-pill <?= !$selectedCategoryId ? 'active' : '' ?>">
+                <img src="https://img.icons8.com/3d-fluency/94/books.png" alt="Tất cả">
+                <span>Tất cả sách</span>
+            </a>
 
             <?php foreach ($categories as $cat): 
                 $style = getCategoryStyle($cat['id']);
                 $isActive = ($selectedCategoryId === (int)$cat['id']);
             ?>
-            <div class="category-item">
-                <a href="/bookstore/index.php?category=<?= $cat['id'] ?>" class="text-decoration-none">
-                    <div class="card h-100 rounded-4 text-center category-card <?= $isActive ? 'active' : 'shadow-sm' ?>" style="background-color: <?= $isActive ? '#fff' : $style['bg'] ?>;">
-                        <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center">
-                            <img src="<?= $style['icon'] ?>" alt="<?= htmlspecialchars($cat['name']) ?>" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
-                            <h6 class="fw-bold mb-0 text-dark text-truncate w-100" style="font-size: 0.9rem;">
-                                <?= htmlspecialchars($cat['name']) ?>
-                            </h6>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            <a href="/bookstore/index.php?category=<?= $cat['id'] ?>" class="category-pill <?= $isActive ? 'active' : '' ?>">
+                <img src="<?= $style['icon'] ?>" alt="<?= htmlspecialchars($cat['name']) ?>">
+                <span><?= htmlspecialchars($cat['name']) ?></span>
+            </a>
             <?php endforeach; ?>
             
         </div>
@@ -195,68 +199,56 @@ function getCategoryStyle($id) {
 
                 <?php foreach ($books as $book): ?>
                 <div class="col">
-                    <div class="card h-100 border-0 shadow-sm book-card">
-
-                        <div class="book-card__img-wrap">
-                            <?php
-                                // Kiểm tra ảnh tồn tại, fallback về ảnh placeholder nếu không có
-                                $imgPath = '/bookstore/assets/images/books/' . $book['image'];
-                                $imgSrc  = (!empty($book['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $imgPath))
-                                            ? $imgPath
-                                            : '/bookstore/assets/images/books/placeholder.png';
-                            ?>
+                    <div class="gallery-card">
+                        <div class="gallery-card__img-wrap">
                             <a href="/bookstore/pages/shop/product.php?id=<?= $book['id'] ?>">
-                                <img
-                                    src="<?= htmlspecialchars($imgSrc) ?>"
-                                    alt="Bìa sách: <?= htmlspecialchars($book['title']) ?>"
-                                    class="card-img-top book-card__img"
-                                    loading="lazy"
-                                >
+                                <?php
+                                    $imgPath = '/bookstore/assets/images/books/' . $book['image'];
+                                    $imgSrc  = (!empty($book['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $imgPath))
+                                                ? $imgPath
+                                                : '/bookstore/assets/images/books/placeholder.png';
+                                ?>
+                                <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($book['title']) ?>" class="gallery-card__img" loading="lazy">
                             </a>
-
-                            <?php if (!empty($book['category_name'])): ?>
-                                <span class="badge bg-warning text-dark book-card__badge">
-                                    <?= htmlspecialchars($book['category_name']) ?>
-                                </span>
-                            <?php endif; ?>
-
+                            
                             <?php if ($book['stock_quantity'] <= 0): ?>
-                                <div class="book-card__overlay-soldout">
-                                    <span>Hết hàng</span>
-                                </div>
+                                <div class="gallery-card__soldout"><span>Hết hàng</span></div>
+                            <?php endif; ?>
+                            
+                            <!-- Nút Action Ẩn đầy nghệ thuật -->
+                            <?php if ($book['stock_quantity'] > 0): ?>
+                            <form method="POST" action="/bookstore/actions/add_to_cart.php" class="gallery-card__form">
+                                <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="gallery-card__btn-add" title="Thêm vào giỏ">
+                                    <i class="bi bi-cart-plus"></i>
+                                </button>
+                            </form>
                             <?php endif; ?>
                         </div>
 
-                        <div class="card-body d-flex flex-column p-3">
-
-                            <h6 class="card-title fw-bold mb-1 book-card__title">
-                                <a href="/bookstore/pages/shop/product.php?id=<?= $book['id'] ?>"
-                                   class="text-dark text-decoration-none stretched-link-title" style="color: #0f3460 !important;">
+                        <div class="gallery-card__info">
+                            <h3 class="gallery-card__title">
+                                <a href="/bookstore/pages/shop/product.php?id=<?= $book['id'] ?>">
                                     <?= htmlspecialchars($book['title']) ?>
                                 </a>
-                            </h6>
+                            </h3>
+                            <p class="gallery-card__author"><?= htmlspecialchars($book['author']) ?></p>
+                            
+                            <?php if (!empty($book['category_name'])): ?>
+                                <span class="gallery-card__category"><?= htmlspecialchars($book['category_name']) ?></span>
+                            <?php endif; ?>
 
-                            <p class="text-muted small mb-2">
-                                <i class="bi bi-person me-1 text-warning"></i>
-                                <?= htmlspecialchars($book['author']) ?>
-                            </p>
-
-                            <div class="mt-auto">
-                                <p class="fw-bold text-danger fs-5 mb-3">
-                                    <?= number_format($book['price'], 0, ',', '.') ?>
-                                    <span class="fs-6">₫</span>
-                                </p>
-
-                                <a href="/bookstore/pages/shop/product.php?id=<?= $book['id'] ?>"
-                                   class="btn btn-warning btn-sm w-100 fw-semibold shadow-sm
-                                          <?= $book['stock_quantity'] <= 0 ? 'disabled' : '' ?>">
-                                    <i class="bi bi-eye me-1"></i>Xem chi tiết
-                                </a>
+                            <div class="gallery-card__price">
+                                <?= number_format($book['price'], 0, ',', '.') ?>₫
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
 
-                        </div></div></div><?php endforeach; ?>
-
-            </div><?php endif; ?>
+            </div>
+            <?php endif; ?>
 
     </div></section>
 

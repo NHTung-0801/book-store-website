@@ -1,4 +1,4 @@
-# 📚 Book Store Website
+# 📚 NOVELTY Website
 
 Một hệ thống website thương mại điện tử quy mô nhỏ, tập trung vào việc giới thiệu và kinh doanh sách trực tuyến. Dự án được thiết kế với tiêu chí tối giản, hiệu năng cao, dễ dàng triển khai và bảo trì.
 
@@ -100,7 +100,7 @@ bookstore/
 └── .gitignore                # Chặn đẩy các file nhạy cảm (như mail.php chứa pass thật) lên GitHub
 ```
 
-# 📚 Book Store
+# 📚 NOVELTY
 
 Website bán sách xây dựng bằng PHP thuần + MySQL + Bootstrap 5.
 
@@ -147,4 +147,4 @@ composer install
 - Username: `user`
 - Password: `123456`
 
-Dự án được hoàn thiện cấu trúc và tối ưu hóa mã nguồn bởi Book Store Development Team. Chúc bạn có những trải nghiệm tuyệt vời khi học tập và phát triển hệ thống này!
+Dự án được hoàn thiện cấu trúc và tối ưu hóa mã nguồn bởi NOVELTY Team. Chúc bạn có những trải nghiệm tuyệt vời khi học tập và phát triển hệ thống này!

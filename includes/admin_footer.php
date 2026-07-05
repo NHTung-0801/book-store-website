@@ -7,7 +7,7 @@ $currentYear = date('Y');
         <div class="container-fluid px-4">
             <div class="d-flex align-items-center justify-content-between small">
                 <div class="text-muted">
-                    &copy; <?= $currentYear ?> <strong>Book Store Admin</strong>. Mọi quyền được bảo lưu.
+                    &copy; <?= $currentYear ?> <strong>NOVELTY Admin</strong>. Mọi quyền được bảo lưu.
                 </div>
                 <div>
                     <span class="text-muted">Phiên bản 1.0.0</span>
